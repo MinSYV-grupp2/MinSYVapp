@@ -28,7 +28,7 @@ const quizOptions: QuizOption[] = [
 ];
 
 const QuizSection = () => {
-  const { addInterest, profile } = useUser();
+  const { addInterest, profile, markQuizCompleted } = useUser();
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
   const handleOptionToggle = (optionId: string, category: "tech" | "nature" | "art" | "social" | "physical" | "analytical") => {
@@ -53,6 +53,9 @@ const QuizSection = () => {
       });
       return;
     }
+
+    // Mark quiz as completed
+    markQuizCompleted();
 
     toast({
       title: "Bra jobbat!",

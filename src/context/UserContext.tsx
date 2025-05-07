@@ -3,11 +3,26 @@ import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 type InterestArea = "tech" | "nature" | "art" | "social" | "physical" | "analytical";
 
+interface School {
+  id: string;
+  name: string;
+  program?: string;
+}
+
+interface DiscussionQuestion {
+  id: string;
+  question: string;
+  created: Date;
+}
+
 interface UserProfile {
   name: string;
   interests: InterestArea[];
   strengths: string[];
   reflections: string[];
+  favoriteSchools: School[];
+  discussionQuestions: DiscussionQuestion[];
+  quizCompleted: boolean;
 }
 
 interface UserContextType {
@@ -18,6 +33,11 @@ interface UserContextType {
   addStrength: (strength: string) => void;
   removeStrength: (strength: string) => void;
   addReflection: (reflection: string) => void;
+  addFavoriteSchool: (school: School) => void;
+  removeFavoriteSchool: (schoolId: string) => void;
+  addDiscussionQuestion: (question: string) => void;
+  removeDiscussionQuestion: (questionId: string) => void;
+  markQuizCompleted: () => void;
 }
 
 const defaultProfile: UserProfile = {
@@ -25,6 +45,9 @@ const defaultProfile: UserProfile = {
   interests: [],
   strengths: [],
   reflections: [],
+  favoriteSchools: [],
+  discussionQuestions: [],
+  quizCompleted: false,
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -75,6 +98,47 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }));
   };
 
+  const addFavoriteSchool = (school: School) => {
+    setProfile(prev => ({
+      ...prev,
+      favoriteSchools: [...prev.favoriteSchools, school]
+    }));
+  };
+
+  const removeFavoriteSchool = (schoolId: string) => {
+    setProfile(prev => ({
+      ...prev,
+      favoriteSchools: prev.favoriteSchools.filter(s => s.id !== schoolId)
+    }));
+  };
+
+  const addDiscussionQuestion = (question: string) => {
+    const newQuestion: DiscussionQuestion = {
+      id: Date.now().toString(),
+      question,
+      created: new Date()
+    };
+    
+    setProfile(prev => ({
+      ...prev,
+      discussionQuestions: [...prev.discussionQuestions, newQuestion]
+    }));
+  };
+
+  const removeDiscussionQuestion = (questionId: string) => {
+    setProfile(prev => ({
+      ...prev,
+      discussionQuestions: prev.discussionQuestions.filter(q => q.id !== questionId)
+    }));
+  };
+
+  const markQuizCompleted = () => {
+    setProfile(prev => ({
+      ...prev,
+      quizCompleted: true
+    }));
+  };
+
   return (
     <UserContext.Provider value={{
       profile,
@@ -83,7 +147,12 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       removeInterest,
       addStrength,
       removeStrength,
-      addReflection
+      addReflection,
+      addFavoriteSchool,
+      removeFavoriteSchool,
+      addDiscussionQuestion,
+      removeDiscussionQuestion,
+      markQuizCompleted
     }}>
       {children}
     </UserContext.Provider>
