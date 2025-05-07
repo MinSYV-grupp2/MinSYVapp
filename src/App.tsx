@@ -11,6 +11,9 @@ import AboutPage from "./pages/AboutPage";
 import BookingPage from "./pages/BookingPage";
 import BookingConfirmationPage from "./pages/BookingConfirmationPage";
 import NotFound from "./pages/NotFound";
+import CareerMapPage from "./pages/CareerMapPage";
+import InterviewsPage from "./pages/InterviewsPage";
+import AIChatPage from "./pages/AIChatPage";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +30,9 @@ const App = () => (
             <Route path="/about" element={<AboutPage />} />
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/booking-confirmation" element={<BookingConfirmationPage />} />
+            <Route path="/career-map" element={<CareerMapPage />} />
+            <Route path="/interviews" element={<InterviewsPage />} />
+            <Route path="/ai-chat" element={<AIChatPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
