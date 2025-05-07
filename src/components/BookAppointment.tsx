@@ -13,11 +13,16 @@ import { toast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '@/context/UserContext';
 
 const BookAppointment = () => {
+  const navigate = useNavigate();
+  const { profile } = useUser();
+  
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState<string | undefined>(undefined);
-  const [name, setName] = useState('');
+  const [name, setName] = useState(profile.name || '');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
@@ -47,20 +52,34 @@ const BookAppointment = () => {
       return;
     }
 
-    // Form is valid, submit booking
+    // Form is valid, create booking data
+    const bookingData = {
+      date: format(date, 'yyyy-MM-dd'),
+      time,
+      name,
+      email,
+      phone,
+      message,
+      counselor: counselors.find(c => c.id === counselor),
+      profile: {
+        interests: profile.interests,
+        strengths: profile.strengths,
+        reflections: profile.reflections,
+        favoriteSchools: profile.favoriteSchools,
+        discussionQuestions: profile.discussionQuestions
+      }
+    };
+
+    // Store booking data in session storage for the confirmation page
+    sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
+
+    // Show toast and navigate to confirmation page
     toast({
       title: "Bokning bekräftad!",
       description: `Din tid med ${counselors.find(c => c.id === counselor)?.name} är bokad ${format(date, 'yyyy-MM-dd')} kl ${time}.`,
     });
 
-    // Reset form
-    setDate(undefined);
-    setTime(undefined);
-    setName('');
-    setEmail('');
-    setPhone('');
-    setMessage('');
-    setCounselor('');
+    navigate('/booking-confirmation');
   };
 
   return (
