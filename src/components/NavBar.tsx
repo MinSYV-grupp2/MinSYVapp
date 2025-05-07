@@ -21,6 +21,9 @@ const NavBar = () => {
           <Link to="/about" className="text-gray-600 hover:text-guidance-blue transition-colors">
             Om SYV
           </Link>
+          <Link to="/booking" className="text-gray-600 hover:text-guidance-blue transition-colors">
+            Boka tid
+          </Link>
           <Link to="/profile" className="text-gray-600 hover:text-guidance-blue transition-colors">
             Min profil
           </Link>
