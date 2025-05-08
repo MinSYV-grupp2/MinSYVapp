@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import TreeDiagram from '@/components/TreeDiagram';
 
 // Program and career path data
 const programData = [
@@ -51,79 +52,109 @@ const programData = [
 
 const CareerMap = () => {
   const [selectedProgram, setSelectedProgram] = useState(programData[0]);
+  const [viewMode, setViewMode] = useState<'list' | 'tree'>('list');
   
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4 text-guidance-blue">Utforska gymnasieprogram och framtidsvägar</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold text-guidance-blue">Utforska gymnasieprogram och framtidsvägar</h2>
+          <div className="space-x-2">
+            <Button 
+              variant={viewMode === 'list' ? "default" : "outline"} 
+              onClick={() => setViewMode('list')}
+              className="bg-guidance-blue hover:bg-guidance-blue/90"
+            >
+              Lista
+            </Button>
+            <Button 
+              variant={viewMode === 'tree' ? "default" : "outline"} 
+              onClick={() => setViewMode('tree')}
+              className={viewMode === 'tree' ? "bg-guidance-blue hover:bg-guidance-blue/90" : ""}
+            >
+              Karriärträd
+            </Button>
+          </div>
+        </div>
+        
         <p className="text-gray-600 mb-6">
           Välj ett gymnasieprogram nedan för att se vilka framtida möjligheter det kan leda till, 
-          både inom högre studier och yrkesliv.
+          både inom högre studier och yrkesliv, eller utforska karriärträdet för att se hela vägen från skola till yrke.
         </p>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-          {programData.map((program) => (
-            <Button
-              key={program.id}
-              variant={selectedProgram.id === program.id ? "default" : "outline"}
-              className={selectedProgram.id === program.id 
-                ? "bg-guidance-blue hover:bg-guidance-blue/90" 
-                : "border-guidance-blue text-guidance-blue hover:bg-guidance-lightBlue/50"}
-              onClick={() => setSelectedProgram(program)}
-            >
-              {program.name}
-            </Button>
-          ))}
-        </div>
+        {viewMode === 'list' && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+              {programData.map((program) => (
+                <Button
+                  key={program.id}
+                  variant={selectedProgram.id === program.id ? "default" : "outline"}
+                  className={selectedProgram.id === program.id 
+                    ? "bg-guidance-blue hover:bg-guidance-blue/90" 
+                    : "border-guidance-blue text-guidance-blue hover:bg-guidance-lightBlue/50"}
+                  onClick={() => setSelectedProgram(program)}
+                >
+                  {program.name}
+                </Button>
+              ))}
+            </div>
+            
+            <Card className="mb-8">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold mb-2 text-guidance-green">{selectedProgram.name}</h3>
+                <p className="text-gray-600 mb-4">{selectedProgram.description}</p>
+                
+                <Tabs defaultValue="careers">
+                  <TabsList className="mb-4">
+                    <TabsTrigger value="careers">Möjliga yrken</TabsTrigger>
+                    <TabsTrigger value="education">Vidare studier</TabsTrigger>
+                    <TabsTrigger value="subjects">Viktiga ämnen</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="careers" className="space-y-4">
+                    <h4 className="font-semibold">Yrken detta program kan leda till:</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                      {selectedProgram.careers.map((career, index) => (
+                        <div key={index} className="bg-guidance-lightGreen p-3 rounded-lg text-center">
+                          {career}
+                        </div>
+                      ))}
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="education" className="space-y-4">
+                    <h4 className="font-semibold">Vanliga universitet och högskolor:</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {selectedProgram.universities.map((university, index) => (
+                        <div key={index} className="bg-guidance-lightBlue p-3 rounded-lg text-center">
+                          {university}
+                        </div>
+                      ))}
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="subjects" className="space-y-4">
+                    <h4 className="font-semibold">Viktiga ämnen i programmet:</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                      {selectedProgram.subjects.map((subject, index) => (
+                        <div key={index} className="bg-guidance-lightPurple p-3 rounded-lg text-center">
+                          {subject}
+                        </div>
+                      ))}
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </>
+        )}
+        
+        {viewMode === 'tree' && (
+          <div className="mb-8">
+            <TreeDiagram />
+          </div>
+        )}
       </div>
-      
-      <Card className="mb-8">
-        <CardContent className="p-6">
-          <h3 className="text-xl font-bold mb-2 text-guidance-green">{selectedProgram.name}</h3>
-          <p className="text-gray-600 mb-4">{selectedProgram.description}</p>
-          
-          <Tabs defaultValue="careers">
-            <TabsList className="mb-4">
-              <TabsTrigger value="careers">Möjliga yrken</TabsTrigger>
-              <TabsTrigger value="education">Vidare studier</TabsTrigger>
-              <TabsTrigger value="subjects">Viktiga ämnen</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="careers" className="space-y-4">
-              <h4 className="font-semibold">Yrken detta program kan leda till:</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                {selectedProgram.careers.map((career, index) => (
-                  <div key={index} className="bg-guidance-lightGreen p-3 rounded-lg text-center">
-                    {career}
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="education" className="space-y-4">
-              <h4 className="font-semibold">Vanliga universitet och högskolor:</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {selectedProgram.universities.map((university, index) => (
-                  <div key={index} className="bg-guidance-lightBlue p-3 rounded-lg text-center">
-                    {university}
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="subjects" className="space-y-4">
-              <h4 className="font-semibold">Viktiga ämnen i programmet:</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                {selectedProgram.subjects.map((subject, index) => (
-                  <div key={index} className="bg-guidance-lightPurple p-3 rounded-lg text-center">
-                    {subject}
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card>
