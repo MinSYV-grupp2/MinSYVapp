@@ -1,85 +1,124 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { toast } from '@/components/ui/sonner';
 
-interface Message {
-  text: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
-}
-
-const predefinedAnswers: Record<string, string> = {
-  'Vilka gymnasieprogram finns?': 'Det finns många olika gymnasieprogram i Sverige. De delas in i högskoleförberedande program (som Naturvetenskap, Samhällsvetenskap, Teknik, Ekonomi) och yrkesprogram (som Barn och fritid, Bygg och anläggning, El och energi). Varje program har olika inriktningar.',
-  'Vad krävs för att komma in på universitet?': 'För att komma in på universitet i Sverige behöver du grundläggande behörighet, vilket du får genom att gå ett högskoleförberedande program eller ett yrkesprogram med extra kurser. Dessutom kan specifika program kräva särskild behörighet med vissa kurser.',
-  'Hur vet jag vilket program som passar mig?': 'Det bästa sättet är att utgå från dina intressen och styrkor. Tänk på vad du tycker om att göra och vilka ämnen du är bra på. Gör gärna vår quiz, prata med vänner, familj och lärare, och besök öppet hus på skolor du är intresserad av.',
-  'Vad gör en studie- och yrkesvägledare?': 'En studie- och yrkesvägledare (SYV) hjälper dig att utforska olika utbildnings- och yrkesvägar. De kan ge information om olika program och skolor, hjälpa dig förstå dina intressen och styrkor, och stödja dig i ditt beslutsfattande.',
-  'Kan jag byta program om jag ångrar mig?': 'Ja, det går att byta program under gymnasietiden, särskilt under första året. Kontakta din SYV så snart du känner att du vill byta för att diskutera möjligheterna. Tänk på att det kan innebära att du behöver läsa ikapp vissa kurser.',
+// Sample AI responses for different education-related queries
+const aiResponseDatabase = {
+  programs: [
+    "Det finns många olika gymnasieprogram att välja mellan. De huvudsakliga kategorierna är högskoleförberedande program (som Naturvetenskapsprogrammet, Samhällsvetenskapsprogrammet, Ekonomiprogrammet) och yrkesprogram (som Bygg- och anläggningsprogrammet, Vård- och omsorgsprogrammet).",
+    "Högskoleförberedande program ger grundläggande behörighet till högskola/universitet, medan yrkesprogram förbereder dig för att börja jobba direkt efter gymnasiet.",
+  ],
+  naturvetenskap: [
+    "Naturvetenskapsprogrammet är ett högskoleförberedande program med fokus på matematik, fysik, kemi och biologi.",
+    "Det passar dig som är intresserad av vetenskap, forskning, medicin eller ingenjörsyrken.",
+    "Efter programmet kan du studera vidare inom områden som medicin, ingenjörsvetenskap, naturvetenskap m.m."
+  ],
+  samhällsvetenskap: [
+    "Samhällsvetenskapsprogrammet ger dig kunskaper om samhällsförhållanden i Sverige och världen.",
+    "Det passar dig som är intresserad av människor, samhälle, historia, och kultur.",
+    "Efter programmet kan du studera vidare inom områden som juridik, psykologi, media, lärare, polis m.m."
+  ],
+  ekonomi: [
+    "Ekonomiprogrammet ger dig kunskaper inom företagsekonomi, entreprenörskap och juridik.",
+    "Det passar dig som är intresserad av ekonomi, företagande och samhällsfrågor.",
+    "Efter programmet kan du studera vidare inom områden som ekonomi, marknadsföring, juridik m.m."
+  ],
+  teknik: [
+    "Teknikprogrammet ger dig kunskap om teknikutveckling och tekniska processer.",
+    "Det passar dig som är intresserad av datorer, programmering, design eller ingenjörsyrken.",
+    "Efter programmet kan du studera vidare inom områden som ingenjörsvetenskap, arkitektur, datavetenskap m.m."
+  ],
+  betyg: [
+    "Betygen från grundskolan är viktiga för att komma in på önskat gymnasieprogram.",
+    "Det är dina 17 bästa betyg från grundskolan som räknas och ger ditt meritvärde.",
+    "Olika gymnasieprogram och skolor har olika antagningspoäng beroende på hur många som söker."
+  ],
+  after_gymnasium: [
+    "Efter gymnasiet har du flera alternativ: studera vidare på högskola/universitet, börja jobba, starta eget företag, eller ta ett sabbatsår för att fundera på vad du vill göra.",
+    "Om du gått ett högskoleförberedande program har du grundläggande behörighet till högskola/universitet.",
+    "Om du gått ett yrkesprogram kan du börja jobba direkt, eller komplettera med kurser för högskolebehörighet."
+  ],
+  default: [
+    "Jag är här för att hjälpa dig med frågor om gymnasieval, utbildning och framtida karriärvägar.",
+    "Du kan fråga mig om olika gymnasieprogram, behörighetskrav, eller vad olika utbildningar kan leda till.",
+    "Om du vill ha mer personlig vägledning rekommenderar jag att du bokar ett möte med en studie- och yrkesvägledare."
+  ]
 };
 
-const commonQuestions = [
-  'Vilka gymnasieprogram finns?',
-  'Vad krävs för att komma in på universitet?',
-  'Hur vet jag vilket program som passar mig?',
-  'Vad gör en studie- och yrkesvägledare?',
-  'Kan jag byta program om jag ångrar mig?',
+// Common questions that students might ask
+const suggestedQuestions = [
+  "Vilka gymnasieprogram finns det?",
+  "Vad är Naturvetenskapsprogrammet?",
+  "Vad är Samhällsvetenskapsprogrammet?",
+  "Vad är Ekonomiprogrammet?",
+  "Vad är Teknikprogrammet?",
+  "Hur viktiga är mina betyg?",
+  "Vad kan jag göra efter gymnasiet?",
+  "Hur bokar jag ett möte med en SYV?",
 ];
 
 const AIChatPage = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      text: 'Hej! Jag är din digitala studievägledare. Vad vill du veta om utbildningar och framtida yrken?',
-      sender: 'ai',
-      timestamp: new Date(),
-    },
+  const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>([
+    { text: "Hej! Jag är din digitala studie- och yrkesvägledare. Jag kan svara på frågor om gymnasieprogram, utbildningar och karriärvägar. Vad undrar du över?", isUser: false }
   ]);
-  const [inputValue, setInputValue] = useState('');
+  const [inputMessage, setInputMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
 
   const handleSendMessage = () => {
-    if (!inputValue.trim()) return;
+    if (!inputMessage.trim()) return;
+
+    // Add user message to chat
+    const newUserMessage = { text: inputMessage, isUser: true };
+    setMessages([...messages, newUserMessage]);
+    setInputMessage("");
     
-    const userMessage: Message = {
-      text: inputValue.trim(),
-      sender: 'user',
-      timestamp: new Date(),
-    };
+    // Simulate AI thinking
+    setIsTyping(true);
     
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
-    
-    // Find a predefined answer or use a generic response
     setTimeout(() => {
-      let response: string;
+      // Find appropriate response based on keywords in the user's message
+      const userMessageLower = inputMessage.toLowerCase();
+      let responseText: string[] = [];
       
-      // Check if there's a predefined answer
-      const lowerCaseInput = inputValue.toLowerCase();
-      const matchingQuestion = Object.keys(predefinedAnswers).find(q => 
-        lowerCaseInput.includes(q.toLowerCase()) || 
-        q.toLowerCase().includes(lowerCaseInput)
-      );
-      
-      if (matchingQuestion) {
-        response = predefinedAnswers[matchingQuestion];
+      if (userMessageLower.includes("program") || userMessageLower.includes("gymnasie")) {
+        responseText = aiResponseDatabase.programs;
+      } else if (userMessageLower.includes("naturvetenskap") || userMessageLower.includes("natur")) {
+        responseText = aiResponseDatabase.naturvetenskap;
+      } else if (userMessageLower.includes("samhällsvetenskap") || userMessageLower.includes("samhäll")) {
+        responseText = aiResponseDatabase.samhällsvetenskap;
+      } else if (userMessageLower.includes("ekonomi")) {
+        responseText = aiResponseDatabase.ekonomi;
+      } else if (userMessageLower.includes("teknik")) {
+        responseText = aiResponseDatabase.teknik;
+      } else if (userMessageLower.includes("betyg") || userMessageLower.includes("poäng")) {
+        responseText = aiResponseDatabase.betyg;
+      } else if (userMessageLower.includes("efter gymnasiet") || userMessageLower.includes("universitet") || 
+                userMessageLower.includes("högskola") || userMessageLower.includes("jobb")) {
+        responseText = aiResponseDatabase.after_gymnasium;
+      } else if (userMessageLower.includes("boka") || userMessageLower.includes("träffa") || 
+                userMessageLower.includes("syv") || userMessageLower.includes("vägledare")) {
+        responseText = ["Du kan boka tid med en studie- och yrkesvägledare under fliken 'Boka SYV' i menyn, eller genom att klicka på knappen nedan."];
       } else {
-        response = 'Det var en intressant fråga! För att få ett mer detaljerat svar, rekommenderar jag att du bokar ett samtal med en av våra studie- och yrkesvägledare som kan ge dig personlig vägledning baserad på din specifika situation.';
+        responseText = aiResponseDatabase.default;
       }
       
-      const aiMessage: Message = {
-        text: response,
-        sender: 'ai',
-        timestamp: new Date(),
-      };
+      // Join response paragraphs with line breaks
+      const aiResponse = { text: responseText.join("\n\n"), isUser: false };
+      setMessages(prevMessages => [...prevMessages, aiResponse]);
       
-      setMessages(prev => [...prev, aiMessage]);
+      setIsTyping(false);
     }, 1000);
   };
 
-  const handleQuickQuestion = (question: string) => {
-    setInputValue(question);
+  const handleSuggestedQuestion = (question: string) => {
+    setInputMessage(question);
+    // Wait a moment before sending to make it feel more natural
     setTimeout(() => {
       handleSendMessage();
     }, 100);
@@ -88,55 +127,60 @@ const AIChatPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
-      <div className="flex-grow container mx-auto p-4">
-        <div className="bg-gradient-to-r from-guidance-blue to-guidance-purple text-white py-10 mb-6 rounded-lg">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">AI-chatt för vägledning</h1>
-            <p className="text-lg md:text-xl max-w-3xl mx-auto">
-              Få snabba svar på vanliga frågor om utbildning och yrken
-            </p>
-          </div>
+      <div className="bg-gradient-to-r from-guidance-purple to-guidance-blue text-white py-10">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">AI-chatt</h1>
+          <p className="text-lg md:text-xl max-w-3xl mx-auto">
+            Få svar på dina frågor om gymnasieval, utbildning och framtidsvägar
+          </p>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Chat Section */}
-          <div className="md:col-span-2">
+      </div>
+      
+      <div className="flex-grow py-8">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row gap-6">
+          {/* Chat Container */}
+          <div className="flex-grow md:w-2/3">
             <Card className="h-[600px] flex flex-col">
-              <CardContent className="flex-grow p-4 overflow-hidden flex flex-col">
-                <div className="flex-grow overflow-y-auto mb-4 p-2">
+              <CardContent className="p-4 flex flex-col h-full">
+                {/* Chat Messages */}
+                <div className="flex-grow overflow-y-auto mb-4 space-y-4 p-2">
                   {messages.map((message, index) => (
                     <div 
-                      key={index} 
-                      className={`mb-4 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}
+                      key={index}
+                      className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
                     >
                       <div 
-                        className={`inline-block rounded-lg px-4 py-2 max-w-[80%] ${
-                          message.sender === 'user' 
+                        className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                          message.isUser 
                             ? 'bg-guidance-blue text-white' 
-                            : 'bg-gray-100'
+                            : 'bg-gray-100 text-gray-800'
                         }`}
                       >
-                        {message.text}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {message.timestamp.toLocaleTimeString()}
+                        {message.text.split("\n\n").map((paragraph, i) => (
+                          <p key={i} className={i > 0 ? 'mt-2' : ''}>
+                            {paragraph}
+                          </p>
+                        ))}
                       </div>
                     </div>
                   ))}
+                  {isTyping && (
+                    <div className="flex justify-start">
+                      <div className="max-w-[80%] rounded-lg px-4 py-2 bg-gray-100 text-gray-800">
+                        <p>Skriver...</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
+                {/* Chat Input */}
                 <div className="flex gap-2">
-                  <Textarea
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
+                  <Input 
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
                     placeholder="Skriv din fråga här..."
-                    className="flex-grow resize-none"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    className="flex-grow"
                   />
                   <Button 
                     onClick={handleSendMessage}
@@ -150,30 +194,33 @@ const AIChatPage = () => {
           </div>
           
           {/* Sidebar */}
-          <div className="md:col-span-1">
+          <div className="md:w-1/3">
             <Card>
               <CardContent className="p-4">
-                <h2 className="text-xl font-bold mb-4 text-guidance-blue">Vanliga frågor</h2>
+                <h3 className="font-bold text-lg mb-4">Vanliga frågor</h3>
                 <div className="space-y-2">
-                  {commonQuestions.map((question, index) => (
+                  {suggestedQuestions.map((question, index) => (
                     <Button 
-                      key={index} 
-                      variant="outline"
-                      className="w-full justify-start text-left h-auto py-2 border-guidance-green text-guidance-green hover:bg-guidance-lightGreen/50"
-                      onClick={() => handleQuickQuestion(question)}
+                      key={index}
+                      variant="outline" 
+                      className="w-full justify-start text-left h-auto py-2"
+                      onClick={() => handleSuggestedQuestion(question)}
                     >
                       {question}
                     </Button>
                   ))}
                 </div>
                 
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <h3 className="font-semibold mb-2">Behöver du mer hjälp?</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    För mer personlig vägledning, boka ett möte med en studie- och yrkesvägledare.
+                <div className="mt-6 pt-6 border-t">
+                  <h3 className="font-bold text-lg mb-4">Behöver du mer hjälp?</h3>
+                  <p className="text-gray-600 mb-4">
+                    Våra studie- och yrkesvägledare finns här för att hjälpa dig med mer specifika frågor och personlig vägledning.
                   </p>
-                  <Button asChild className="w-full bg-guidance-green hover:bg-guidance-green/90">
-                    <Link to="/booking">Boka vägledningssamtal</Link>
+                  <Button 
+                    asChild
+                    className="w-full bg-guidance-green hover:bg-guidance-green/90"
+                  >
+                    <Link to="/booking">Boka tid med SYV</Link>
                   </Button>
                 </div>
               </CardContent>
@@ -181,6 +228,7 @@ const AIChatPage = () => {
           </div>
         </div>
       </div>
+      
       <Footer />
     </div>
   );

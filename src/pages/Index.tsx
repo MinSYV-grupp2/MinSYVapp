@@ -6,11 +6,38 @@ import ReflectionQuestions from '@/components/ReflectionQuestions';
 import GuidanceCounselor from '@/components/GuidanceCounselor';
 import ProfileSection from '@/components/ProfileSection';
 import Footer from '@/components/Footer';
+import GuidanceQuiz from '@/components/GuidanceQuiz';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
+import { useState } from 'react';
 
 const Index = () => {
+  const [showGuidanceQuiz, setShowGuidanceQuiz] = useState(false);
+  const [showInterestsQuiz, setShowInterestsQuiz] = useState(false);
+
+  const handleStartGuidanceQuiz = () => {
+    setShowGuidanceQuiz(true);
+    setShowInterestsQuiz(false);
+    // Smooth scroll to quiz section
+    setTimeout(() => {
+      document.getElementById('quiz')?.scrollIntoView({
+        behavior: 'smooth'
+      });
+    }, 100);
+  };
+
+  const handleStartInterestsQuiz = () => {
+    setShowInterestsQuiz(true);
+    setShowGuidanceQuiz(false);
+    // Smooth scroll to quiz section
+    setTimeout(() => {
+      document.getElementById('quiz')?.scrollIntoView({
+        behavior: 'smooth'
+      });
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
@@ -23,12 +50,12 @@ const Index = () => {
             Lär känna dig själv bättre inför framtida utbildnings- och yrkesval
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <a 
-              href="#quiz" 
+            <Button 
+              onClick={handleStartGuidanceQuiz}
               className="bg-white text-guidance-blue hover:bg-gray-100 font-semibold py-3 px-6 rounded-lg transition-colors"
             >
               Starta quizet
-            </a>
+            </Button>
             <Link 
               to="/career-map" 
               className="bg-guidance-green hover:bg-guidance-green/90 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
@@ -87,12 +114,60 @@ const Index = () => {
         </div>
       </div>
       
+      {/* Quiz Section */}
+      {showGuidanceQuiz && <GuidanceQuiz />}
+      {showInterestsQuiz && <QuizSection />}
+      {!showGuidanceQuiz && !showInterestsQuiz && (
+        <div className="py-12 bg-gray-50" id="quiz">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold mb-8 text-guidance-blue">Vilken typ av quiz vill du göra?</h2>
+            
+            <div className="flex flex-col md:flex-row gap-6 justify-center max-w-3xl mx-auto">
+              <Card className="flex-1">
+                <CardContent className="p-6 flex flex-col items-center">
+                  <div className="text-5xl mb-4">🏫</div>
+                  <h3 className="text-xl font-bold mb-2">Gymnasievägledning</h3>
+                  <p className="text-gray-600 mb-6">
+                    Hitta rätt gymnasieprogram baserat på dina intressen och mål.
+                  </p>
+                  <Button 
+                    onClick={handleStartGuidanceQuiz} 
+                    className="bg-guidance-blue hover:bg-guidance-blue/90"
+                  >
+                    Starta gymnasium-quiz
+                  </Button>
+                </CardContent>
+              </Card>
+              
+              <Card className="flex-1">
+                <CardContent className="p-6 flex flex-col items-center">
+                  <div className="text-5xl mb-4">👤</div>
+                  <h3 className="text-xl font-bold mb-2">Personliga intressen</h3>
+                  <p className="text-gray-600 mb-6">
+                    Utforska dina intressen och styrkor för att forma din profil.
+                  </p>
+                  <Button 
+                    onClick={handleStartInterestsQuiz}
+                    className="bg-guidance-purple hover:bg-guidance-purple/90"
+                  >
+                    Starta intresse-quiz
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Main Content */}
       <div className="flex-grow">
-        <QuizSection />
-        <ReflectionQuestions />
-        <GuidanceCounselor />
-        <ProfileSection />
+        {!showGuidanceQuiz && !showInterestsQuiz && (
+          <>
+            <ReflectionQuestions />
+            <GuidanceCounselor />
+            <ProfileSection />
+          </>
+        )}
       </div>
       
       <Footer />
