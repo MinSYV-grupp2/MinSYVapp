@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronRight, School, GraduationCap, Briefcase, Book } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 // Career path data structure
 interface PathNode {
@@ -13,7 +12,7 @@ interface PathNode {
   children?: PathNode[];
 }
 
-// Mock data for the career paths
+// Mock data for the career paths with all Gothenburg high schools
 const careerPathData: PathNode[] = [
   {
     id: 'school-1',
@@ -22,74 +21,26 @@ const careerPathData: PathNode[] = [
     children: [
       {
         id: 'program-1',
-        name: 'Naturvetenskapsprogrammet',
+        name: 'Ekonomiprogrammet',
         type: 'program',
         children: [
           {
             id: 'spec-1',
-            name: 'Naturvetenskap',
+            name: 'Ekonomi',
             type: 'specialization',
             children: [
               {
                 id: 'choice-1',
-                name: 'Matematik 5',
+                name: 'Företagsekonomi 2',
                 type: 'individual_choice',
                 children: [
                   {
                     id: 'edu-1',
-                    name: 'Civilingenjör',
+                    name: 'Civilekonomprogrammet',
                     type: 'education',
                     children: [
-                      { id: 'job-1', name: 'Ingenjör', type: 'job' },
-                      { id: 'job-2', name: 'Forskare', type: 'job' }
-                    ]
-                  },
-                  {
-                    id: 'edu-2',
-                    name: 'Läkarprogrammet',
-                    type: 'education',
-                    children: [
-                      { id: 'job-3', name: 'Läkare', type: 'job' },
-                      { id: 'job-4', name: 'Kirurg', type: 'job' }
-                    ]
-                  }
-                ]
-              },
-              {
-                id: 'choice-2',
-                name: 'Programmering 1',
-                type: 'individual_choice',
-                children: [
-                  {
-                    id: 'edu-3',
-                    name: 'Systemvetenskap',
-                    type: 'education',
-                    children: [
-                      { id: 'job-5', name: 'Systemutvecklare', type: 'job' },
-                      { id: 'job-6', name: 'IT-konsult', type: 'job' }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            id: 'spec-2',
-            name: 'Matematik',
-            type: 'specialization',
-            children: [
-              {
-                id: 'choice-3',
-                name: 'Fysik 2',
-                type: 'individual_choice',
-                children: [
-                  {
-                    id: 'edu-4',
-                    name: 'Matematikprogrammet',
-                    type: 'education',
-                    children: [
-                      { id: 'job-7', name: 'Statistiker', type: 'job' },
-                      { id: 'job-8', name: 'Aktuarie', type: 'job' }
+                      { id: 'job-1', name: 'Ekonomichef', type: 'job' },
+                      { id: 'job-2', name: 'Revisor', type: 'job' }
                     ]
                   }
                 ]
@@ -100,26 +51,56 @@ const careerPathData: PathNode[] = [
       },
       {
         id: 'program-2',
-        name: 'Samhällsvetenskapsprogrammet',
+        name: 'Naturvetenskapsprogrammet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-2',
+            name: 'Naturvetenskap',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-2',
+                name: 'Matematik 5',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-2',
+                    name: 'Läkarprogrammet',
+                    type: 'education',
+                    children: [
+                      { id: 'job-3', name: 'Läkare', type: 'job' },
+                      { id: 'job-4', name: 'Kirurg', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'program-3',
+        name: 'Estetiska programmet',
         type: 'program',
         children: [
           {
             id: 'spec-3',
-            name: 'Beteendevetenskap',
+            name: 'Musik',
             type: 'specialization',
             children: [
               {
-                id: 'choice-4',
-                name: 'Psykologi 2',
+                id: 'choice-3',
+                name: 'Musikproduktion',
                 type: 'individual_choice',
                 children: [
                   {
-                    id: 'edu-5',
-                    name: 'Psykologprogrammet',
+                    id: 'edu-3',
+                    name: 'Musikproducentprogrammet',
                     type: 'education',
                     children: [
-                      { id: 'job-9', name: 'Psykolog', type: 'job' },
-                      { id: 'job-10', name: 'HR-specialist', type: 'job' }
+                      { id: 'job-5', name: 'Musikproducent', type: 'job' },
+                      { id: 'job-6', name: 'Ljudtekniker', type: 'job' }
                     ]
                   }
                 ]
@@ -136,27 +117,568 @@ const careerPathData: PathNode[] = [
     type: 'school',
     children: [
       {
-        id: 'program-3',
-        name: 'Teknikprogrammet',
+        id: 'program-4',
+        name: 'Ekonomiprogrammet',
         type: 'program',
         children: [
           {
             id: 'spec-4',
-            name: 'Informationsteknik',
+            name: 'Juridik',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-4',
+                name: 'Rätten och samhället',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-4',
+                    name: 'Juristprogrammet',
+                    type: 'education',
+                    children: [
+                      { id: 'job-7', name: 'Advokat', type: 'job' },
+                      { id: 'job-8', name: 'Domare', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'program-5',
+        name: 'Teknikprogrammet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-5',
+            name: 'Design och produktutveckling',
             type: 'specialization',
             children: [
               {
                 id: 'choice-5',
-                name: 'Webbutveckling',
+                name: 'CAD-teknik',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-5',
+                    name: 'Civilingenjör Design',
+                    type: 'education',
+                    children: [
+                      { id: 'job-9', name: 'Produktutvecklare', type: 'job' },
+                      { id: 'job-10', name: 'Designer', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'school-3',
+    name: 'Katrinelundsgymnasiet',
+    type: 'school',
+    children: [
+      {
+        id: 'program-6',
+        name: 'Naturvetenskapsprogrammet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-6',
+            name: 'Naturvetenskap och samhälle',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-6',
+                name: 'Miljö och hållbarhet',
                 type: 'individual_choice',
                 children: [
                   {
                     id: 'edu-6',
-                    name: 'Datavetenskapligt program',
+                    name: 'Miljövetenskapligt program',
                     type: 'education',
                     children: [
-                      { id: 'job-11', name: 'Webbutvecklare', type: 'job' },
-                      { id: 'job-12', name: 'UX-designer', type: 'job' }
+                      { id: 'job-11', name: 'Miljökonsult', type: 'job' },
+                      { id: 'job-12', name: 'Hållbarhetsanalytiker', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'school-4',
+    name: 'Angeredsgymnasiet',
+    type: 'school',
+    children: [
+      {
+        id: 'program-7',
+        name: 'Samhällsvetenskapsprogrammet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-7',
+            name: 'Beteendevetenskap',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-7',
+                name: 'Psykologi 2',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-7',
+                    name: 'Psykologprogrammet',
+                    type: 'education',
+                    children: [
+                      { id: 'job-13', name: 'Psykolog', type: 'job' },
+                      { id: 'job-14', name: 'HR-specialist', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'program-8',
+        name: 'Vård- och omsorgsprogrammet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-8',
+            name: 'Vård och omsorg',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-8',
+                name: 'Medicin 2',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-8',
+                    name: 'Sjuksköterskeprogrammet',
+                    type: 'education',
+                    children: [
+                      { id: 'job-15', name: 'Sjuksköterska', type: 'job' },
+                      { id: 'job-16', name: 'Barnmorska', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'school-5',
+    name: 'Schillerska gymnasiet',
+    type: 'school',
+    children: [
+      {
+        id: 'program-9',
+        name: 'Humanistiska programmet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-9',
+            name: 'Kultur',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-9',
+                name: 'Litteratur',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-9',
+                    name: 'Litteraturvetenskapligt program',
+                    type: 'education',
+                    children: [
+                      { id: 'job-17', name: 'Redaktör', type: 'job' },
+                      { id: 'job-18', name: 'Författare', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'school-6',
+    name: 'Burgårdens gymnasium',
+    type: 'school',
+    children: [
+      {
+        id: 'program-10',
+        name: 'Barn- och fritidsprogrammet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-10',
+            name: 'Pedagogiskt och socialt arbete',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-10',
+                name: 'Socialt arbete',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-10',
+                    name: 'Socionomprogram',
+                    type: 'education',
+                    children: [
+                      { id: 'job-19', name: 'Socionom', type: 'job' },
+                      { id: 'job-20', name: 'Kurator', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'school-7',
+    name: 'L M Engström gymnasium',
+    type: 'school',
+    children: [
+      {
+        id: 'program-11',
+        name: 'Samhällsvetenskapsprogrammet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-11',
+            name: 'Samhällsvetenskap',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-11',
+                name: 'Internationella relationer',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-11',
+                    name: 'Internationella relationer',
+                    type: 'education',
+                    children: [
+                      { id: 'job-21', name: 'Diplomat', type: 'job' },
+                      { id: 'job-22', name: 'Biståndsarbetare', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'school-8',
+    name: 'Kitas Gymnasium',
+    type: 'school',
+    children: [
+      {
+        id: 'program-12',
+        name: 'Ekonomiprogrammet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-12',
+            name: 'Ekonomi',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-12',
+                name: 'Internationell ekonomi',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-12',
+                    name: 'Internationell ekonomi',
+                    type: 'education',
+                    children: [
+                      { id: 'job-23', name: 'Nationalekonom', type: 'job' },
+                      { id: 'job-24', name: 'Finansanalytiker', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'school-9',
+    name: 'Göteborgs Högre Samskola',
+    type: 'school',
+    children: [
+      {
+        id: 'program-13',
+        name: 'Naturvetenskapsprogrammet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-13',
+            name: 'Naturvetenskap',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-13',
+                name: 'Kemi fördjupning',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-13',
+                    name: 'Kemiingenjörsprogram',
+                    type: 'education',
+                    children: [
+                      { id: 'job-25', name: 'Kemiingenjör', type: 'job' },
+                      { id: 'job-26', name: 'Läkemedelsutvecklare', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'school-10',
+    name: 'Bräckegymnasiet',
+    type: 'school',
+    children: [
+      {
+        id: 'program-14',
+        name: 'Bygg- och anläggningsprogrammet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-14',
+            name: 'Husbyggnad',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-14',
+                name: 'Betong',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-14',
+                    name: 'Byggingenjörsprogrammet',
+                    type: 'education',
+                    children: [
+                      { id: 'job-27', name: 'Byggnadsingenjör', type: 'job' },
+                      { id: 'job-28', name: 'Projektledare bygg', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'school-11',
+    name: 'NTI Gymnasiet',
+    type: 'school',
+    children: [
+      {
+        id: 'program-15',
+        name: 'Teknikprogrammet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-15',
+            name: 'Informations- och medieteknik',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-15',
+                name: 'Webbutveckling',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-15',
+                    name: 'Datavetenskap',
+                    type: 'education',
+                    children: [
+                      { id: 'job-29', name: 'Webbutvecklare', type: 'job' },
+                      { id: 'job-30', name: 'UX-designer', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'school-12',
+    name: 'Donnergymnasiet',
+    type: 'school',
+    children: [
+      {
+        id: 'program-16',
+        name: 'Estetiska programmet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-16',
+            name: 'Musik',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-16',
+                name: 'Ensemble',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-16',
+                    name: 'Musikhögskolan',
+                    type: 'education',
+                    children: [
+                      { id: 'job-31', name: 'Musiker', type: 'job' },
+                      { id: 'job-32', name: 'Musiklärare', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'school-13',
+    name: 'Drottning Blankas Gymnasieskola',
+    type: 'school',
+    children: [
+      {
+        id: 'program-17',
+        name: 'Frisör- och stylistprogrammet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-17',
+            name: 'Frisör',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-17',
+                name: 'Färgning',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-17',
+                    name: 'Frisörmästare',
+                    type: 'education',
+                    children: [
+                      { id: 'job-33', name: 'Frisör', type: 'job' },
+                      { id: 'job-34', name: 'Frisörsalongsägare', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'school-14',
+    name: 'Jensen Gymnasium',
+    type: 'school',
+    children: [
+      {
+        id: 'program-18',
+        name: 'Ekonomiprogrammet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-18',
+            name: 'Juridik',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-18',
+                name: 'Affärsjuridik',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-18',
+                    name: 'Juristprogrammet',
+                    type: 'education',
+                    children: [
+                      { id: 'job-35', name: 'Företagsjurist', type: 'job' },
+                      { id: 'job-36', name: 'Förhandlare', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'school-15',
+    name: 'Sjölins gymnasium',
+    type: 'school',
+    children: [
+      {
+        id: 'program-19',
+        name: 'Samhällsvetenskapsprogrammet',
+        type: 'program',
+        children: [
+          {
+            id: 'spec-19',
+            name: 'Samhällsvetenskap',
+            type: 'specialization',
+            children: [
+              {
+                id: 'choice-19',
+                name: 'Geografi',
+                type: 'individual_choice',
+                children: [
+                  {
+                    id: 'edu-19',
+                    name: 'Samhällsplaneringsprogram',
+                    type: 'education',
+                    children: [
+                      { id: 'job-37', name: 'Stadsplanerare', type: 'job' },
+                      { id: 'job-38', name: 'GIS-specialist', type: 'job' }
                     ]
                   }
                 ]
