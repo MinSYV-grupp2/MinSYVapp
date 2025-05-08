@@ -9,6 +9,29 @@ interface School {
   program?: string;
 }
 
+interface SavedProgram {
+  id: string;
+  programName: string;
+  schoolName: string;
+  specialization?: string;
+}
+
+interface Appointment {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  counselor: string;
+  description?: string;
+}
+
+interface ImportantDate {
+  id: string;
+  title: string;
+  date: string;
+  description?: string;
+}
+
 interface DiscussionQuestion {
   id: string;
   question: string;
@@ -21,6 +44,9 @@ interface UserProfile {
   strengths: string[];
   reflections: string[];
   favoriteSchools: School[];
+  savedPrograms: SavedProgram[];
+  appointments: Appointment[];
+  importantDates: ImportantDate[];
   discussionQuestions: DiscussionQuestion[];
   quizCompleted: boolean;
 }
@@ -35,6 +61,12 @@ interface UserContextType {
   addReflection: (reflection: string) => void;
   addFavoriteSchool: (school: School) => void;
   removeFavoriteSchool: (schoolId: string) => void;
+  addSavedProgram: (program: SavedProgram) => void;
+  removeSavedProgram: (programId: string) => void;
+  addAppointment: (appointment: Appointment) => void;
+  removeAppointment: (appointmentId: string) => void;
+  addImportantDate: (date: ImportantDate) => void;
+  removeImportantDate: (dateId: string) => void;
   addDiscussionQuestion: (question: string) => void;
   removeDiscussionQuestion: (questionId: string) => void;
   markQuizCompleted: () => void;
@@ -46,6 +78,9 @@ const defaultProfile: UserProfile = {
   strengths: [],
   reflections: [],
   favoriteSchools: [],
+  savedPrograms: [],
+  appointments: [],
+  importantDates: [],
   discussionQuestions: [],
   quizCompleted: false,
 };
@@ -112,6 +147,48 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }));
   };
 
+  const addSavedProgram = (program: SavedProgram) => {
+    setProfile(prev => ({
+      ...prev,
+      savedPrograms: [...prev.savedPrograms, program]
+    }));
+  };
+
+  const removeSavedProgram = (programId: string) => {
+    setProfile(prev => ({
+      ...prev,
+      savedPrograms: prev.savedPrograms.filter(p => p.id !== programId)
+    }));
+  };
+
+  const addAppointment = (appointment: Appointment) => {
+    setProfile(prev => ({
+      ...prev,
+      appointments: [...prev.appointments, appointment]
+    }));
+  };
+
+  const removeAppointment = (appointmentId: string) => {
+    setProfile(prev => ({
+      ...prev,
+      appointments: prev.appointments.filter(a => a.id !== appointmentId)
+    }));
+  };
+
+  const addImportantDate = (date: ImportantDate) => {
+    setProfile(prev => ({
+      ...prev,
+      importantDates: [...prev.importantDates, date]
+    }));
+  };
+
+  const removeImportantDate = (dateId: string) => {
+    setProfile(prev => ({
+      ...prev,
+      importantDates: prev.importantDates.filter(d => d.id !== dateId)
+    }));
+  };
+
   const addDiscussionQuestion = (question: string) => {
     const newQuestion: DiscussionQuestion = {
       id: Date.now().toString(),
@@ -150,6 +227,12 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       addReflection,
       addFavoriteSchool,
       removeFavoriteSchool,
+      addSavedProgram,
+      removeSavedProgram,
+      addAppointment,
+      removeAppointment,
+      addImportantDate,
+      removeImportantDate,
       addDiscussionQuestion,
       removeDiscussionQuestion,
       markQuizCompleted

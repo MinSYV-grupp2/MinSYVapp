@@ -5,6 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import TreeDiagram from '@/components/TreeDiagram';
+import { useUser } from '@/context/UserContext';
+import { toast } from '@/components/ui/use-toast';
+import { Heart } from 'lucide-react';
 
 // Program and career path data
 const programData = [
@@ -50,9 +53,41 @@ const programData = [
   }
 ];
 
+// Schools in Göteborg
+const schools = [
+  "Angeredsgymnasiet",
+  "Burgårdens gymnasium",
+  "Donnergymnasiet",
+  "Hvitfeldtska gymnasiet",
+  "International High School of the Gothenburg Region",
+  "Katrinelundsgymnasiet",
+  "Lindholmens tekniska gymnasium",
+  "Polhemsgymnasiet",
+  "Schillerska gymnasiet"
+];
+
 const CareerMap = () => {
+  const { addSavedProgram } = useUser();
   const [selectedProgram, setSelectedProgram] = useState(programData[0]);
   const [viewMode, setViewMode] = useState<'list' | 'tree'>('list');
+  const [selectedSchool, setSelectedSchool] = useState<string | null>(null);
+  
+  const handleSaveProgram = (school?: string) => {
+    const schoolName = school || selectedSchool || "Valfri skola";
+    const programId = `${Date.now().toString()}-${selectedProgram.id}`;
+    
+    addSavedProgram({
+      id: programId,
+      programName: selectedProgram.name,
+      schoolName: schoolName,
+      specialization: undefined
+    });
+    
+    toast({
+      title: "Program sparat",
+      description: `${selectedProgram.name} på ${schoolName} har lagts till i din profil.`,
+    });
+  };
   
   return (
     <div className="container mx-auto px-4 py-8">
@@ -101,49 +136,93 @@ const CareerMap = () => {
             
             <Card className="mb-8">
               <CardContent className="p-6">
-                <h3 className="text-xl font-bold mb-2 text-guidance-green">{selectedProgram.name}</h3>
-                <p className="text-gray-600 mb-4">{selectedProgram.description}</p>
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold mb-2 text-guidance-green">{selectedProgram.name}</h3>
+                    <p className="text-gray-600">{selectedProgram.description}</p>
+                  </div>
+                  <Button
+                    onClick={() => handleSaveProgram()}
+                    variant="outline"
+                    className="border-guidance-green text-guidance-green hover:bg-guidance-lightGreen/50"
+                  >
+                    <Heart className="mr-2 h-4 w-4" />
+                    Spara program
+                  </Button>
+                </div>
                 
-                <Tabs defaultValue="careers">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="careers">Möjliga yrken</TabsTrigger>
-                    <TabsTrigger value="education">Vidare studier</TabsTrigger>
-                    <TabsTrigger value="subjects">Viktiga ämnen</TabsTrigger>
-                  </TabsList>
+                <div className="mt-6">
+                  <h4 className="font-semibold mb-2">Välj skola</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-6">
+                    {schools.map((school) => (
+                      <Button
+                        key={school}
+                        variant={selectedSchool === school ? "default" : "outline"}
+                        className={selectedSchool === school
+                          ? "bg-guidance-purple hover:bg-guidance-purple/90"
+                          : ""}
+                        onClick={() => setSelectedSchool(school)}
+                      >
+                        {school}
+                      </Button>
+                    ))}
+                  </div>
                   
-                  <TabsContent value="careers" className="space-y-4">
-                    <h4 className="font-semibold">Yrken detta program kan leda till:</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                      {selectedProgram.careers.map((career, index) => (
-                        <div key={index} className="bg-guidance-lightGreen p-3 rounded-lg text-center">
-                          {career}
-                        </div>
-                      ))}
+                  {selectedSchool && (
+                    <div className="flex justify-end">
+                      <Button
+                        onClick={() => handleSaveProgram(selectedSchool)}
+                        className="bg-guidance-green hover:bg-guidance-green/90"
+                      >
+                        <Heart className="mr-2 h-4 w-4" />
+                        Spara {selectedProgram.name} på {selectedSchool}
+                      </Button>
                     </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="education" className="space-y-4">
-                    <h4 className="font-semibold">Vanliga universitet och högskolor:</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {selectedProgram.universities.map((university, index) => (
-                        <div key={index} className="bg-guidance-lightBlue p-3 rounded-lg text-center">
-                          {university}
-                        </div>
-                      ))}
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="subjects" className="space-y-4">
-                    <h4 className="font-semibold">Viktiga ämnen i programmet:</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                      {selectedProgram.subjects.map((subject, index) => (
-                        <div key={index} className="bg-guidance-lightPurple p-3 rounded-lg text-center">
-                          {subject}
-                        </div>
-                      ))}
-                    </div>
-                  </TabsContent>
-                </Tabs>
+                  )}
+                </div>
+                
+                <div className="mt-8">
+                  <Tabs defaultValue="careers">
+                    <TabsList className="mb-4">
+                      <TabsTrigger value="careers">Möjliga yrken</TabsTrigger>
+                      <TabsTrigger value="education">Vidare studier</TabsTrigger>
+                      <TabsTrigger value="subjects">Viktiga ämnen</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="careers" className="space-y-4">
+                      <h4 className="font-semibold">Yrken detta program kan leda till:</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                        {selectedProgram.careers.map((career, index) => (
+                          <div key={index} className="bg-guidance-lightGreen p-3 rounded-lg text-center">
+                            {career}
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="education" className="space-y-4">
+                      <h4 className="font-semibold">Vanliga universitet och högskolor:</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {selectedProgram.universities.map((university, index) => (
+                          <div key={index} className="bg-guidance-lightBlue p-3 rounded-lg text-center">
+                            {university}
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="subjects" className="space-y-4">
+                      <h4 className="font-semibold">Viktiga ämnen i programmet:</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                        {selectedProgram.subjects.map((subject, index) => (
+                          <div key={index} className="bg-guidance-lightPurple p-3 rounded-lg text-center">
+                            {subject}
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </div>
               </CardContent>
             </Card>
           </>

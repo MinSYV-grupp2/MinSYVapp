@@ -18,7 +18,7 @@ import { useUser } from '@/context/UserContext';
 
 const BookAppointment = () => {
   const navigate = useNavigate();
-  const { profile } = useUser();
+  const { profile, addAppointment } = useUser();
   
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState<string | undefined>(undefined);
@@ -52,7 +52,22 @@ const BookAppointment = () => {
       return;
     }
 
-    // Form is valid, create booking data
+    // Get counselor name
+    const counselorName = counselors.find(c => c.id === counselor)?.name || "";
+
+    // Add appointment to user profile
+    const appointmentData = {
+      id: Date.now().toString(),
+      title: `SYV-möte med ${counselorName}`,
+      date: format(date, 'yyyy-MM-dd'),
+      time: time,
+      counselor: counselorName,
+      description: message || undefined
+    };
+
+    addAppointment(appointmentData);
+
+    // Form is valid, create booking data for session storage
     const bookingData = {
       date: format(date, 'yyyy-MM-dd'),
       time,
