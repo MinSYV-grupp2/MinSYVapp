@@ -113,7 +113,7 @@ const careerPathData: PathNode[] = [
                       { 
                         id: 'job-new5', 
                         name: 'Internationell marknadsförare', 
-                        type::job',
+                        type: 'job',
                         description: 'Arbetar med marknadsföring på internationella marknader' 
                       }
                     ]
