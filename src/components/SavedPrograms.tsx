@@ -3,81 +3,112 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/context/UserContext';
+import { FileHeart, Trash2 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { X, FileHeart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const SavedPrograms = () => {
   const { profile, removeSavedProgram } = useUser();
-
-  const handleRemoveProgram = (id: string) => {
-    removeSavedProgram(id);
+  
+  const handleRemoveProgram = (programId: string, programName: string) => {
+    removeSavedProgram(programId);
     toast({
       title: "Program borttaget",
-      description: "Programmet har tagits bort från dina sparade program.",
+      description: `${programName} har tagits bort från dina sparade program.`,
     });
   };
-
+  
   return (
-    <Card className="shadow">
+    <Card>
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold text-guidance-blue">Sparade program</h3>
-          {profile.savedPrograms.length > 0 && (
-            <span className="bg-guidance-lightPurple text-guidance-purple text-xs font-medium px-2.5 py-1 rounded-full">
-              {profile.savedPrograms.length}
-            </span>
-          )}
+          <div className="flex items-center">
+            <FileHeart className="h-5 w-5 text-guidance-green mr-2" />
+            <h2 className="text-xl font-semibold text-guidance-blue">Mina sparade program</h2>
+          </div>
+          <Button 
+            asChild
+            variant="outline" 
+            size="sm"
+            className="border-guidance-blue text-guidance-blue hover:bg-guidance-lightBlue/50"
+          >
+            <Link to="/career-map">Utforska fler program</Link>
+          </Button>
         </div>
         
         {profile.savedPrograms.length > 0 ? (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {profile.savedPrograms.map((program) => (
-              <Card key={program.id} className="relative border-l-4 border-guidance-purple">
-                <CardContent className="p-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-slate-100"
-                    onClick={() => handleRemoveProgram(program.id)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                  <div className="flex items-start">
-                    <div className="mr-3 mt-1">
-                      <div className="bg-guidance-lightPurple p-2 rounded-full">
-                        <FileHeart className="h-4 w-4 text-guidance-purple" />
+              <div 
+                key={program.id} 
+                className="border border-gray-100 rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-medium text-guidance-green">{program.programName}</h3>
+                    <p className="text-gray-600 text-sm">{program.schoolName}</p>
+                    {program.specialization && (
+                      <p className="text-gray-500 text-xs mt-1">Inriktning: {program.specialization}</p>
+                    )}
+                    {program.merit && (
+                      <div className="mt-2 bg-guidance-lightPurple text-guidance-purple text-xs px-2 py-1 rounded inline-block">
+                        Meritpoäng: {program.merit}
                       </div>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-guidance-blue">{program.programName}</h4>
-                      <p className="text-sm text-gray-600">{program.schoolName}</p>
-                      {program.specialization && (
-                        <p className="text-sm text-gray-500 mt-1">
-                          Inriktning: {program.specialization}
-                        </p>
-                      )}
-                    </div>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
+                  
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-500 p-1 h-auto">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Ta bort program</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Är du säker på att du vill ta bort {program.programName} från dina sparade program?
+                          Detta går inte att ångra.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={() => handleRemoveProgram(program.id, program.programName)}
+                          className="bg-red-500 hover:bg-red-600"
+                        >
+                          Ta bort
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-6 space-y-3">
-            <div className="flex justify-center">
-              <div className="bg-gray-100 p-4 rounded-full">
-                <FileHeart className="h-8 w-8 text-gray-400" />
-              </div>
-            </div>
-            <p className="text-gray-500 italic">
-              Du har inte sparat några program ännu.
-            </p>
+          <div className="text-center py-8 bg-gray-50 rounded-lg">
+            <div className="text-4xl mb-2">📚</div>
+            <p className="text-gray-500 mb-4">Du har inga sparade program ännu</p>
             <Button 
               asChild
-              className="bg-guidance-purple hover:bg-guidance-purple/90"
+              className="bg-guidance-green hover:bg-guidance-green/90"
             >
-              <Link to="/career-map">Utforska karriärkartan</Link>
+              <Link to="/career-map">
+                <FileHeart className="mr-2 h-4 w-4" />
+                Utforska gymnasieprogram
+              </Link>
             </Button>
           </div>
         )}

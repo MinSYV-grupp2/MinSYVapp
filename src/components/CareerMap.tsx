@@ -25,7 +25,8 @@ const programData = [
     educationDescription: 'Programmet omfattar 2500 gymnasiepoäng med fokus på tekniska och naturvetenskapliga ämnen. Programmet har flera inriktningar som informations- och medieteknik, produktionsteknik och samhällsbyggande.',
     careers: ['Civilingenjör', 'Programmerare', 'Arkitekt', 'Produktutvecklare'],
     universities: ['KTH', 'Chalmers', 'Linköpings Universitet'],
-    subjects: ['Matematik', 'Fysik', 'Programmering', 'Teknik']
+    subjects: ['Matematik', 'Fysik', 'Programmering', 'Teknik'],
+    merit: '1.0'
   },
   {
     id: 'science',
@@ -35,7 +36,8 @@ const programData = [
     educationDescription: 'Programmet omfattar 2500 gymnasiepoäng med fokus på biologi, kemi, fysik och matematik. Två inriktningar finns tillgängliga: naturvetenskap och naturvetenskap och samhälle.',
     careers: ['Läkare', 'Veterinär', 'Forskare', 'Apotekare'],
     universities: ['Karolinska Institutet', 'Uppsala Universitet', 'Lunds Universitet'],
-    subjects: ['Biologi', 'Kemi', 'Fysik', 'Matematik']
+    subjects: ['Biologi', 'Kemi', 'Fysik', 'Matematik'],
+    merit: '1.0'
   },
   {
     id: 'social',
@@ -45,7 +47,8 @@ const programData = [
     educationDescription: 'Programmet omfattar 2500 gymnasiepoäng med fokus på samhälle, beteende och språk. Det har flera inriktningar som beteendevetenskap, samhällsvetenskap och medier.',
     careers: ['Jurist', 'Psykolog', 'Socionom', 'Journalist'],
     universities: ['Stockholms Universitet', 'Göteborgs Universitet', 'Lunds Universitet'],
-    subjects: ['Samhällskunskap', 'Historia', 'Psykologi', 'Svenska']
+    subjects: ['Samhällskunskap', 'Historia', 'Psykologi', 'Svenska'],
+    merit: '0.5'
   },
   {
     id: 'business',
@@ -55,7 +58,8 @@ const programData = [
     educationDescription: 'Programmet omfattar 2500 gymnasiepoäng med fokus på företagsekonomi, nationalekonomi och juridik. Två inriktningar finns: ekonomi och juridik.',
     careers: ['Ekonom', 'Marknadsförare', 'Revisor', 'Entreprenör'],
     universities: ['Handelshögskolan', 'Lunds Universitet', 'Uppsala Universitet'],
-    subjects: ['Företagsekonomi', 'Juridik', 'Matematik', 'Entreprenörskap']
+    subjects: ['Företagsekonomi', 'Juridik', 'Matematik', 'Entreprenörskap'],
+    merit: '0.5'
   },
   {
     id: 'arts',
@@ -65,7 +69,8 @@ const programData = [
     educationDescription: 'Programmet omfattar 2500 gymnasiepoäng med fokus på estetiska uttrycksformer. Det har flera inriktningar som bild och formgivning, dans, musik och teater.',
     careers: ['Konstnär', 'Musiker', 'Skådespelare', 'Designer'],
     universities: ['Konstfack', 'Musikhögskolan', 'Teaterhögskolan'],
-    subjects: ['Konst', 'Musik', 'Teater', 'Design']
+    subjects: ['Konst', 'Musik', 'Teater', 'Design'],
+    merit: '0.0'
   }
 ];
 
@@ -96,12 +101,13 @@ const CareerMap = () => {
       id: programId,
       programName: selectedProgram.name,
       schoolName: schoolName,
-      specialization: undefined
+      specialization: undefined,
+      merit: selectedProgram.merit
     });
     
     toast({
       title: "Program sparat",
-      description: `${selectedProgram.name} på ${schoolName} har lagts till i din profil.`,
+      description: `${selectedProgram.name} på ${schoolName} har lagts till i din profil. Meritpoäng: ${selectedProgram.merit}`,
     });
   };
   
@@ -145,7 +151,12 @@ const CareerMap = () => {
                     : "border-guidance-blue text-guidance-blue hover:bg-guidance-lightBlue/50"}
                   onClick={() => setSelectedProgram(program)}
                 >
-                  {program.name}
+                  <span className="flex items-center">
+                    {program.name}
+                    <span className="ml-2 bg-guidance-lightPurple text-guidance-purple text-xs px-1.5 py-0.5 rounded">
+                      Merit: {program.merit}
+                    </span>
+                  </span>
                 </Button>
               ))}
             </div>
@@ -154,7 +165,12 @@ const CareerMap = () => {
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-xl font-bold mb-2 text-guidance-green">{selectedProgram.name}</h3>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-xl font-bold text-guidance-green">{selectedProgram.name}</h3>
+                      <span className="bg-guidance-purple text-white text-sm px-2 py-0.5 rounded-md">
+                        Merit: {selectedProgram.merit}
+                      </span>
+                    </div>
                     <p className="text-gray-600">{selectedProgram.description}</p>
                     
                     <div className="mt-4 space-y-3">

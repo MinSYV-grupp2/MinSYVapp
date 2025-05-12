@@ -14,6 +14,7 @@ interface SavedProgram {
   programName: string;
   schoolName: string;
   specialization?: string;
+  merit?: string;
 }
 
 interface Appointment {
