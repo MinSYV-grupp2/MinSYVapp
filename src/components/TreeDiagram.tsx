@@ -18,7 +18,7 @@ interface PathNode {
   children?: PathNode[];
 }
 
-// Mock data for the career paths with all Gothenburg high schools
+// Mock data for the career paths with all Gothenburg high schools and expanded education options
 const careerPathData: PathNode[] = [
   {
     id: 'school-1',
@@ -61,6 +61,110 @@ const careerPathData: PathNode[] = [
                         name: 'Revisor', 
                         type: 'job',
                         description: 'Granskar företags redovisning och ekonomiska rapporter' 
+                      },
+                      { 
+                        id: 'job-newec1', 
+                        name: 'Finansanalytiker', 
+                        type: 'job',
+                        description: 'Analyserar trender och investeringsmöjligheter på finansmarknaden' 
+                      }
+                    ]
+                  },
+                  {
+                    id: 'edu-new1',
+                    name: 'Ekonomie kandidatprogram',
+                    type: 'education',
+                    description: '3-årig utbildning som ger en ekonomie kandidatexamen',
+                    children: [
+                      { 
+                        id: 'job-new2', 
+                        name: 'Controller', 
+                        type: 'job',
+                        description: 'Planerar och övervakar företagets ekonomiska processer' 
+                      },
+                      { 
+                        id: 'job-new3', 
+                        name: 'Redovisningskonsult', 
+                        type: 'job',
+                        description: 'Hjälper företag med bokföring och ekonomisk rådgivning' 
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                id: 'choice-new1',
+                name: 'Internationell ekonomi',
+                type: 'individual_choice',
+                description: 'Fokus på internationell handel och ekonomi i ett globalt perspektiv',
+                children: [
+                  {
+                    id: 'edu-new2',
+                    name: 'International Business Program',
+                    type: 'education',
+                    description: '3-årig utbildning med fokus på internationell handel',
+                    children: [
+                      { 
+                        id: 'job-new4', 
+                        name: 'Exportansvarig', 
+                        type: 'job',
+                        description: 'Utvecklar och leder företagets exportverksamhet' 
+                      },
+                      { 
+                        id: 'job-new5', 
+                        name: 'Internationell marknadsförare', 
+                        type::job',
+                        description: 'Arbetar med marknadsföring på internationella marknader' 
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            id: 'spec-new1',
+            name: 'Juridik',
+            type: 'specialization',
+            description: 'Fördjupning inom juridik och rättsväsende',
+            children: [
+              {
+                id: 'choice-new2',
+                name: 'Rätten och samhället',
+                type: 'individual_choice',
+                description: 'Fördjupningskurs om juridikens roll i samhället',
+                children: [
+                  {
+                    id: 'edu-new3',
+                    name: 'Juristprogrammet',
+                    type: 'education',
+                    description: '4.5-årig utbildning som leder till jur.kand-examen',
+                    children: [
+                      { 
+                        id: 'job-new6', 
+                        name: 'Advokat', 
+                        type: 'job',
+                        description: 'Ger juridisk rådgivning och representerar klienter i domstol' 
+                      },
+                      { 
+                        id: 'job-new7', 
+                        name: 'Åklagare', 
+                        type: 'job',
+                        description: 'Leder förundersökningar och för statens talan i brottmål' 
+                      }
+                    ]
+                  },
+                  {
+                    id: 'edu-new4',
+                    name: 'Rättsvetenskapligt program',
+                    type: 'education',
+                    description: '3-årig utbildning inom juridik och rättsvetenskap',
+                    children: [
+                      { 
+                        id: 'job-new8', 
+                        name: 'Utredare', 
+                        type: 'job',
+                        description: 'Arbetar med juridiska utredningar inom myndigheter' 
                       }
                     ]
                   }
@@ -105,6 +209,110 @@ const careerPathData: PathNode[] = [
                         name: 'Kirurg', 
                         type: 'job',
                         description: 'Utför operationer för att behandla sjukdomar och skador' 
+                      },
+                      { 
+                        id: 'job-new9', 
+                        name: 'Forskare inom medicin', 
+                        type: 'job',
+                        description: 'Bedriver medicinsk forskning för att utveckla nya behandlingsmetoder' 
+                      }
+                    ]
+                  },
+                  {
+                    id: 'edu-new5',
+                    name: 'Civilingenjör Teknisk Fysik',
+                    type: 'education',
+                    description: '5-årig utbildning inom avancerad fysik och matematik',
+                    children: [
+                      { 
+                        id: 'job-new10', 
+                        name: 'Utvecklingsingenjör', 
+                        type: 'job',
+                        description: 'Arbetar med forskning och utveckling av ny teknik' 
+                      },
+                      { 
+                        id: 'job-new11', 
+                        name: 'Teknisk konsult', 
+                        type: 'job',
+                        description: 'Ger expertrådgivning inom avancerad teknik' 
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                id: 'choice-new3',
+                name: 'Biologi 2',
+                type: 'individual_choice',
+                description: 'Fördjupning inom biologiska processer och genetik',
+                children: [
+                  {
+                    id: 'edu-new6',
+                    name: 'Biomedicinprogrammet',
+                    type: 'education',
+                    description: '3-årig utbildning inom biomedicinsk vetenskap',
+                    children: [
+                      { 
+                        id: 'job-new12', 
+                        name: 'Biomedicinsk analytiker', 
+                        type: 'job',
+                        description: 'Analyserar prover för diagnos av sjukdomar' 
+                      },
+                      { 
+                        id: 'job-new13', 
+                        name: 'Forskningsassistent', 
+                        type: 'job',
+                        description: 'Assisterar i forskningsprojekt inom biomedicin' 
+                      }
+                    ]
+                  },
+                  {
+                    id: 'edu-new7',
+                    name: 'Bioteknikprogrammet',
+                    type: 'education',
+                    description: '3-årig utbildning inom bioteknik och genteknik',
+                    children: [
+                      { 
+                        id: 'job-new14', 
+                        name: 'Processingenjör', 
+                        type: 'job',
+                        description: 'Utvecklar biotekniska processer för industrin' 
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            id: 'spec-new2',
+            name: 'Naturvetenskap och samhälle',
+            type: 'specialization',
+            description: 'Kombinerar naturvetenskap med samhällsfrågor',
+            children: [
+              {
+                id: 'choice-new4',
+                name: 'Hållbar utveckling',
+                type: 'individual_choice',
+                description: 'Kurs om miljöproblem och hållbara lösningar',
+                children: [
+                  {
+                    id: 'edu-new8',
+                    name: 'Miljövetenskapligt program',
+                    type: 'education',
+                    description: '3-årig utbildning om miljö och hållbar utveckling',
+                    children: [
+                      { 
+                        id: 'job-new15', 
+                        name: 'Miljökonsult', 
+                        type: 'job',
+                        description: 'Ger råd om miljöfrågor och hållbarhet till företag' 
+                      },
+                      { 
+                        id: 'job-new16', 
+                        name: 'Miljöinspektör', 
+                        type: 'job',
+                        description: 'Kontrollerar att miljölagar och förordningar följs' 
                       }
                     ]
                   }
@@ -245,6 +453,196 @@ const careerPathData: PathNode[] = [
                         name: 'Designer', 
                         type: 'job',
                         description: 'Skapar estetiskt tilltalande och funktionella produkter' 
+                      }
+                    ]
+                  },
+                  {
+                    id: 'edu-new9',
+                    name: 'Högskoleingenjör Design',
+                    type: 'education',
+                    description: '3-årig utbildning inom produktdesign',
+                    children: [
+                      { 
+                        id: 'job-new17', 
+                        name: 'CAD-konstruktör', 
+                        type: 'job',
+                        description: 'Skapar digitala 3D-modeller för produktutveckling' 
+                      },
+                      { 
+                        id: 'job-new18', 
+                        name: 'Teknisk illustratör', 
+                        type: 'job',
+                        description: 'Skapar tekniska illustrationer för manualer och dokumentation' 
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                id: 'choice-new5',
+                name: '3D-visualisering',
+                type: 'individual_choice',
+                description: 'Avancerade kunskaper i 3D-modellering och rendering',
+                children: [
+                  {
+                    id: 'edu-new10',
+                    name: 'Digital Design-programmet',
+                    type: 'education',
+                    description: '3-årig utbildning inom digital design och visualisering',
+                    children: [
+                      { 
+                        id: 'job-new19', 
+                        name: '3D-artist', 
+                        type: 'job',
+                        description: 'Skapar 3D-modeller och miljöer för spel och film' 
+                      },
+                      { 
+                        id: 'job-new20', 
+                        name: 'Visualiseringsspecialist', 
+                        type: 'job',
+                        description: 'Skapar realistiska visualiseringar av arkitektur och produkter' 
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            id: 'spec-new3',
+            name: 'Informations- och medieteknik',
+            type: 'specialization',
+            description: 'Fokus på programmering, webbdesign och digitala medier',
+            children: [
+              {
+                id: 'choice-new6',
+                name: 'Programmering 2',
+                type: 'individual_choice',
+                description: 'Fördjupad programmering och mjukvaruutveckling',
+                children: [
+                  {
+                    id: 'edu-new11',
+                    name: 'Civilingenjör Datateknik',
+                    type: 'education',
+                    description: '5-årig utbildning inom avancerad mjukvaruutveckling',
+                    children: [
+                      { 
+                        id: 'job-new21', 
+                        name: 'Systemutvecklare', 
+                        type: 'job',
+                        description: 'Utvecklar komplexa mjukvarusystem' 
+                      },
+                      { 
+                        id: 'job-new22', 
+                        name: 'AI-utvecklare', 
+                        type: 'job',
+                        description: 'Arbetar med artificiell intelligens och maskininlärning' 
+                      }
+                    ]
+                  },
+                  {
+                    id: 'edu-new12',
+                    name: 'Datavetenskap',
+                    type: 'education',
+                    description: '3-årig utbildning inom algoritmer och datastrukturer',
+                    children: [
+                      { 
+                        id: 'job-new23', 
+                        name: 'Backend-utvecklare', 
+                        type: 'job',
+                        description: 'Utvecklar serverlogik och databasintegration för webb- och mobilappar' 
+                      },
+                      { 
+                        id: 'job-new24', 
+                        name: 'Spelutvecklare', 
+                        type: 'job',
+                        description: 'Programmerar spel för olika plattformar' 
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                id: 'choice-new7',
+                name: 'Webbutveckling',
+                type: 'individual_choice',
+                description: 'Fokus på webbteknologier och gränssnitt',
+                children: [
+                  {
+                    id: 'edu-new13',
+                    name: 'Frontend-utvecklare (YH)',
+                    type: 'education',
+                    description: '2-årig YH-utbildning inom användargränssnitt',
+                    children: [
+                      { 
+                        id: 'job-new25', 
+                        name: 'Frontend-utvecklare', 
+                        type: 'job',
+                        description: 'Utvecklar användargränssnitt för webb och mobil' 
+                      },
+                      { 
+                        id: 'job-new26', 
+                        name: 'UX-designer', 
+                        type: 'job',
+                        description: 'Designar användarupplevelser för digitala produkter' 
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'program-new1',
+        name: 'El- och energiprogrammet',
+        type: 'program',
+        description: 'Praktisk utbildning inom el, automation och energiteknik',
+        children: [
+          {
+            id: 'spec-new4',
+            name: 'Automation',
+            type: 'specialization',
+            description: 'Fokus på automatiserad styrning och reglerteknik',
+            children: [
+              {
+                id: 'choice-new8',
+                name: 'Styrsystem',
+                type: 'individual_choice',
+                description: 'Kurs om programmering av industriella styrsystem',
+                children: [
+                  {
+                    id: 'edu-new14',
+                    name: 'Automationsingenjör (YH)',
+                    type: 'education',
+                    description: '2-årig YH-utbildning inom industriell automation',
+                    children: [
+                      { 
+                        id: 'job-new27', 
+                        name: 'Automationstekniker', 
+                        type: 'job',
+                        description: 'Installerar och underhåller automatiserade system' 
+                      },
+                      { 
+                        id: 'job-new28', 
+                        name: 'PLC-programmerare', 
+                        type: 'job',
+                        description: 'Programmerar styrsystem för industriella processer' 
+                      }
+                    ]
+                  },
+                  {
+                    id: 'edu-new15',
+                    name: 'Högskoleingenjör Elektroteknik',
+                    type: 'education',
+                    description: '3-årig utbildning inom elektrisk styrning och reglerteknik',
+                    children: [
+                      { 
+                        id: 'job-new29', 
+                        name: 'Elkonstruktör', 
+                        type: 'job',
+                        description: 'Konstruerar elektriska kretsar och styrsystem' 
                       }
                     ]
                   }
@@ -772,6 +1170,192 @@ const careerPathData: PathNode[] = [
                     children: [
                       { id: 'job-37', name: 'Stadsplanerare', type: 'job' },
                       { id: 'job-38', name: 'GIS-specialist', type: 'job' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'school-new1',
+    name: 'IT-Gymnasiet Göteborg',
+    type: 'school',
+    description: 'Specialiserat gymnasium med fokus på IT och digitala medier',
+    children: [
+      {
+        id: 'program-new2',
+        name: 'Teknikprogrammet',
+        type: 'program',
+        description: 'Inriktning mot IT och mjukvaruutveckling',
+        children: [
+          {
+            id: 'spec-new5',
+            name: 'Informations- och medieteknik',
+            type: 'specialization',
+            description: 'Fokus på programmering och systemutveckling',
+            children: [
+              {
+                id: 'choice-new9',
+                name: 'Applikationsutveckling',
+                type: 'individual_choice',
+                description: 'Utveckling av mobila applikationer',
+                children: [
+                  {
+                    id: 'edu-new16',
+                    name: 'Mjukvaruutvecklare (YH)',
+                    type: 'education',
+                    description: '2-årig YH-utbildning inom app- och webbutveckling',
+                    children: [
+                      { 
+                        id: 'job-new30', 
+                        name: 'App-utvecklare', 
+                        type: 'job',
+                        description: 'Utvecklar mobila applikationer för iOS och Android' 
+                      },
+                      { 
+                        id: 'job-new31', 
+                        name: 'Full-stack utvecklare', 
+                        type: 'job',
+                        description: 'Utvecklar både frontend och backend för webbapplikationer' 
+                      }
+                    ]
+                  },
+                  {
+                    id: 'edu-new17',
+                    name: 'Datateknik (högskoleingenjör)',
+                    type: 'education',
+                    description: '3-årig utbildning inom mjukvarusystem och programmering',
+                    children: [
+                      { 
+                        id: 'job-new32', 
+                        name: 'DevOps-ingenjör', 
+                        type: 'job',
+                        description: 'Arbetar med kontinuerlig integration och leverans av mjukvara' 
+                      },
+                      { 
+                        id: 'job-new33', 
+                        name: 'Systemarkitekt', 
+                        type: 'job',
+                        description: 'Designar övergripande struktur för komplexa mjukvarusystem' 
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                id: 'choice-new10',
+                name: 'Cybersäkerhet',
+                type: 'individual_choice',
+                description: 'Grundläggande kunskaper i IT-säkerhet och etisk hackning',
+                children: [
+                  {
+                    id: 'edu-new18',
+                    name: 'IT-säkerhetsspecialist (YH)',
+                    type: 'education',
+                    description: '2-årig YH-utbildning inom cybersäkerhet',
+                    children: [
+                      { 
+                        id: 'job-new34', 
+                        name: 'Säkerhetsanalytiker', 
+                        type: 'job',
+                        description: 'Analyserar IT-system för sårbarheter och säkerhetsproblem' 
+                      },
+                      { 
+                        id: 'job-new35', 
+                        name: 'Etisk hackare', 
+                        type: 'job',
+                        description: 'Testar säkerheten genom kontrollerade hackning-försök' 
+                      }
+                    ]
+                  },
+                  {
+                    id: 'edu-new19',
+                    name: 'Master i IT-säkerhet',
+                    type: 'education',
+                    description: '2-årig masterutbildning inom avancerad cybersäkerhet',
+                    children: [
+                      { 
+                        id: 'job-new36', 
+                        name: 'IT-säkerhetschef', 
+                        type: 'job',
+                        description: 'Ansvarar för företagets övergripande IT-säkerhetsstrategi' 
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'program-new3',
+        name: 'Estetiska programmet',
+        type: 'program',
+        description: 'Inriktning mot digitalt skapande och speldesign',
+        children: [
+          {
+            id: 'spec-new6',
+            name: 'Digitalt skapande',
+            type: 'specialization',
+            description: 'Fokus på digitala medier och interaktiv design',
+            children: [
+              {
+                id: 'choice-new11',
+                name: 'Speldesign',
+                type: 'individual_choice',
+                description: 'Design av spelmekanik och spelupplevelser',
+                children: [
+                  {
+                    id: 'edu-new20',
+                    name: 'Speldesign och programmering',
+                    type: 'education',
+                    description: '3-årig högskoleutbildning inom spelutveckling',
+                    children: [
+                      { 
+                        id: 'job-new37', 
+                        name: 'Speldesigner', 
+                        type: 'job',
+                        description: 'Skapar koncept, regler och mekanik för spel' 
+                      },
+                      { 
+                        id: 'job-new38', 
+                        name: 'Level designer', 
+                        type: 'job',
+                        description: 'Designar banor och nivåer för datorspel' 
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                id: 'choice-new12',
+                name: 'Grafisk design',
+                type: 'individual_choice',
+                description: 'Digital bildbearbetning och grafisk formgivning',
+                children: [
+                  {
+                    id: 'edu-new21',
+                    name: 'Grafisk design och kommunikation',
+                    type: 'education',
+                    description: '3-årig högskoleutbildning inom grafisk design',
+                    children: [
+                      { 
+                        id: 'job-new39', 
+                        name: 'UI-designer', 
+                        type: 'job',
+                        description: 'Designar användargränssnitt för digitala produkter' 
+                      },
+                      { 
+                        id: 'job-new40', 
+                        name: 'Art Director', 
+                        type: 'job',
+                        description: 'Leder det visuella arbetet inom reklam och design' 
+                      }
                     ]
                   }
                 ]
