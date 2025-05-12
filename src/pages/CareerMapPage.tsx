@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import CareerMap from '@/components/CareerMap';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileHeart, Calendar, List, Layers, Book, GraduationCap, Briefcase } from 'lucide-react';
+import { FileHeart, Calendar, List, Layers, Book, GraduationCap, Briefcase, School } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const CareerMapPage = () => {
