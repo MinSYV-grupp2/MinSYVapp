@@ -7,14 +7,22 @@ import { Link } from 'react-router-dom';
 import TreeDiagram from '@/components/TreeDiagram';
 import { useUser } from '@/context/UserContext';
 import { toast } from '@/components/ui/use-toast';
-import { Heart } from 'lucide-react';
+import { Heart, Info } from 'lucide-react';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-// Program and career path data
+// Program and career path data with expanded information
 const programData = [
   {
     id: 'tech',
     name: 'Teknikprogrammet',
     description: 'Fokuserar på matematik, fysik, kemi och teknologi. Förbereder för ingenjörsstudier och tekniska yrken.',
+    meritDescription: 'Ger särskild behörighet till tekniska utbildningar på högskola/universitet. Meriten ligger på 1.0 för relevanta tekniska utbildningar.',
+    educationDescription: 'Programmet omfattar 2500 gymnasiepoäng med fokus på tekniska och naturvetenskapliga ämnen. Programmet har flera inriktningar som informations- och medieteknik, produktionsteknik och samhällsbyggande.',
     careers: ['Civilingenjör', 'Programmerare', 'Arkitekt', 'Produktutvecklare'],
     universities: ['KTH', 'Chalmers', 'Linköpings Universitet'],
     subjects: ['Matematik', 'Fysik', 'Programmering', 'Teknik']
@@ -23,6 +31,8 @@ const programData = [
     id: 'science',
     name: 'Naturvetenskapsprogrammet',
     description: 'Fokuserar på biologi, fysik, kemi och matematik. Förbereder för vidare studier inom naturvetenskap och medicin.',
+    meritDescription: 'Ger särskild behörighet till medicin- och naturvetenskapliga utbildningar. Meriten ligger på 1.0 för medicinska och naturvetenskapliga utbildningar.',
+    educationDescription: 'Programmet omfattar 2500 gymnasiepoäng med fokus på biologi, kemi, fysik och matematik. Två inriktningar finns tillgängliga: naturvetenskap och naturvetenskap och samhälle.',
     careers: ['Läkare', 'Veterinär', 'Forskare', 'Apotekare'],
     universities: ['Karolinska Institutet', 'Uppsala Universitet', 'Lunds Universitet'],
     subjects: ['Biologi', 'Kemi', 'Fysik', 'Matematik']
@@ -31,6 +41,8 @@ const programData = [
     id: 'social',
     name: 'Samhällsvetenskapsprogrammet',
     description: 'Fokuserar på samhällskunskap, historia, psykologi och språk. Förbereder för studier inom samhällsvetenskap och humaniora.',
+    meritDescription: 'Ger behörighet till de flesta samhällsvetenskapliga och humanistiska utbildningar. Meriten kan ligga på 0.5 för vissa specialutbildningar.',
+    educationDescription: 'Programmet omfattar 2500 gymnasiepoäng med fokus på samhälle, beteende och språk. Det har flera inriktningar som beteendevetenskap, samhällsvetenskap och medier.',
     careers: ['Jurist', 'Psykolog', 'Socionom', 'Journalist'],
     universities: ['Stockholms Universitet', 'Göteborgs Universitet', 'Lunds Universitet'],
     subjects: ['Samhällskunskap', 'Historia', 'Psykologi', 'Svenska']
@@ -39,6 +51,8 @@ const programData = [
     id: 'business',
     name: 'Ekonomiprogrammet',
     description: 'Fokuserar på företagsekonomi, juridik och matematik. Förbereder för studier inom ekonomi och handel.',
+    meritDescription: 'Ger särskild behörighet till ekonomiska utbildningar. Meriten kan vara upp till 0.5 för vissa ekonomiutbildningar.',
+    educationDescription: 'Programmet omfattar 2500 gymnasiepoäng med fokus på företagsekonomi, nationalekonomi och juridik. Två inriktningar finns: ekonomi och juridik.',
     careers: ['Ekonom', 'Marknadsförare', 'Revisor', 'Entreprenör'],
     universities: ['Handelshögskolan', 'Lunds Universitet', 'Uppsala Universitet'],
     subjects: ['Företagsekonomi', 'Juridik', 'Matematik', 'Entreprenörskap']
@@ -47,6 +61,8 @@ const programData = [
     id: 'arts',
     name: 'Estetiska programmet',
     description: 'Fokuserar på kreativa ämnen som bild, musik, teater och design. Förbereder för konstnärliga utbildningar.',
+    meritDescription: 'Ger grundläggande behörighet för högre studier. För konstnärliga utbildningar kan arbetsprover vara avgörande utöver betyg.',
+    educationDescription: 'Programmet omfattar 2500 gymnasiepoäng med fokus på estetiska uttrycksformer. Det har flera inriktningar som bild och formgivning, dans, musik och teater.',
     careers: ['Konstnär', 'Musiker', 'Skådespelare', 'Designer'],
     universities: ['Konstfack', 'Musikhögskolan', 'Teaterhögskolan'],
     subjects: ['Konst', 'Musik', 'Teater', 'Design']
@@ -140,6 +156,32 @@ const CareerMap = () => {
                   <div>
                     <h3 className="text-xl font-bold mb-2 text-guidance-green">{selectedProgram.name}</h3>
                     <p className="text-gray-600">{selectedProgram.description}</p>
+                    
+                    <div className="mt-4 space-y-3">
+                      <div className="bg-guidance-lightGreen/50 p-4 rounded-lg">
+                        <div className="flex items-center mb-2">
+                          <h4 className="font-semibold text-guidance-green">Merit och behörighet</h4>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="sm" className="p-0 h-6 w-6 ml-1">
+                                  <Info className="h-4 w-4 text-guidance-green" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs">
+                                <p>Merit anger hur mycket extra poäng du kan få vid ansökan till olika utbildningar.</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                        <p className="text-sm text-gray-700">{selectedProgram.meritDescription}</p>
+                      </div>
+                      
+                      <div className="bg-guidance-lightBlue/50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-guidance-blue mb-2">Om utbildningen</h4>
+                        <p className="text-sm text-gray-700">{selectedProgram.educationDescription}</p>
+                      </div>
+                    </div>
                   </div>
                   <Button
                     onClick={() => handleSaveProgram()}

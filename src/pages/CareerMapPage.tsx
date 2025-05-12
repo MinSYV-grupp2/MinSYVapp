@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import CareerMap from '@/components/CareerMap';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileHeart, Calendar } from 'lucide-react';
+import { FileHeart, Calendar, List, Layers } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const CareerMapPage = () => {
@@ -39,6 +39,36 @@ const CareerMapPage = () => {
             </CardContent>
           </Card>
           
+          <div className="flex flex-col sm:flex-row items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold text-guidance-blue mb-4 sm:mb-0">Din väg till framtiden</h2>
+            <div className="flex flex-wrap gap-2 md:gap-4 justify-center">
+              <div className="flex items-center bg-guidance-lightPurple p-2 rounded-md">
+                <div className="bg-guidance-purple p-1.5 rounded-full mr-2">
+                  <List className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-sm">Skola</span>
+              </div>
+              <div className="flex items-center bg-guidance-lightBlue p-2 rounded-md">
+                <div className="bg-guidance-blue p-1.5 rounded-full mr-2">
+                  <Layers className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-sm">Inriktning</span>
+              </div>
+              <div className="flex items-center bg-guidance-lightGreen p-2 rounded-md">
+                <div className="bg-guidance-green p-1.5 rounded-full mr-2">
+                  <FileHeart className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-sm">Kurser</span>
+              </div>
+              <div className="flex items-center bg-gray-100 p-2 rounded-md">
+                <div className="bg-gray-500 p-1.5 rounded-full mr-2">
+                  <Calendar className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-sm">Yrken</span>
+              </div>
+            </div>
+          </div>
+
           <div className="flex flex-col md:flex-row justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-guidance-blue mb-4 md:mb-0">Utforska din framtida väg</h2>
             <div className="flex gap-4">
