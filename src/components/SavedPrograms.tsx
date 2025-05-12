@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/context/UserContext';
-import { FileHeart, Trash2 } from 'lucide-react';
+import { FileHeart, Trash2, GraduationCap } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Link } from 'react-router-dom';
 import {
@@ -62,8 +62,11 @@ const SavedPrograms = () => {
                       <p className="text-gray-500 text-xs mt-1">Inriktning: {program.specialization}</p>
                     )}
                     {program.merit && (
-                      <div className="mt-2 bg-guidance-lightPurple text-guidance-purple text-xs px-2 py-1 rounded inline-block">
-                        Meritpoäng: {program.merit}
+                      <div className="mt-2 flex items-center">
+                        <GraduationCap className="h-4 w-4 text-guidance-purple mr-1" />
+                        <span className="bg-guidance-lightPurple text-guidance-purple text-xs px-2 py-1 rounded inline-block">
+                          Meritpoäng: {program.merit}
+                        </span>
                       </div>
                     )}
                   </div>

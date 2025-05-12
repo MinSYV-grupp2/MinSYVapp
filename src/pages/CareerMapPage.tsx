@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import CareerMap from '@/components/CareerMap';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileHeart, Calendar, List, Layers, Book, GraduationCap, Briefcase, School } from 'lucide-react';
+import { FileHeart, Calendar, Search, List, Layers, Book, GraduationCap, Briefcase, School, Compare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const CareerMapPage = () => {
@@ -17,7 +17,7 @@ const CareerMapPage = () => {
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">Karriärkarta</h1>
             <p className="text-lg md:text-xl max-w-3xl mx-auto">
-              Utforska sambandet mellan gymnasieskolor, program, inriktningar och framtida karriärmöjligheter
+              Utforska sambandet mellan gymnasieprogram, inriktningar, vidare utbildning och framtida karriärmöjligheter
             </p>
           </div>
         </div>
@@ -25,84 +25,79 @@ const CareerMapPage = () => {
         <div className="container mx-auto px-4 py-8">
           <Card className="mb-8 border-l-4 border-guidance-purple">
             <CardContent className="p-6">
-              <h2 className="text-xl font-semibold mb-3 text-guidance-purple">Hur fungerar karriärkartan?</h2>
+              <h2 className="text-xl font-semibold mb-3 text-guidance-purple">Hur du använder karriärkartan</h2>
               <div className="space-y-3 text-gray-700">
-                <p>Karriärkartan hjälper dig att se hur olika utbildningsval hänger ihop med framtida möjligheter:</p>
+                <p>Karriärkartan hjälper dig att utforska din framtida utbildnings- och yrkesbana:</p>
                 <ol className="list-decimal pl-5 space-y-2">
-                  <li><span className="font-medium">Välj startpunkt</span> - Börja med en skola eller direkt med ett program</li>
-                  <li><span className="font-medium">Utforska vägen</span> - Följ utbildningsvägen från program till inriktning och individuella val</li>
-                  <li><span className="font-medium">Upptäck möjligheter</span> - Se vilka högre utbildningar och yrken som kan passa dig</li>
-                  <li><span className="font-medium">Spara favoriter</span> - Klicka på program du är intresserad av för att spara dem till din profil</li>
+                  <li><span className="font-medium">Välj program</span> - Börja med att välja ett gymnasieprogram som intresserar dig</li>
+                  <li><span className="font-medium">Se möjligheter</span> - Utforska inriktningar, högskoleutbildningar och yrken programmet kan leda till</li>
+                  <li><span className="font-medium">Jämför skolor</span> - Se vilka skolor som erbjuder programmet och hur de skiljer sig åt</li>
+                  <li><span className="font-medium">Jämför program</span> - Använd jämförelsefunktionen för att se skillnader mellan olika program</li>
+                  <li><span className="font-medium">Spara favoriter</span> - Klicka på hjärtat för att spara program du är intresserad av till din profil</li>
                 </ol>
-                <p>Genom att utforska karriärkartan får du en helhetsbild av hur olika val påverkar dina framtida möjligheter!</p>
               </div>
             </CardContent>
           </Card>
 
           <Card className="mb-8 border-l-4 border-guidance-green">
             <CardContent className="p-6">
-              <h2 className="text-xl font-semibold mb-3 text-guidance-green">Upptäck hela utbildningsvägen</h2>
-              <div className="space-y-3 text-gray-700">
-                <p>I karriärkartan kan du nu utforska hela vägen från gymnasiet till yrke:</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                  <div className="bg-guidance-lightPurple/50 p-4 rounded-lg">
-                    <div className="flex items-center mb-2">
-                      <div className="bg-guidance-purple p-1.5 rounded-full mr-2">
-                        <School className="h-4 w-4 text-white" />
-                      </div>
-                      <h3 className="font-medium">Gymnasieskolor</h3>
-                    </div>
-                    <p className="text-sm">Utforska olika gymnasieskolor i Göteborg och vilka program de erbjuder. Varje skola har sin egen profil och specialisering.</p>
-                  </div>
+              <h2 className="text-xl font-semibold mb-3 text-guidance-green">Hitta rätt gymnasieprogram</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-gray-700 mb-4">
+                    Välj ett program som passar dina intressen och framtidsplaner. Karriärkartan låter dig:
+                  </p>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start">
+                      <span className="bg-guidance-lightGreen p-1 rounded-full mr-2 mt-1">
+                        <Search className="h-3 w-3 text-guidance-green" />
+                      </span>
+                      <span>Se detaljerad information om programmens innehåll och inriktningar</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="bg-guidance-lightGreen p-1 rounded-full mr-2 mt-1">
+                        <List className="h-3 w-3 text-guidance-green" />
+                      </span>
+                      <span>Förstå vilka kurser som ingår och vilka som är valfria</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="bg-guidance-lightGreen p-1 rounded-full mr-2 mt-1">
+                        <Compare className="h-3 w-3 text-guidance-green" />
+                      </span>
+                      <span>Jämföra olika program och skolor sida vid sida</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="bg-guidance-lightGreen p-1 rounded-full mr-2 mt-1">
+                        <Briefcase className="h-3 w-3 text-guidance-green" />
+                      </span>
+                      <span>Se vilka yrken och karriärvägar programmet kan leda till</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div className="bg-guidance-lightPurple/30 p-4 rounded-lg">
+                  <h3 className="font-medium text-guidance-purple mb-3 flex items-center">
+                    <GraduationCap className="mr-2 h-5 w-5" />
+                    Tänk på meritpoäng för högskola
+                  </h3>
+                  <p className="text-gray-700 mb-3 text-sm">
+                    Olika gymnasieprogram ger olika meritpoäng för olika högskoleutbildningar. 
+                    Detta kan vara avgörande när du söker till högskola eller universitet senare.
+                  </p>
                   
-                  <div className="bg-guidance-lightBlue/50 p-4 rounded-lg">
-                    <div className="flex items-center mb-2">
-                      <div className="bg-guidance-blue p-1.5 rounded-full mr-2">
-                        <Book className="h-4 w-4 text-white" />
-                      </div>
-                      <h3 className="font-medium">Program</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center p-2 bg-white rounded">
+                      <span>Naturvetenskap / Teknik</span>
+                      <span className="bg-guidance-purple text-white text-xs px-2 py-0.5 rounded">Merit: 1.0</span>
                     </div>
-                    <p className="text-sm">Se vilka gymnasieprogram som finns och vad de innehåller. Programmen är grunden för din framtida utbildning och karriär.</p>
-                  </div>
-                  
-                  <div className="bg-guidance-lightGreen/50 p-4 rounded-lg">
-                    <div className="flex items-center mb-2">
-                      <div className="bg-guidance-green p-1.5 rounded-full mr-2">
-                        <Layers className="h-4 w-4 text-white" />
-                      </div>
-                      <h3 className="font-medium">Inriktningar</h3>
+                    <div className="flex justify-between items-center p-2 bg-white rounded">
+                      <span>Ekonomi / Samhäll</span>
+                      <span className="bg-guidance-purple text-white text-xs px-2 py-0.5 rounded">Merit: 0.5</span>
                     </div>
-                    <p className="text-sm">Upptäck olika inriktningar inom programmen och hur de specialiserar din utbildning mot specifika områden.</p>
-                  </div>
-                  
-                  <div className="bg-amber-50 p-4 rounded-lg">
-                    <div className="flex items-center mb-2">
-                      <div className="bg-amber-300 p-1.5 rounded-full mr-2">
-                        <Book className="h-4 w-4 text-white" />
-                      </div>
-                      <h3 className="font-medium">Individuella val</h3>
+                    <div className="flex justify-between items-center p-2 bg-white rounded">
+                      <span>Estet / Yrkesprogram</span>
+                      <span className="bg-guidance-purple text-white text-xs px-2 py-0.5 rounded">Merit: 0.0</span>
                     </div>
-                    <p className="text-sm">Utforska hur individuella kursval kan påverka dina framtida studie- och karriärmöjligheter.</p>
-                  </div>
-                  
-                  <div className="bg-indigo-50 p-4 rounded-lg">
-                    <div className="flex items-center mb-2">
-                      <div className="bg-indigo-300 p-1.5 rounded-full mr-2">
-                        <GraduationCap className="h-4 w-4 text-white" />
-                      </div>
-                      <h3 className="font-medium">Vidare utbildning</h3>
-                    </div>
-                    <p className="text-sm">Se vilka högskole- och universitetsutbildningar som dina val kan leda till, inklusive både YH och akademiska program.</p>
-                  </div>
-                  
-                  <div className="bg-gray-100 p-4 rounded-lg">
-                    <div className="flex items-center mb-2">
-                      <div className="bg-gray-500 p-1.5 rounded-full mr-2">
-                        <Briefcase className="h-4 w-4 text-white" />
-                      </div>
-                      <h3 className="font-medium">Yrken</h3>
-                    </div>
-                    <p className="text-sm">Upptäck vilka yrken och karriärvägar som öppnas upp genom olika utbildningsvägar.</p>
                   </div>
                 </div>
               </div>
@@ -110,14 +105,8 @@ const CareerMapPage = () => {
           </Card>
           
           <div className="flex flex-col sm:flex-row items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-guidance-blue mb-4 sm:mb-0">Din väg till framtiden</h2>
+            <h2 className="text-2xl font-bold text-guidance-blue mb-4 sm:mb-0">Börja med att välja program</h2>
             <div className="flex flex-wrap gap-2 md:gap-4 justify-center">
-              <div className="flex items-center bg-guidance-lightPurple p-2 rounded-md">
-                <div className="bg-guidance-purple p-1.5 rounded-full mr-2">
-                  <School className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-sm">Skola</span>
-              </div>
               <div className="flex items-center bg-guidance-lightBlue p-2 rounded-md">
                 <div className="bg-guidance-blue p-1.5 rounded-full mr-2">
                   <Book className="h-4 w-4 text-white" />
@@ -130,11 +119,11 @@ const CareerMapPage = () => {
                 </div>
                 <span className="text-sm">Inriktning</span>
               </div>
-              <div className="flex items-center bg-amber-50 p-2 rounded-md border border-amber-200">
-                <div className="bg-amber-300 p-1.5 rounded-full mr-2">
-                  <Book className="h-4 w-4 text-white" />
+              <div className="flex items-center bg-guidance-lightPurple p-2 rounded-md">
+                <div className="bg-guidance-purple p-1.5 rounded-full mr-2">
+                  <School className="h-4 w-4 text-white" />
                 </div>
-                <span className="text-sm">Kurser</span>
+                <span className="text-sm">Skola</span>
               </div>
               <div className="flex items-center bg-indigo-50 p-2 rounded-md border border-indigo-200">
                 <div className="bg-indigo-300 p-1.5 rounded-full mr-2">
@@ -152,7 +141,7 @@ const CareerMapPage = () => {
           </div>
 
           <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold text-guidance-blue mb-4 md:mb-0">Utforska din framtida väg</h2>
+            <h2 className="text-2xl font-bold text-guidance-blue mb-4 md:mb-0">Din framtida karriärväg</h2>
             <div className="flex gap-4">
               <Button 
                 asChild
