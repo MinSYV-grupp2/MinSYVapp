@@ -7,6 +7,23 @@ import { toast } from '@/components/ui/use-toast';
 import { X, Calendar, Clock } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
+// Define types imported from UserContext to fix TS errors
+interface Appointment {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  counselor: string;
+  description?: string;
+}
+
+interface ImportantDate {
+  id: string;
+  title: string;
+  date: string;
+  description?: string;
+}
+
 // Define a union type for our combined date items
 type DateItem = 
   | ({ type: 'appointment'; dateObj: Date } & Omit<Appointment, 'id'> & { id: string }) 
