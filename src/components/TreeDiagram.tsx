@@ -1027,4 +1027,17 @@ const TreeDiagram: React.FC = () => {
               <TreeNode
                 key={node.id}
                 node={node}
-                level
+                level={0}
+                path={[]}
+                onSelect={handleNodeSelect}
+                selectedPath={selectedPath}
+              />
+            ))}
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+};
+
+export default TreeDiagram;
