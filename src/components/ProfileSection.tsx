@@ -7,6 +7,7 @@ import { useUser } from '@/context/UserContext';
 import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
+import { User, Heart, FileHeart, Calendar } from 'lucide-react';
 
 const interestEmojis: Record<string, string> = {
   tech: '💻',
@@ -95,43 +96,92 @@ const ProfileSection = () => {
                       <span>Quizet har slutförts! Här är dina intressen:</span>
                     </div>
                     
-                    {profile.interests.length > 0 ? (
-                      <div className="flex flex-wrap gap-3">
-                        {profile.interests.map((interest) => (
-                          <div 
-                            key={interest}
-                            className="bg-guidance-lightBlue text-guidance-blue px-3 py-2 rounded-full 
-                                    flex items-center gap-2"
-                          >
-                            <span>{interestEmojis[interest]}</span>
-                            <span>{interestLabels[interest]}</span>
-                          </div>
-                        ))}
+                    <div className="mb-6">
+                      <div className="flex flex-wrap gap-3 mb-4">
+                        {profile.interests.length > 0 ? (
+                          profile.interests.map((interest) => (
+                            <div 
+                              key={interest}
+                              className="bg-guidance-lightBlue text-guidance-blue px-3 py-2 rounded-full 
+                                      flex items-center gap-2"
+                            >
+                              <span>{interestEmojis[interest]}</span>
+                              <span>{interestLabels[interest]}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-500">Du har inte lagt till några intressen än.</p>
+                        )}
                       </div>
-                    ) : (
-                      <p className="text-gray-500">Du har inte lagt till några intressen än.</p>
-                    )}
+                      
+                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                        <h4 className="font-medium text-guidance-purple mb-2">Resultatanalys:</h4>
+                        <p className="text-sm text-gray-600">
+                          Baserat på dina intressen {profile.interests.map(i => interestLabels[i]).join(', ')} 
+                          kan du passa för utbildningar och yrken som involverar {profile.interests.length > 0 ? 
+                          profile.interests.includes('tech') ? 'teknisk problemlösning, ' : '' : ''}
+                          {profile.interests.includes('art') ? 'kreativt skapande, ' : ''}
+                          {profile.interests.includes('social') ? 'sociala interaktioner, ' : ''}
+                          {profile.interests.includes('analytical') ? 'analytiskt tänkande, ' : ''}
+                          {profile.interests.includes('nature') ? 'naturvetenskapligt arbete, ' : ''}
+                          {profile.interests.includes('physical') ? 'fysisk aktivitet' : ''}.
+                        </p>
+                      </div>
+                    </div>
                     
                     <div className="mt-6">
-                      <p className="text-gray-600 mb-4">
-                        Baserat på dina intressen rekommenderar vi att du utforskar:
-                      </p>
+                      <h4 className="font-medium text-guidance-blue mb-3">Nästa steg för din framtid:</h4>
                       
-                      <div className="flex justify-between gap-4 flex-wrap">
-                        <Button 
-                          asChild
-                          className="bg-guidance-purple hover:bg-guidance-purple/90 flex-grow"
-                        >
-                          <Link to="/career-map">Karriärkartan</Link>
-                        </Button>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Card className="shadow-sm transition-all hover:shadow-md">
+                          <CardContent className="p-4 flex flex-col items-center text-center">
+                            <div className="h-12 w-12 rounded-full bg-guidance-lightPurple flex items-center justify-center mb-3">
+                              <FileHeart className="h-6 w-6 text-guidance-purple" />
+                            </div>
+                            <h5 className="font-medium mb-2">Karriärkarta</h5>
+                            <p className="text-xs text-gray-500 mb-3">Utforska utbildningsvägar och karriärmöjligheter</p>
+                            <Button 
+                              asChild
+                              className="bg-guidance-purple hover:bg-guidance-purple/90 w-full mt-auto"
+                            >
+                              <Link to="/career-map">Utforska</Link>
+                            </Button>
+                          </CardContent>
+                        </Card>
                         
-                        <Button 
-                          asChild
-                          variant="outline"
-                          className="border-guidance-blue text-guidance-blue hover:bg-guidance-lightBlue/50 flex-grow"
-                        >
-                          <Link to="/booking">Boka tid med SYV</Link>
-                        </Button>
+                        <Card className="shadow-sm transition-all hover:shadow-md">
+                          <CardContent className="p-4 flex flex-col items-center text-center">
+                            <div className="h-12 w-12 rounded-full bg-guidance-lightGreen flex items-center justify-center mb-3">
+                              <Calendar className="h-6 w-6 text-guidance-green" />
+                            </div>
+                            <h5 className="font-medium mb-2">Boka SYV</h5>
+                            <p className="text-xs text-gray-500 mb-3">Prata med en studie- och yrkesvägledare</p>
+                            <Button 
+                              asChild
+                              variant="outline"
+                              className="border-guidance-green text-guidance-green hover:bg-guidance-lightGreen w-full mt-auto"
+                            >
+                              <Link to="/booking">Boka tid</Link>
+                            </Button>
+                          </CardContent>
+                        </Card>
+                        
+                        <Card className="shadow-sm transition-all hover:shadow-md">
+                          <CardContent className="p-4 flex flex-col items-center text-center">
+                            <div className="h-12 w-12 rounded-full bg-guidance-lightBlue flex items-center justify-center mb-3">
+                              <Heart className="h-6 w-6 text-guidance-blue" />
+                            </div>
+                            <h5 className="font-medium mb-2">Min profil</h5>
+                            <p className="text-xs text-gray-500 mb-3">Se alla dina sparade val och intressen</p>
+                            <Button 
+                              asChild
+                              variant="outline" 
+                              className="border-guidance-blue text-guidance-blue hover:bg-guidance-lightBlue w-full mt-auto"
+                            >
+                              <Link to="/profile">Min profil</Link>
+                            </Button>
+                          </CardContent>
+                        </Card>
                       </div>
                     </div>
                   </>

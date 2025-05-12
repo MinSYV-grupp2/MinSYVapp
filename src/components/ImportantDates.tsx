@@ -7,6 +7,11 @@ import { toast } from '@/components/ui/use-toast';
 import { X, Calendar, Clock } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
+// Define a union type for our combined date items
+type DateItem = 
+  | ({ type: 'appointment'; dateObj: Date } & Omit<Appointment, 'id'> & { id: string }) 
+  | ({ type: 'date'; dateObj: Date } & Omit<ImportantDate, 'id'> & { id: string });
+
 const ImportantDates = () => {
   const { profile, removeAppointment, removeImportantDate } = useUser();
 
@@ -26,16 +31,16 @@ const ImportantDates = () => {
     });
   };
 
-  // Sort all dates chronologically
-  const allDates = [
+  // Sort all dates chronologically with proper typing
+  const allDates: DateItem[] = [
     ...profile.appointments.map(appt => ({
       ...appt,
-      type: 'appointment',
+      type: 'appointment' as const,
       dateObj: parseISO(`${appt.date}T${appt.time}`)
     })),
     ...profile.importantDates.map(date => ({
       ...date,
-      type: 'date',
+      type: 'date' as const,
       dateObj: parseISO(date.date)
     }))
   ].sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
@@ -85,10 +90,10 @@ const ImportantDates = () => {
                           <>
                             <span className="flex items-center">
                               <Clock className="h-3.5 w-3.5 mr-1.5" />
-                              {(item as typeof profile.appointments[0]).time}
+                              {item.time}
                             </span>
                             <span>
-                              SYV: {(item as typeof profile.appointments[0]).counselor}
+                              SYV: {item.counselor}
                             </span>
                           </>
                         )}

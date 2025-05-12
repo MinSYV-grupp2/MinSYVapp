@@ -4,7 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/context/UserContext';
 import { toast } from '@/components/ui/use-toast';
-import { X } from 'lucide-react';
+import { X, FileHeart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const SavedPrograms = () => {
   const { profile, removeSavedProgram } = useUser();
@@ -20,12 +21,19 @@ const SavedPrograms = () => {
   return (
     <Card className="shadow">
       <CardContent className="p-6">
-        <h3 className="text-xl font-semibold mb-4 text-guidance-blue">Sparade program</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-semibold text-guidance-blue">Sparade program</h3>
+          {profile.savedPrograms.length > 0 && (
+            <span className="bg-guidance-lightPurple text-guidance-purple text-xs font-medium px-2.5 py-1 rounded-full">
+              {profile.savedPrograms.length}
+            </span>
+          )}
+        </div>
         
         {profile.savedPrograms.length > 0 ? (
           <div className="space-y-3">
             {profile.savedPrograms.map((program) => (
-              <Card key={program.id} className="relative">
+              <Card key={program.id} className="relative border-l-4 border-guidance-purple">
                 <CardContent className="p-4">
                   <Button
                     variant="ghost"
@@ -35,22 +43,43 @@ const SavedPrograms = () => {
                   >
                     <X className="h-4 w-4" />
                   </Button>
-                  <h4 className="font-medium text-guidance-blue">{program.programName}</h4>
-                  <p className="text-sm text-gray-600">{program.schoolName}</p>
-                  {program.specialization && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      Inriktning: {program.specialization}
-                    </p>
-                  )}
+                  <div className="flex items-start">
+                    <div className="mr-3 mt-1">
+                      <div className="bg-guidance-lightPurple p-2 rounded-full">
+                        <FileHeart className="h-4 w-4 text-guidance-purple" />
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-guidance-blue">{program.programName}</h4>
+                      <p className="text-sm text-gray-600">{program.schoolName}</p>
+                      {program.specialization && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          Inriktning: {program.specialization}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 text-center italic">
-            Du har inte sparat några program ännu. 
-            Besök <a href="/career-map" className="text-guidance-blue hover:underline">karriärkartan</a> för att utforska och spara program.
-          </p>
+          <div className="text-center py-6 space-y-3">
+            <div className="flex justify-center">
+              <div className="bg-gray-100 p-4 rounded-full">
+                <FileHeart className="h-8 w-8 text-gray-400" />
+              </div>
+            </div>
+            <p className="text-gray-500 italic">
+              Du har inte sparat några program ännu.
+            </p>
+            <Button 
+              asChild
+              className="bg-guidance-purple hover:bg-guidance-purple/90"
+            >
+              <Link to="/career-map">Utforska karriärkartan</Link>
+            </Button>
+          </div>
         )}
       </CardContent>
     </Card>
