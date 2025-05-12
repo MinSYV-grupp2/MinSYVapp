@@ -1,11 +1,10 @@
-
 import React from 'react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import CareerMap from '@/components/CareerMap';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileHeart, Calendar, Search, List, Layers, Book, GraduationCap, Briefcase, School, Compare } from 'lucide-react';
+import { FileHeart, Calendar, Search, List, Layers, Book, GraduationCap, Briefcase, School, SplitSquareVertical } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const CareerMapPage = () => {
@@ -62,7 +61,7 @@ const CareerMapPage = () => {
                     </li>
                     <li className="flex items-start">
                       <span className="bg-guidance-lightGreen p-1 rounded-full mr-2 mt-1">
-                        <Compare className="h-3 w-3 text-guidance-green" />
+                        <SplitSquareVertical className="h-3 w-3 text-guidance-green" />
                       </span>
                       <span>Jämföra olika program och skolor sida vid sida</span>
                     </li>
