@@ -3,13 +3,13 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import TreeDiagram from '@/components/TreeDiagram';
-import { Program } from './types';
+import { Program, ViewMode } from './types';
 import { programData } from '@/data/programData';
 
 interface CareerTreeProps {
   selectedProgram: Program;
   handleSaveProgram: () => void;
-  setViewMode: (viewMode: 'programs' | 'compare' | 'tree' | 'programDetail') => void;
+  setViewMode: (viewMode: ViewMode) => void;
 }
 
 const CareerTree = ({ selectedProgram, handleSaveProgram, setViewMode }: CareerTreeProps) => {
