@@ -12,6 +12,7 @@ import { useSYlVester } from '@/context/SYlVesterContext';
 import { useUser } from '@/context/UserContext';
 import { openaiService, ChatMessage, AIInsight } from '@/services/openai';
 import AIInsightsPreview from '@/components/AIInsightsPreview';
+import { useAI } from '@/hooks/use-ai';
 
 // Common questions that students might ask
 const suggestedQuestions = [
@@ -35,6 +36,7 @@ const AIChatPage = () => {
   const { setMood } = useSYlVester();
   const { addChatMessage, addAIInsight } = useUser();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { sendMessage, loading } = useAI();
 
   // Scroll to bottom of messages when messages change
   useEffect(() => {
@@ -55,34 +57,39 @@ const AIChatPage = () => {
     setMood('thinking');
 
     try {
-      // Prepare context for the AI
-      const context: ChatMessage = {
-        role: 'system',
-        content: "Du är SYlVester, en digital studie- och yrkesvägledare för gymnasieelever i Sverige. " +
-                 "Du hjälper elever att utforska olika gymnasieprogram, förstå sina intressen och " +
-                 "planera sina framtida utbildnings- och karriärvägar. Du är positiv, uppmuntrande " +
-                 "och pedagogisk. Du svarar alltid på svenska."
-      };
+      // Prepare system prompt for the AI
+      const systemPrompt = "Du är SYlVester, en digital studie- och yrkesvägledare för gymnasieelever i Sverige. " +
+        "Du hjälper elever att utforska olika gymnasieprogram, förstå sina intressen och " +
+        "planera sina framtida utbildnings- och karriärvägar. " +
+        "Var positiv, uppmuntrande och pedagogisk i dina svar. " +
+        "Ge specifika och hjälpsamma svar, särskilt om olika gymnasieprogram, högskolor, yrken och karriärvägar. " +
+        "När elever berättar om sina intressen, hjälp dem att koppla dessa till möjliga utbildnings- och karriärvägar. " +
+        "Undvik att fråga efter känslig personlig information. " +
+        "Svara alltid på svenska och anpassa ditt språk för gymnasieelever.";
       
-      // Get chat history for context but limit it to last 10 messages
-      const recentMessages = [...messages.slice(-10), userMessage];
+      // Get chat history but limit it to last 10 messages for context
+      const recentMessages = messages.slice(-10);
       
-      // Generate AI response
-      const aiContent = await openaiService.generateChatCompletion([context, ...recentMessages]);
+      // Use the useAI hook for generating response and insights
+      const result = await sendMessage(inputMessage, systemPrompt, recentMessages);
       
       // Add AI response to chat
-      const aiMessage: ChatMessage = { role: 'assistant', content: aiContent };
+      const aiMessage: ChatMessage = { role: 'assistant', content: result.response };
       setMessages(prev => [...prev, aiMessage]);
-      addChatMessage('assistant', aiContent);
       
-      // Extract insights from the conversation
-      const insights = await openaiService.extractInsightsFromConversation([...recentMessages, aiMessage]);
-      
-      if (insights.length > 0) {
-        setPendingInsights(insights);
+      // Handle insights
+      if (result.insights.length > 0) {
+        setPendingInsights(result.insights);
       }
     } catch (error) {
       console.error('Error in chat:', error);
+      // Add fallback message if the API call fails
+      const errorMessage: ChatMessage = { 
+        role: 'assistant', 
+        content: "Jag kunde tyvärr inte bearbeta ditt meddelande just nu. Försök gärna igen senare." 
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      
       toast({
         title: "Ett fel uppstod",
         description: "Kunde inte processa ditt meddelande. Försök igen senare.",

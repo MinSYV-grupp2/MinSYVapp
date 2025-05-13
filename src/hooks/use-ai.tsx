@@ -30,8 +30,7 @@ export const useAI = () => {
         content: userMessage
       };
       
-      // Store the user message
-      addChatMessage('user', userMessage);
+      // Store the user message (already done in AIChatPage)
       
       // Create the messages array for the API call
       const messages = [systemMessage, ...previousMessages, newUserMessage];
@@ -39,8 +38,7 @@ export const useAI = () => {
       // Get AI response
       const aiResponse = await openaiService.generateChatCompletion(messages);
       
-      // Store the AI response
-      addChatMessage('assistant', aiResponse);
+      // Store the AI response (already done in AIChatPage)
       
       // Extract insights
       const insights = await openaiService.extractInsightsFromConversation([
@@ -61,10 +59,7 @@ export const useAI = () => {
         description: "Kunde inte processa ditt meddelande",
         variant: "destructive"
       });
-      return {
-        response: "Jag kunde tyvärr inte bearbeta ditt meddelande just nu. Försök gärna igen senare.",
-        insights: []
-      };
+      throw err; // Rethrow so the component can handle it
     } finally {
       setLoading(false);
     }
