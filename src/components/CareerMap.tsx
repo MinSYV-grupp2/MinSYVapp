@@ -18,7 +18,8 @@ import {
   FileText,
   Search,
   SplitSquareVertical,
-  Trees
+  TreeDeciduous,
+  ArrowLeft
 } from 'lucide-react';
 import { 
   Tooltip,
@@ -676,6 +677,10 @@ const CareerMap = () => {
     setViewMode('programs');
   };
   
+  const handleViewCareerTree = () => {
+    setViewMode('tree');
+  };
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -687,7 +692,7 @@ const CareerMap = () => {
               onClick={handleBackToPrograms}
               className="flex items-center gap-2"
             >
-              <arrow-left className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4" />
               Tillbaka till programöversikt
             </Button>
           )}
@@ -704,4 +709,279 @@ const CareerMap = () => {
       {viewMode === 'programs' && (
         <div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-            {programData
+            {programData.map((program) => (
+              <Card 
+                key={program.id} 
+                className="hover:shadow-lg transition-shadow cursor-pointer border-l-4 border-guidance-blue"
+                onClick={() => handleProgramSelect(program)}
+              >
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-semibold mb-2 text-guidance-blue">{program.name}</h3>
+                  <p className="text-sm text-gray-600 line-clamp-3 mb-2">{program.description}</p>
+                  <div className="flex justify-between items-center mt-3">
+                    <span className="bg-guidance-lightBlue text-guidance-blue text-xs px-2 py-1 rounded-full">
+                      Meritpoäng: {program.merit}
+                    </span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-guidance-blue hover:text-guidance-purple"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleProgramSelect(program);
+                      }}
+                    >
+                      <Info className="h-4 w-4 mr-1" />
+                      <span className="text-xs">Mer info</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {viewMode === 'programDetail' && (
+        <div id="program-detail">
+          <Card className="mb-8 border-l-4 border-guidance-blue">
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-guidance-blue mb-3">{selectedProgram.name}</h2>
+              <p className="text-gray-700 mb-6">{selectedProgram.description}</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-guidance-blue mb-3 flex items-center">
+                    <BookOpen className="h-5 w-5 mr-2" />
+                    Programinformation
+                  </h3>
+                  <ul className="space-y-3">
+                    <li className="flex items-start">
+                      <span className="bg-guidance-lightBlue p-1 rounded-full mr-2 mt-1">
+                        <School className="h-3 w-3 text-guidance-blue" />
+                      </span>
+                      <div>
+                        <span className="font-medium">Programpoäng:</span> 2500 poäng
+                      </div>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="bg-guidance-lightBlue p-1 rounded-full mr-2 mt-1">
+                        <Star className="h-3 w-3 text-guidance-blue" />
+                      </span>
+                      <div>
+                        <span className="font-medium">Meritpoäng:</span> {selectedProgram.merit} extra poäng vid högskolestudier
+                      </div>
+                    </li>
+                  </ul>
+                  
+                  <h4 className="text-md font-medium text-guidance-blue mt-4 mb-2">Obligatoriska kurser:</h4>
+                  <ul className="list-disc list-inside text-sm text-gray-700 space-y-1 pl-2">
+                    {selectedProgram.requiredCourses?.map((course, index) => (
+                      <li key={index}>{course}</li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold text-guidance-blue mb-3 flex items-center">
+                    <Map className="h-5 w-5 mr-2" />
+                    Inriktningar
+                  </h3>
+                  <ul className="space-y-2">
+                    {selectedProgram.specializations?.map((specialization, index) => (
+                      <li key={index} className="bg-guidance-lightGreen/30 p-2 rounded text-sm">
+                        {specialization}
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <h4 className="text-md font-medium text-guidance-blue mt-4 mb-2">Rekommenderade kurser:</h4>
+                  <ul className="list-disc list-inside text-sm text-gray-700 space-y-1 pl-2">
+                    {selectedProgram.recommendedCourses?.map((course, index) => (
+                      <li key={index}>{course}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="border-t border-gray-200 pt-5">
+                <h3 className="text-lg font-semibold text-guidance-purple mb-3 flex items-center">
+                  <GraduationCap className="h-5 w-5 mr-2" />
+                  Vidare studier och karriärvägar
+                </h3>
+                <p className="text-gray-700 mb-4">{selectedProgram.meritDescription}</p>
+                
+                <h4 className="text-md font-medium text-guidance-blue mt-4 mb-2">Utbildningar detta program kan leda till:</h4>
+                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1 pl-2">
+                  {selectedProgram.furtherEducation?.map((education, index) => (
+                    <li key={index}><span className="font-medium">{education.name}</span> - {education.description}</li>
+                  ))}
+                </ul>
+                
+                <h4 className="text-md font-medium text-guidance-blue mt-4 mb-2">Möjliga yrken:</h4>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {selectedProgram.careers?.map((career, index) => (
+                    <span key={index} className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
+                      {career}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
+                <Button 
+                  variant="outline" 
+                  className="border-guidance-green text-guidance-green hover:bg-guidance-lightGreen flex gap-2"
+                  onClick={() => toggleCompareProgram(selectedProgram.id)}
+                >
+                  <SplitSquareVertical className="h-4 w-4" />
+                  <span>Jämför</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="border-guidance-purple text-guidance-purple hover:bg-guidance-lightPurple flex gap-2"
+                  onClick={() => handleViewCareerTree()}
+                >
+                  <TreeDeciduous className="h-4 w-4" />
+                  <span>Karriärträd</span>
+                </Button>
+                <Button 
+                  className="bg-guidance-purple hover:bg-guidance-purple/90 text-white flex gap-2"
+                  onClick={() => handleSaveProgram()}
+                >
+                  <Heart className="h-4 w-4" />
+                  <span>Spara</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-xl font-semibold text-guidance-blue mb-4 flex items-center">
+                <School className="h-5 w-5 mr-2" />
+                Skolor som erbjuder {selectedProgram.name}
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {schoolsWithSelectedProgram.map((school) => (
+                  <Card key={school.id} className="hover:shadow-md transition-shadow border-l-4 border-guidance-green">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start">
+                        <h4 className="text-lg font-semibold mb-2">{school.name}</h4>
+                        <div className="flex gap-1">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-guidance-green hover:text-guidance-purple"
+                                  onClick={() => toggleCompareSchool(school.id)}
+                                >
+                                  <SplitSquareVertical className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Jämför skola</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-guidance-purple hover:text-guidance-blue"
+                                  onClick={() => handleSaveProgram(school.name)}
+                                >
+                                  <Heart className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Spara som favorit</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </div>
+                      
+                      <div className="text-sm text-gray-600 mb-2">{school.location.address}</div>
+                      
+                      <div className="flex justify-between items-center mt-2">
+                        <span className="bg-guidance-lightPurple text-guidance-purple text-xs px-2 py-1 rounded-full">
+                          Antagning: {school.admissionScores[selectedProgram.id]}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {school.statistics.satisfactionRate}% nöjda elever
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+      
+      {viewMode === 'tree' && (
+        <div>
+          <Card className="mb-8">
+            <CardContent className="p-6">
+              <div className="mb-4">
+                <h2 className="text-2xl font-bold text-guidance-blue mb-2 flex items-center">
+                  <TreeDeciduous className="h-6 w-6 mr-2 text-guidance-green" />
+                  Karriärträd för {selectedProgram.name}
+                </h2>
+                <p className="text-gray-600">
+                  Utforska olika vägar från gymnasiet till karriär genom detta interaktiva karriärträd.
+                  Klicka på rubrikerna för att visa mer information om varje steg.
+                </p>
+              </div>
+              
+              <TreeDiagram
+                program={selectedProgram.name}
+                specializations={selectedProgram.specializations || []}
+                educationPaths={selectedProgram.furtherEducation?.map(edu => edu.name) || []}
+                careers={selectedProgram.careers || []}
+                selectedProgram={selectedProgram.id}
+                programData={selectedProgram}
+              />
+              
+              <div className="mt-6 flex justify-between">
+                <Button 
+                  variant="outline"
+                  onClick={() => setViewMode('programDetail')}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Tillbaka till programinformation
+                </Button>
+                
+                <Button 
+                  className="bg-guidance-purple hover:bg-guidance-purple/90 text-white flex gap-2"
+                  onClick={() => handleSaveProgram()}
+                >
+                  <Heart className="h-4 w-4" />
+                  <span>Spara detta program</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {viewMode === 'compare' && (
+        <div className="space-y-8">
+          {/* Compare view content would go here */}
+          <p>Compare view is under development</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CareerMap;
