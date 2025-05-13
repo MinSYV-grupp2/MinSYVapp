@@ -40,16 +40,32 @@ export interface AIInsight {
   approved: boolean; // Whether the user has approved this insight
 }
 
-// API Key handling - in a real app this would be server-side
-// For this prototype, we'll use a placeholder approach
-const API_KEY = ""; // This should be handled securely via environment variables
+// Azure OpenAI Configuration - Detta skulle hanteras mer säkert i en produktionsmiljö
+const AZURE_API_KEY = ""; // Skulle hanteras via en säker miljövariabel
+const AZURE_ENDPOINT = ""; // t.ex. "https://your-resource-name.openai.azure.com"
+const AZURE_DEPLOYMENT_NAME = "gpt-4o"; // Namn på din Azure GPT-4o deployment
+const AZURE_API_VERSION = "2024-04-01-preview";
+
+// Standard OpenAI API Key - används som fallback
+const OPENAI_API_KEY = ""; // Befintlig nyckel
 
 // OpenAI API service
 export const openaiService = {
   // Generate a chat completion from the OpenAI API
   async generateChatCompletion(messages: ChatMessage[]): Promise<string> {
     try {
-      if (!API_KEY || API_KEY === "") {
+      // Om Azure-konfiguration finns, försök använda Azure först
+      if (AZURE_API_KEY && AZURE_ENDPOINT) {
+        try {
+          return await this.generateAzureChatCompletion(messages);
+        } catch (error) {
+          console.error('Error with Azure OpenAI API, falling back to standard OpenAI:', error);
+          // Om Azure misslyckas, fortsätt med standardmetoden
+        }
+      }
+      
+      // Standardmetod (befintlig kod)
+      if (!OPENAI_API_KEY || OPENAI_API_KEY === "") {
         // For demo purposes, return a simulated response
         return simulateGPTResponse(messages);
       }
@@ -58,7 +74,7 @@ export const openaiService = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_KEY}`
+          'Authorization': `Bearer ${OPENAI_API_KEY}`
         },
         body: JSON.stringify({
           model: "gpt-4o",
@@ -86,59 +102,180 @@ export const openaiService = {
     }
   },
 
-  // Extract insights from a conversation
-  extractInsightsFromConversation(messages: ChatMessage[]): Promise<AIInsight[]> {
-    // For demo purposes, this uses a simplified approach
-    // In a production app, this would be a more sophisticated algorithm
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const insights: AIInsight[] = [];
-        const lastUserMessage = messages.filter(m => m.role === 'user').pop();
+  // Ny funktion för Azure OpenAI API
+  async generateAzureChatCompletion(messages: ChatMessage[]): Promise<string> {
+    try {
+      const azureUrl = `${AZURE_ENDPOINT}/openai/deployments/${AZURE_DEPLOYMENT_NAME}/chat/completions?api-version=${AZURE_API_VERSION}`;
+      
+      const response = await fetch(azureUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': AZURE_API_KEY
+        },
+        body: JSON.stringify({
+          messages,
+          max_tokens: 500,
+          temperature: 0.7,
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || 'Failed to get response from Azure OpenAI');
+      }
+
+      const data: OpenAICompletionResponse = await response.json();
+      return data.choices[0].message.content;
+    } catch (error) {
+      console.error('Error calling Azure OpenAI API:', error);
+      throw error; // Låt huvudfunktionen hantera fallback
+    }
+  },
+
+  // Extract insights from a conversation - förbättrad för att identifiera intressen
+  async extractInsightsFromConversation(messages: ChatMessage[]): Promise<AIInsight[]> {
+    try {
+      // Använd Azure OpenAI om det finns konfigurerat, annars simulera för demo
+      if (AZURE_API_KEY && AZURE_ENDPOINT) {
+        // Skapa en prompt specifikt för insiktsextrahering som filtrerar ut känslig information
+        const systemPrompt: ChatMessage = {
+          role: 'system',
+          content: `Analysera följande konversation och extrahera relevanta insikter om användarens:
+          - Intressen (t.ex. teknik, konst, sport)
+          - Styrkor och färdigheter
+          - Utbildningsmål och preferenser
+          
+          Fokusera endast på positiva och relevanta insikter för studie- och yrkesvägledning.
+          Undvik att extrahera känslig personlig information som kan vara privat (t.ex. diagnoser, familjeproblem).
+          
+          Formatera varje insikt som ett JSON-objekt med följande struktur:
+          { "type": "[interest/strength/value/education/career/reflection]", "content": "[insikt]", "confidence": [0-1 värde] }
+          `
+        };
         
-        if (lastUserMessage) {
-          const text = lastUserMessage.content.toLowerCase();
-          
-          // Simple keyword-based extraction - this would be much more sophisticated with real GPT
-          if (text.includes('teknik') || text.includes('programmering') || text.includes('datorer')) {
-            insights.push({
-              id: Date.now().toString(),
-              type: 'interest',
-              content: 'Teknik',
-              confidence: 0.85,
-              source: lastUserMessage.content,
-              extracted: new Date(),
-              approved: false
-            });
-          }
-          
-          if (text.includes('kreativ') || text.includes('skapa') || text.includes('design')) {
-            insights.push({
-              id: (Date.now()+1).toString(),
-              type: 'interest',
-              content: 'Kreativitet',
-              confidence: 0.82,
-              source: lastUserMessage.content,
-              extracted: new Date(),
-              approved: false
-            });
-          }
-          
-          if (text.includes('hjälpa') || text.includes('andra') || text.includes('människor')) {
-            insights.push({
-              id: (Date.now()+2).toString(),
-              type: 'value',
-              content: 'Hjälpa andra människor',
-              confidence: 0.9,
-              source: lastUserMessage.content,
-              extracted: new Date(),
-              approved: false
-            });
-          }
+        // Skapa en prompt som innehåller konversationen
+        const userPrompt: ChatMessage = {
+          role: 'user',
+          content: `Här är konversationen att analysera:\n${messages.map(m => `${m.role}: ${m.content}`).join('\n')}`
+        };
+        
+        // Anropa Azure API för analys
+        const azureUrl = `${AZURE_ENDPOINT}/openai/deployments/${AZURE_DEPLOYMENT_NAME}/chat/completions?api-version=${AZURE_API_VERSION}`;
+        
+        const response = await fetch(azureUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'api-key': AZURE_API_KEY
+          },
+          body: JSON.stringify({
+            messages: [systemPrompt, userPrompt],
+            max_tokens: 500,
+            temperature: 0.3, // Lägre temperatur för mer konsekvent output
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to extract insights');
         }
+
+        const data: OpenAICompletionResponse = await response.json();
+        const insightsText = data.choices[0].message.content;
         
-        resolve(insights);
-      }, 500);
-    });
+        // Försök parsa insikterna från text
+        try {
+          // Leta efter JSON-objekt i texten
+          const jsonRegex = /\{[\s\S]*?\}/g;
+          const matches = insightsText.match(jsonRegex);
+          
+          if (matches && matches.length > 0) {
+            const insights: AIInsight[] = matches.map((match, index) => {
+              try {
+                const parsedInsight = JSON.parse(match);
+                return {
+                  id: (Date.now() + index).toString(),
+                  type: parsedInsight.type || 'interest',
+                  content: parsedInsight.content,
+                  confidence: parsedInsight.confidence || 0.7,
+                  source: messages[messages.length - 1]?.content || '',
+                  extracted: new Date(),
+                  approved: false
+                };
+              } catch (e) {
+                console.error('Failed to parse insight:', match);
+                return null;
+              }
+            }).filter(Boolean) as AIInsight[];
+            
+            return insights;
+          }
+        } catch (error) {
+          console.error('Error parsing insights:', error);
+          // Fallback till simulerad logik vid fel
+        }
+      }
+
+      // Fallback till den befintliga simulerade logiken
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const insights: AIInsight[] = [];
+          const lastUserMessage = messages.filter(m => m.role === 'user').pop();
+          
+          if (lastUserMessage) {
+            const text = lastUserMessage.content.toLowerCase();
+            
+            // Simple keyword-based extraction - this would be much more sophisticated with real GPT
+            if (text.includes('teknik') || text.includes('programmering') || text.includes('datorer') || text.includes('drönare')) {
+              insights.push({
+                id: Date.now().toString(),
+                type: 'interest',
+                content: text.includes('drönare') ? 'Drönarteknik' : 'Teknik',
+                confidence: 0.85,
+                source: lastUserMessage.content,
+                extracted: new Date(),
+                approved: false
+              });
+            }
+            
+            if (text.includes('kreativ') || text.includes('skapa') || text.includes('design')) {
+              insights.push({
+                id: (Date.now()+1).toString(),
+                type: 'interest',
+                content: 'Kreativitet',
+                confidence: 0.82,
+                source: lastUserMessage.content,
+                extracted: new Date(),
+                approved: false
+              });
+            }
+            
+            if (text.includes('hjälpa') || text.includes('andra') || text.includes('människor')) {
+              insights.push({
+                id: (Date.now()+2).toString(),
+                type: 'value',
+                content: 'Hjälpa andra människor',
+                confidence: 0.9,
+                source: lastUserMessage.content,
+                extracted: new Date(),
+                approved: false
+              });
+            }
+          }
+          
+          resolve(insights);
+        }, 500);
+      });
+    } catch (error) {
+      console.error('Error extracting insights:', error);
+      // Fallback till den befintliga simulerade logiken
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const insights: AIInsight[] = [];
+          resolve(insights);
+        }, 500);
+      });
+    }
   }
 };
 
