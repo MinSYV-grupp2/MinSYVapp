@@ -3,10 +3,12 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
+import SYlVester from '@/components/SYlVester';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
+import { useSYlVester } from '@/context/SYlVesterContext';
 
 // Sample AI responses for different education-related queries
 const aiResponseDatabase = {
@@ -65,10 +67,11 @@ const suggestedQuestions = [
 
 const AIChatPage = () => {
   const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>([
-    { text: "Hej! Jag är din digitala studie- och yrkesvägledare. Jag kan svara på frågor om gymnasieprogram, utbildningar och karriärvägar. Vad undrar du över?", isUser: false }
+    { text: "Hej! Jag är SYlVester, din digitala studie- och yrkesvägledare. Jag kan svara på frågor om gymnasieprogram, utbildningar och karriärvägar. Vad undrar du över?", isUser: false }
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const { setMood } = useSYlVester();
 
   const handleSendMessage = () => {
     if (!inputMessage.trim()) return;
@@ -80,6 +83,7 @@ const AIChatPage = () => {
     
     // Simulate AI thinking
     setIsTyping(true);
+    setMood('thinking');
     
     setTimeout(() => {
       // Find appropriate response based on keywords in the user's message
@@ -113,6 +117,7 @@ const AIChatPage = () => {
       setMessages(prevMessages => [...prevMessages, aiResponse]);
       
       setIsTyping(false);
+      setMood('happy');
     }, 1000);
   };
 
@@ -124,12 +129,33 @@ const AIChatPage = () => {
     }, 100);
   };
 
+  const handleSYlVesterTip = (tip: string) => {
+    let question = "";
+    switch(tip) {
+      case "Vad kan jag fråga om?":
+        question = "Vad kan du hjälpa mig med?";
+        break;
+      case "Hur fungerar chatten?":
+        question = "Hur fungerar den här chatten?";
+        break;
+      case "Vilka program finns?":
+        question = "Vilka gymnasieprogram finns det?";
+        break;
+      default:
+        question = tip;
+    }
+    setInputMessage(question);
+    setTimeout(() => {
+      handleSendMessage();
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
       <div className="bg-gradient-to-r from-guidance-purple to-guidance-blue text-white py-10">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">AI-chatt</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">Chatta med SYlVester</h1>
           <p className="text-lg md:text-xl max-w-3xl mx-auto">
             Få svar på dina frågor om gymnasieval, utbildning och framtidsvägar
           </p>
@@ -142,6 +168,17 @@ const AIChatPage = () => {
           <div className="flex-grow md:w-2/3">
             <Card className="h-[600px] flex flex-col">
               <CardContent className="p-4 flex flex-col h-full">
+                {/* SYlVester at the top of chat */}
+                <div className="flex justify-center mb-4">
+                  <SYlVester 
+                    size="md" 
+                    mood="happy" 
+                    greeting="Hej! Jag är SYlVester! Ställ dina frågor om gymnasiet och olika program här!"
+                    tips={["Vad kan jag fråga om?", "Hur fungerar chatten?", "Vilka program finns?"]}
+                    onTipClick={handleSYlVesterTip}
+                  />
+                </div>
+                
                 {/* Chat Messages */}
                 <div className="flex-grow overflow-y-auto mb-4 space-y-4 p-2">
                   {messages.map((message, index) => (
@@ -149,6 +186,13 @@ const AIChatPage = () => {
                       key={index}
                       className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
                     >
+                      {!message.isUser && (
+                        <div className="mr-2 flex-shrink-0">
+                          <div className="w-8 h-8 bg-guidance-lightPurple rounded-full flex items-center justify-center">
+                            <SYlVester size="sm" className="m-0 p-0" />
+                          </div>
+                        </div>
+                      )}
                       <div 
                         className={`max-w-[80%] rounded-lg px-4 py-2 ${
                           message.isUser 
@@ -166,6 +210,11 @@ const AIChatPage = () => {
                   ))}
                   {isTyping && (
                     <div className="flex justify-start">
+                      <div className="mr-2 flex-shrink-0">
+                        <div className="w-8 h-8 bg-guidance-lightPurple rounded-full flex items-center justify-center">
+                          <SYlVester size="sm" className="m-0 p-0" mood="thinking" />
+                        </div>
+                      </div>
                       <div className="max-w-[80%] rounded-lg px-4 py-2 bg-gray-100 text-gray-800">
                         <p>Skriver...</p>
                       </div>

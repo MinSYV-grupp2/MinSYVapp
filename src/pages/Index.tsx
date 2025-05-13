@@ -7,21 +7,26 @@ import GuidanceCounselor from '@/components/GuidanceCounselor';
 import ProfileSection from '@/components/ProfileSection';
 import Footer from '@/components/Footer';
 import GuidanceQuiz from '@/components/GuidanceQuiz';
+import SYlVester from '@/components/SYlVester';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { useState } from 'react';
 import { BookOpen, MessageSquare, CircleUser, HelpCircle } from 'lucide-react';
+import { useSYlVester } from '@/context/SYlVesterContext';
+import { toast } from '@/components/ui/use-toast';
 
 const Index = () => {
   const [showGuidanceQuiz, setShowGuidanceQuiz] = useState(false);
   const [showInterestsQuiz, setShowInterestsQuiz] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const { mood, setMood } = useSYlVester();
 
   const handleStartGuidanceQuiz = () => {
     setShowGuidanceQuiz(true);
     setShowInterestsQuiz(false);
     setCurrentStep(2);
+    setMood('excited');
     // Smooth scroll to quiz section
     setTimeout(() => {
       document.getElementById('quiz')?.scrollIntoView({
@@ -34,6 +39,7 @@ const Index = () => {
     setShowInterestsQuiz(true);
     setShowGuidanceQuiz(false);
     setCurrentStep(2);
+    setMood('excited');
     // Smooth scroll to quiz section
     setTimeout(() => {
       document.getElementById('quiz')?.scrollIntoView({
@@ -42,14 +48,46 @@ const Index = () => {
     }, 100);
   };
 
+  const handleSYlVesterTip = (tip: string) => {
+    let message = "";
+    switch(tip) {
+      case "Hur fungerar quizen?":
+        message = "Quizen hjälper dig att hitta gymnasieprogram baserat på dina intressen. Det tar bara några minuter att göra!";
+        break;
+      case "Hur sparar jag program?":
+        message = "När du hittat ett program du gillar, tryck på 'Spara' knappen. Du hittar alla sparade program i din profil!";
+        break;
+      case "Vad är en SYV?":
+        message = "SYV står för Studie- och Yrkesvägledare. De hjälper dig att välja rätt utbildning. Du kan boka tid med en SYV här på sidan!";
+        break;
+      default:
+        message = "Jag hjälper dig att hitta rätt gymnasieprogram! Gör quizen eller utforska karriärkartan för att komma igång.";
+    }
+    toast({
+      title: "SYlVester säger:",
+      description: message,
+      duration: 5000,
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
       
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-guidance-blue to-guidance-purple text-white py-16">
+      {/* Hero Section with SYlVester */}
+      <div className="bg-gradient-to-r from-guidance-blue to-guidance-purple text-white py-16 relative">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Utforska dina intressen och styrkor</h1>
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <SYlVester 
+              size="lg" 
+              mood="excited" 
+              greeting="Hej! Jag är SYlVester och jag kommer att hjälpa dig att hitta rätt gymnasieprogram! Ska vi börja med ett quiz?"
+              tips={["Hur fungerar quizen?", "Hur sparar jag program?", "Vad är en SYV?"]}
+              onTipClick={handleSYlVesterTip}
+              className="mb-4"
+            />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 mt-12">Utforska dina intressen och styrkor</h1>
           <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
             Hitta gymnasieprogram som passar just dig!
           </p>
