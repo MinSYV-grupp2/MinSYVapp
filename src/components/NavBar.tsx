@@ -3,14 +3,20 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/context/UserContext';
+import { useNavigate } from 'react-router-dom';
+import SYlVester from '@/components/SYlVester';
 
 const NavBar = () => {
   const { profile } = useUser();
+  const navigate = useNavigate();
   
   return (
     <header className="sticky top-0 z-40 w-full bg-white shadow-sm">
       <div className="container mx-auto py-4 px-4 flex justify-between items-center">
         <Link to="/" className="flex items-center gap-2">
+          <div className="hidden sm:block">
+            <SYlVester size="sm" hideText={true} />
+          </div>
           <span className="text-2xl font-bold">
             <span className="text-guidance-green">Min</span>
             <span className="text-guidance-blue">SYV</span>
@@ -26,9 +32,6 @@ const NavBar = () => {
           </Link>
           <Link to="/booking" className="text-gray-600 hover:text-guidance-blue transition-colors">
             Boka tid
-          </Link>
-          <Link to="/profile" className="text-gray-600 hover:text-guidance-blue transition-colors">
-            Min profil
           </Link>
         </nav>
         
