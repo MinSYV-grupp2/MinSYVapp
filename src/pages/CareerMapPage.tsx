@@ -17,7 +17,7 @@ const CareerMapPage = () => {
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">Karriärkarta</h1>
             <p className="text-lg md:text-xl max-w-3xl mx-auto">
-              Utforska sambandet mellan gymnasieprogram, inriktningar, vidare utbildning och framtida karriärmöjligheter
+              Hitta program som passar just dig och se vad de kan leda till i framtiden!
             </p>
           </div>
         </div>
@@ -25,15 +25,22 @@ const CareerMapPage = () => {
         <div className="container mx-auto px-4 py-8">
           <Card className="mb-8 border-l-4 border-guidance-purple">
             <CardContent className="p-6">
-              <h2 className="text-xl font-semibold mb-3 text-guidance-purple">Hur du använder karriärkartan</h2>
+              <h2 className="text-xl font-semibold mb-3 text-guidance-purple">Så här använder du karriärkartan</h2>
               <div className="space-y-3 text-gray-700">
-                <p>Karriärkartan hjälper dig att utforska din framtida utbildnings- och yrkesbana:</p>
-                <ol className="list-decimal pl-5 space-y-2">
-                  <li><span className="font-medium">Välj program</span> - Börja med att välja ett gymnasieprogram som intresserar dig</li>
-                  <li><span className="font-medium">Se möjligheter</span> - Utforska inriktningar, högskoleutbildningar och yrken programmet kan leda till</li>
-                  <li><span className="font-medium">Jämför skolor</span> - Se vilka skolor som erbjuder programmet och hur de skiljer sig åt</li>
-                  <li><span className="font-medium">Jämför program</span> - Använd jämförelsefunktionen för att se skillnader mellan olika program</li>
-                  <li><span className="font-medium">Spara favoriter</span> - Klicka på hjärtat för att spara program du är intresserad av till din profil</li>
+                <p className="font-medium">Följ dessa tre enkla steg:</p>
+                <ol className="list-decimal pl-5 space-y-4">
+                  <li className="bg-guidance-lightBlue/30 p-3 rounded-lg">
+                    <span className="font-medium text-guidance-blue block">Steg 1: Välj program</span>
+                    <p className="text-sm mt-1">Klicka på ett gymnasieprogram som låter intressant för dig. Det finns många att välja mellan!</p>
+                  </li>
+                  <li className="bg-guidance-lightGreen/30 p-3 rounded-lg">
+                    <span className="font-medium text-guidance-green block">Steg 2: Utforska möjligheter</span>
+                    <p className="text-sm mt-1">Se vilka inriktningar, högskole-utbildningar och yrken programmet kan leda till. Testa olika för att jämföra!</p>
+                  </li>
+                  <li className="bg-guidance-lightPurple/30 p-3 rounded-lg">
+                    <span className="font-medium text-guidance-purple block">Steg 3: Jämför och spara</span>
+                    <p className="text-sm mt-1">Klicka på hjärtat för att spara dina favoritprogram till din profil, och använd jämför-knappen för att se skillnader mellan olika program.</p>
+                  </li>
                 </ol>
               </div>
             </CardContent>
@@ -41,36 +48,36 @@ const CareerMapPage = () => {
 
           <Card className="mb-8 border-l-4 border-guidance-green">
             <CardContent className="p-6">
-              <h2 className="text-xl font-semibold mb-3 text-guidance-green">Hitta rätt gymnasieprogram</h2>
+              <h2 className="text-xl font-semibold mb-3 text-guidance-green">Vad ska jag tänka på när jag väljer gymnasieprogram?</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-gray-700 mb-4">
-                    Välj ett program som passar dina intressen och framtidsplaner. Karriärkartan låter dig:
+                  <p className="text-gray-700 mb-4 font-medium">
+                    Välj efter vad DU tycker är intressant och roligt! Tänk på:
                   </p>
-                  <ul className="space-y-2 text-gray-700">
+                  <ul className="space-y-3 text-gray-700">
                     <li className="flex items-start">
-                      <span className="bg-guidance-lightGreen p-1 rounded-full mr-2 mt-1">
-                        <Search className="h-3 w-3 text-guidance-green" />
+                      <span className="bg-guidance-lightGreen p-2 rounded-full mr-3 flex-shrink-0 mt-0.5">
+                        <Search className="h-4 w-4 text-guidance-green" />
                       </span>
-                      <span>Se detaljerad information om programmens innehåll och inriktningar</span>
+                      <span>Vilka ämnen tycker du är roligast i skolan just nu?</span>
                     </li>
                     <li className="flex items-start">
-                      <span className="bg-guidance-lightGreen p-1 rounded-full mr-2 mt-1">
-                        <List className="h-3 w-3 text-guidance-green" />
+                      <span className="bg-guidance-lightGreen p-2 rounded-full mr-3 flex-shrink-0 mt-0.5">
+                        <List className="h-4 w-4 text-guidance-green" />
                       </span>
-                      <span>Förstå vilka kurser som ingår och vilka som är valfria</span>
+                      <span>Vill du plugga vidare på högskola eller börja jobba direkt?</span>
                     </li>
                     <li className="flex items-start">
-                      <span className="bg-guidance-lightGreen p-1 rounded-full mr-2 mt-1">
-                        <SplitSquareVertical className="h-3 w-3 text-guidance-green" />
+                      <span className="bg-guidance-lightGreen p-2 rounded-full mr-3 flex-shrink-0 mt-0.5">
+                        <Briefcase className="h-4 w-4 text-guidance-green" />
                       </span>
-                      <span>Jämföra olika program och skolor sida vid sida</span>
+                      <span>Har du redan en dröm om vad du vill jobba med?</span>
                     </li>
                     <li className="flex items-start">
-                      <span className="bg-guidance-lightGreen p-1 rounded-full mr-2 mt-1">
-                        <Briefcase className="h-3 w-3 text-guidance-green" />
+                      <span className="bg-guidance-lightGreen p-2 rounded-full mr-3 flex-shrink-0 mt-0.5">
+                        <School className="h-4 w-4 text-guidance-green" />
                       </span>
-                      <span>Se vilka yrken och karriärvägar programmet kan leda till</span>
+                      <span>Finns programmet på en skola som känns bra för dig?</span>
                     </li>
                   </ul>
                 </div>
@@ -78,26 +85,27 @@ const CareerMapPage = () => {
                 <div className="bg-guidance-lightPurple/30 p-4 rounded-lg">
                   <h3 className="font-medium text-guidance-purple mb-3 flex items-center">
                     <GraduationCap className="mr-2 h-5 w-5" />
-                    Tänk på meritpoäng för högskola
+                    Visste du? Meritpoäng är viktigt!
                   </h3>
                   <p className="text-gray-700 mb-3 text-sm">
-                    Olika gymnasieprogram ger olika meritpoäng för olika högskoleutbildningar. 
-                    Detta kan vara avgörande när du söker till högskola eller universitet senare.
+                    Om du vill plugga på högskola efter gymnasiet är det bra att veta att olika gymnasieprogram 
+                    ger dig olika mycket extrapoäng när du söker. Dessa kallas "meritpoäng".
                   </p>
                   
-                  <div className="space-y-2">
+                  <div className="space-y-2 text-sm">
                     <div className="flex justify-between items-center p-2 bg-white rounded">
                       <span>Naturvetenskap / Teknik</span>
-                      <span className="bg-guidance-purple text-white text-xs px-2 py-0.5 rounded">Merit: 1.0</span>
+                      <span className="bg-guidance-purple text-white text-xs px-2 py-1 rounded">Mest meritpoäng</span>
                     </div>
                     <div className="flex justify-between items-center p-2 bg-white rounded">
                       <span>Ekonomi / Samhäll</span>
-                      <span className="bg-guidance-purple text-white text-xs px-2 py-0.5 rounded">Merit: 0.5</span>
+                      <span className="bg-guidance-purple text-white text-xs px-2 py-1 rounded">Mellan meritpoäng</span>
                     </div>
                     <div className="flex justify-between items-center p-2 bg-white rounded">
                       <span>Estet / Yrkesprogram</span>
-                      <span className="bg-guidance-purple text-white text-xs px-2 py-0.5 rounded">Merit: 0.0</span>
+                      <span className="bg-guidance-purple text-white text-xs px-2 py-1 rounded">Minst meritpoäng</span>
                     </div>
+                    <p className="pt-2 text-xs text-gray-600 italic">Men kom ihåg - välj det som passar DIG bäst!</p>
                   </div>
                 </div>
               </div>
@@ -105,7 +113,7 @@ const CareerMapPage = () => {
           </Card>
           
           <div className="flex flex-col sm:flex-row items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-guidance-blue mb-4 sm:mb-0">Börja med att välja program</h2>
+            <h2 className="text-2xl font-bold text-guidance-blue mb-4 sm:mb-0">Välj ett program nedan</h2>
             <div className="flex flex-wrap gap-2 md:gap-4 justify-center">
               <div className="flex items-center bg-guidance-lightBlue p-2 rounded-md">
                 <div className="bg-guidance-blue p-1.5 rounded-full mr-2">
@@ -142,7 +150,7 @@ const CareerMapPage = () => {
 
           <div className="flex flex-col md:flex-row justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-guidance-blue mb-4 md:mb-0">Din framtida karriärväg</h2>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button 
                 asChild
                 variant="outline"
@@ -151,6 +159,7 @@ const CareerMapPage = () => {
                 <Link to="/booking">
                   <Calendar className="h-5 w-5" />
                   <span>Boka SYV-möte</span>
+                  <span className="text-xs block sm:hidden">(Prata med en studie-och yrkesvägledare)</span>
                 </Link>
               </Button>
               
@@ -161,6 +170,7 @@ const CareerMapPage = () => {
                 <Link to="/profile">
                   <FileHeart className="h-5 w-5" />
                   <span>Min profil</span>
+                  <span className="text-xs block sm:hidden">(Se dina sparade favoriter)</span>
                 </Link>
               </Button>
             </div>
