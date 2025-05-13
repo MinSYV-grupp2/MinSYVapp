@@ -67,11 +67,16 @@ export const SYlVesterProvider: React.FC<SYlVesterProviderProps> = ({ children }
   const [tips, setTips] = useState<Record<string, Tip[]>>(defaultTips);
   const [greeting, setGreeting] = useState(defaultContext.greeting);
   const [isVisible, setIsVisible] = useState(true);
+  const [currentPath, setCurrentPath] = useState('/');
+  
+  // Use location hook safely inside a useEffect
   const location = useLocation();
-
+  
   // Update greeting based on current route
   useEffect(() => {
     const path = location.pathname;
+    setCurrentPath(path);
+    
     let newGreeting = defaultContext.greeting;
     let newMood: Mood = 'happy';
 
