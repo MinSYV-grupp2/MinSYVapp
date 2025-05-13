@@ -6,13 +6,15 @@ interface TreeDiagramProps {
   specializations: string[];
   educationPaths: string[];
   careers: string[];
+  selectedProgram?: string; // Added this optional prop
 }
 
 const TreeDiagram: React.FC<TreeDiagramProps> = ({ 
   program, 
   specializations, 
   educationPaths, 
-  careers 
+  careers,
+  selectedProgram // Make it available in component
 }) => {
   return (
     <div className="p-4">

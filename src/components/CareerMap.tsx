@@ -1162,7 +1162,13 @@ const CareerMap = () => {
           <p className="text-gray-600 mb-6">
             Utforska hur gymnasieprogram, högskoleprogram och yrken hänger ihop i ett interaktivt karriärträd.
           </p>
-          <TreeDiagram selectedProgram={selectedProgram.id} />
+          <TreeDiagram 
+            program={selectedProgram.name}
+            specializations={selectedProgram.specializations}
+            educationPaths={selectedProgram.furtherEducation.map(edu => edu.name)}
+            careers={selectedProgram.careers}
+            selectedProgram={selectedProgram.id}
+          />
         </div>
       )}
     </div>
