@@ -24,17 +24,17 @@ const NavBar = () => {
         </Link>
         
         <nav className="hidden md:flex items-center gap-6">
-          <Link to="/career-map" className="text-gray-600 hover:text-guidance-blue transition-colors">
-            Karriärkarta
+          <Link to="/" className="text-gray-600 hover:text-guidance-blue transition-colors">
+            Hem
           </Link>
           <Link to="/interviews" className="text-gray-600 hover:text-guidance-blue transition-colors">
             Intervjuer
           </Link>
-          <Link to="/ai-chat" className="text-gray-600 hover:text-guidance-blue transition-colors">
-            AI-hjälp
-          </Link>
           <Link to="/booking" className="text-gray-600 hover:text-guidance-blue transition-colors">
             Boka tid
+          </Link>
+          <Link to="/about" className="text-gray-600 hover:text-guidance-blue transition-colors">
+            Om SYV
           </Link>
         </nav>
         
