@@ -1,5 +1,5 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
 
 type Mood = 'happy' | 'thinking' | 'excited';
 
@@ -19,6 +19,7 @@ interface SYlVesterContextType {
   setIsVisible: (isVisible: boolean) => void;
   getPageTips: (path: string) => string[];
   currentPath: string;
+  setCurrentPath: (path: string) => void;
 }
 
 const defaultContext: SYlVesterContextType = {
@@ -33,6 +34,7 @@ const defaultContext: SYlVesterContextType = {
   setIsVisible: () => {},
   getPageTips: () => [],
   currentPath: '/',
+  setCurrentPath: () => {},
 };
 
 const defaultTips: Record<string, Tip[]> = {
@@ -70,13 +72,9 @@ export const SYlVesterProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [isVisible, setIsVisible] = useState(true);
   const [currentPath, setCurrentPath] = useState('/');
   
-  // Use location hook inside a useEffect to avoid router context issues
-  const location = useLocation();
-  
-  // Update greeting based on current route
+  // Update greeting based on current path
   useEffect(() => {
-    const path = location.pathname;
-    setCurrentPath(path);
+    const path = currentPath;
     
     let newGreeting = defaultContext.greeting;
     let newMood: Mood = 'happy';
@@ -101,7 +99,7 @@ export const SYlVesterProvider: React.FC<{ children: ReactNode }> = ({ children 
     
     setGreeting(newGreeting);
     setMood(newMood);
-  }, [location.pathname]);
+  }, [currentPath]);
 
   const addTip = (path: string, tip: Tip) => {
     setTips(prevTips => {
@@ -141,7 +139,8 @@ export const SYlVesterProvider: React.FC<{ children: ReactNode }> = ({ children 
       isVisible,
       setIsVisible,
       getPageTips,
-      currentPath
+      currentPath,
+      setCurrentPath
     }}>
       {children}
     </SYlVesterContext.Provider>
