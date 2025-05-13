@@ -1,24 +1,69 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Heart, FileText, SplitSquareVertical } from 'lucide-react';
 
 interface ProgramDetailsProps {
   program: string;
   specializations: string[];
   educationPaths: string[];
   careers: string[];
+  onSave?: () => void;
+  onCompare?: () => void;
+  onViewTree?: () => void;
 }
 
 const ProgramDetails: React.FC<ProgramDetailsProps> = ({ 
   program, 
   specializations, 
   educationPaths, 
-  careers 
+  careers,
+  onSave,
+  onCompare,
+  onViewTree
 }) => {
   return (
     <Card className="mb-6">
       <CardContent className="p-4">
-        <h3 className="text-xl font-semibold mb-3 text-guidance-blue">{program}</h3>
+        <div className="flex justify-between items-start mb-3">
+          <h3 className="text-xl font-semibold text-guidance-blue">{program}</h3>
+          <div className="flex gap-2">
+            {onViewTree && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="border-guidance-purple text-guidance-purple hover:bg-guidance-lightPurple flex gap-1 text-xs"
+                onClick={onViewTree}
+              >
+                <FileText className="h-3.5 w-3.5" />
+                Karriärträd
+              </Button>
+            )}
+            {onCompare && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="border-guidance-blue text-guidance-blue hover:bg-guidance-lightBlue flex gap-1 text-xs"
+                onClick={onCompare}
+              >
+                <SplitSquareVertical className="h-3.5 w-3.5" />
+                Jämför
+              </Button>
+            )}
+            {onSave && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="border-guidance-green text-guidance-green hover:bg-guidance-lightGreen flex gap-1 text-xs"
+                onClick={onSave}
+              >
+                <Heart className="h-3.5 w-3.5" />
+                Spara
+              </Button>
+            )}
+          </div>
+        </div>
         
         <div className="space-y-4">
           <div>

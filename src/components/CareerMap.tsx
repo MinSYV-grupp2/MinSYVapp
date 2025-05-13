@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,8 @@ import {
   Calendar,
   FileText,
   Search,
-  SplitSquareVertical
+  SplitSquareVertical,
+  Trees
 } from 'lucide-react';
 import { 
   Tooltip,
@@ -563,7 +564,7 @@ const schoolsData = [
 const CareerMap = () => {
   const { addSavedProgram } = useUser();
   const [selectedProgram, setSelectedProgram] = useState(programData[0]);
-  const [viewMode, setViewMode] = useState<'programs' | 'compare' | 'tree'>('programs');
+  const [viewMode, setViewMode] = useState<'programs' | 'compare' | 'tree' | 'programDetail'>('programs');
   const [selectedSchool, setSelectedSchool] = useState<string | null>(null);
   const [compareItems, setCompareItems] = useState<{
     schools: string[],
@@ -572,6 +573,16 @@ const CareerMap = () => {
     schools: [],
     programs: []
   });
+  
+  // Auto-scroll to info section when a program is selected
+  useEffect(() => {
+    if (viewMode === 'programDetail') {
+      const infoElement = document.getElementById('program-detail');
+      if (infoElement) {
+        infoElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }, [viewMode]);
   
   // Filter schools that offer the selected program
   const schoolsWithSelectedProgram = schoolsData.filter(
@@ -656,523 +667,41 @@ const CareerMap = () => {
     });
   };
   
+  const handleProgramSelect = (program: any) => {
+    setSelectedProgram(program);
+    setViewMode('programDetail');
+  };
+  
+  const handleBackToPrograms = () => {
+    setViewMode('programs');
+  };
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-guidance-blue">Utforska gymnasieprogram och framtidsvägar</h2>
-          <div className="space-x-2">
+          {viewMode !== 'programs' && (
             <Button 
-              variant={viewMode === 'programs' ? "default" : "outline"} 
-              onClick={() => setViewMode('programs')}
-              className={viewMode === 'programs' ? "bg-guidance-blue hover:bg-guidance-blue/90" : ""}
+              variant="outline"
+              onClick={handleBackToPrograms}
+              className="flex items-center gap-2"
             >
-              <BookOpen className="mr-2 h-4 w-4" />
-              Program
+              <arrow-left className="h-4 w-4" />
+              Tillbaka till programöversikt
             </Button>
-            <Button 
-              variant={viewMode === 'compare' ? "default" : "outline"} 
-              onClick={() => setViewMode('compare')}
-              className={viewMode === 'compare' ? "bg-guidance-blue hover:bg-guidance-blue/90" : ""}
-            >
-              <SplitSquareVertical className="mr-2 h-4 w-4" />
-              Jämför
-            </Button>
-            <Button 
-              variant={viewMode === 'tree' ? "default" : "outline"} 
-              onClick={() => setViewMode('tree')}
-              className={viewMode === 'tree' ? "bg-guidance-blue hover:bg-guidance-blue/90" : ""}
-            >
-              <FileText className="mr-2 h-4 w-4" />
-              Karriärträd
-            </Button>
-          </div>
+          )}
         </div>
         
         <p className="text-gray-600 mb-6">
           {viewMode === 'programs' && "Välj ett gymnasieprogram nedan för att se vad det innehåller, vilka behörigheter det ger och vilka skolor som erbjuder det."}
           {viewMode === 'compare' && "Jämför olika program och skolor sida vid sida för att hitta det som passar dig bäst."}
           {viewMode === 'tree' && "Utforska hur olika utbildningsvägar hänger ihop med olika karriärval genom ett interaktivt träd."}
+          {viewMode === 'programDetail' && `Utforska ${selectedProgram.name} och se vilka möjligheter det öppnar för din framtid.`}
         </p>
       </div>
 
       {viewMode === 'programs' && (
         <div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-            {programData.map(program => (
-              <Card 
-                key={program.id}
-                className={`cursor-pointer transition-all duration-200 hover:shadow-md ${selectedProgram.id === program.id ? 'border-2 border-guidance-blue bg-guidance-lightBlue/20' : ''}`}
-                onClick={() => setSelectedProgram(program)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-medium text-guidance-blue">{program.name}</h3>
-                    <div className="bg-guidance-lightPurple text-xs font-medium text-guidance-purple px-2 py-1 rounded">
-                      Merit: {program.merit}
-                    </div>
-                  </div>
-                  
-                  <p className="text-sm text-gray-600 mt-2 line-clamp-2">{program.description}</p>
-                  
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {program.subjects.slice(0, 3).map((subject, index) => (
-                      <span key={index} className="text-xs bg-guidance-lightBlue/50 text-guidance-blue px-2 py-1 rounded">
-                        {subject}
-                      </span>
-                    ))}
-                    {program.subjects.length > 3 && (
-                      <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                        +{program.subjects.length - 3}
-                      </span>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          
-          {selectedProgram && (
-            <div className="mb-8">
-              <div className="bg-white border rounded-lg overflow-hidden shadow-sm">
-                <div className="bg-guidance-blue text-white p-4 flex justify-between items-center">
-                  <h3 className="text-xl font-semibold">{selectedProgram.name}</h3>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-white text-white hover:bg-white hover:text-guidance-blue"
-                      onClick={() => toggleCompareProgram(selectedProgram.id)}
-                    >
-                      <SplitSquareVertical className="h-4 w-4 mr-1" />
-                      Jämför
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-white text-white hover:bg-white hover:text-guidance-blue"
-                      onClick={() => handleSaveProgram()}
-                    >
-                      <Heart className="h-4 w-4 mr-1" />
-                      Spara
-                    </Button>
-                  </div>
-                </div>
-                
-                <Tabs defaultValue="info" className="p-4">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="info" className="text-sm">
-                      <Info className="h-4 w-4 mr-1" />
-                      Information
-                    </TabsTrigger>
-                    <TabsTrigger value="education" className="text-sm">
-                      <BookOpen className="h-4 w-4 mr-1" />
-                      Kurser
-                    </TabsTrigger>
-                    <TabsTrigger value="further" className="text-sm">
-                      <GraduationCap className="h-4 w-4 mr-1" />
-                      Vidare studier
-                    </TabsTrigger>
-                    <TabsTrigger value="schools" className="text-sm">
-                      <School className="h-4 w-4 mr-1" />
-                      Skolor
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="info" className="space-y-4">
-                    <p className="text-gray-700">{selectedProgram.description}</p>
-                    <div className="bg-guidance-lightGreen/20 p-4 rounded-md">
-                      <h4 className="font-medium text-guidance-green flex items-center">
-                        <Star className="h-4 w-4 mr-2" />
-                        Meritpoäng
-                      </h4>
-                      <p className="text-sm text-gray-700 mt-1">{selectedProgram.meritDescription}</p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-medium text-gray-800 mb-2">Inriktningar</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {selectedProgram.specializations.map((spec, index) => (
-                          <div key={index} className="bg-guidance-lightBlue/20 p-2 rounded flex items-start">
-                            <div className="bg-guidance-blue text-white p-1 rounded-full mr-2">
-                              <Map className="h-3 w-3" />
-                            </div>
-                            <span className="text-sm">{spec}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-medium text-gray-800 mb-2">Möjliga yrken</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedProgram.careers.map((career, index) => (
-                          <span key={index} className="text-sm bg-guidance-lightPurple/30 text-guidance-purple px-3 py-1 rounded-full">
-                            {career}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="education">
-                    <div className="space-y-4">
-                      <p className="text-gray-700">{selectedProgram.educationDescription}</p>
-                      
-                      <div>
-                        <h4 className="font-medium text-gray-800 mb-2">Obligatoriska kurser</h4>
-                        <div className="space-y-2">
-                          {selectedProgram.requiredCourses.map((course, index) => (
-                            <div key={index} className="bg-guidance-lightBlue/20 p-2 rounded flex items-center">
-                              <div className="bg-guidance-blue text-white p-1 rounded-full mr-2">
-                                <BookOpen className="h-3 w-3" />
-                              </div>
-                              <span className="text-sm">{course}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium text-gray-800 mb-2">Rekommenderade kurser</h4>
-                        <div className="space-y-2">
-                          {selectedProgram.recommendedCourses.map((course, index) => (
-                            <div key={index} className="bg-guidance-lightGreen/20 p-2 rounded flex items-center">
-                              <div className="bg-guidance-green text-white p-1 rounded-full mr-2">
-                                <Star className="h-3 w-3" />
-                              </div>
-                              <span className="text-sm">{course}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="further">
-                    <div className="space-y-4">
-                      <p className="text-gray-700 mb-4">
-                        Efter {selectedProgram.name} kan du studera vidare på olika utbildningar. Här är några exempel:
-                      </p>
-                      
-                      {selectedProgram.furtherEducation.map((edu, index) => (
-                        <Card key={index} className="border-l-4 border-guidance-purple">
-                          <CardContent className="p-4">
-                            <div className="flex justify-between">
-                              <h5 className="font-medium text-guidance-purple">{edu.name}</h5>
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger>
-                                    <Info className="h-4 w-4 text-gray-400" />
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p className="text-xs">{edu.description}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                            
-                            <div className="mt-2 flex items-center text-sm">
-                              <GraduationCap className="h-4 w-4 mr-1 text-gray-500" />
-                              <span className="text-gray-600">{edu.meritRequirements}</span>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                      
-                      <div className="mt-4">
-                        <h4 className="font-medium text-gray-800 mb-2">Populära universitet/högskolor</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedProgram.universities.map((uni, index) => (
-                            <span key={index} className="text-sm bg-guidance-lightBlue/30 text-guidance-blue px-3 py-1 rounded-full">
-                              {uni}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="schools">
-                    <div className="space-y-4">
-                      <p className="text-gray-700 mb-4">
-                        Följande skolor erbjuder {selectedProgram.name}:
-                      </p>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {schoolsWithSelectedProgram.map(school => (
-                          <Card key={school.id} className="overflow-hidden">
-                            <div className="bg-gradient-to-r from-guidance-lightBlue to-guidance-lightPurple p-3">
-                              <div className="flex justify-between items-center">
-                                <h4 className="font-medium text-guidance-blue">{school.name}</h4>
-                                <div className="flex space-x-2">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="border-guidance-blue bg-white text-guidance-blue h-8 hover:bg-guidance-blue hover:text-white"
-                                    onClick={() => toggleCompareSchool(school.id)}
-                                  >
-                                    <SplitSquareVertical className="h-3.5 w-3.5" />
-                                  </Button>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="border-guidance-purple bg-white text-guidance-purple h-8 hover:bg-guidance-purple hover:text-white"
-                                    onClick={() => handleSaveProgram(school.name)}
-                                  >
-                                    <Heart className="h-3.5 w-3.5" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <CardContent className="p-3">
-                              <div className="flex justify-between text-sm text-gray-600 mb-2">
-                                <span>Antagningspoäng: <span className="font-medium">{school.admissionScores[selectedProgram.id]}</span></span>
-                                <span>Genomsnittsbetyg: <span className="font-medium">{school.statistics.averageGrade}</span></span>
-                              </div>
-                              
-                              <div className="mt-3 text-sm">
-                                <div className="flex items-start mb-2">
-                                  <Map className="h-4 w-4 mr-2 text-gray-500 mt-0.5 flex-shrink-0" />
-                                  <span className="text-gray-600">{school.location.address}</span>
-                                </div>
-                                
-                                <div className="flex items-start">
-                                  <Calendar className="h-4 w-4 mr-2 text-guidance-green mt-0.5 flex-shrink-0" />
-                                  {school.events[0] ? (
-                                    <span className="text-guidance-green">
-                                      Öppet hus: {new Date(school.events[0].date).toLocaleDateString('sv-SE')} kl {school.events[0].time}
-                                    </span>
-                                  ) : (
-                                    <span className="text-gray-500">Inga kommande event</span>
-                                  )}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {viewMode === 'compare' && (
-        <div>
-          <h3 className="text-xl font-semibold text-guidance-blue mb-4">Jämför program och skolor</h3>
-          
-          {(compareItems.programs.length === 0 && compareItems.schools.length === 0) ? (
-            <div className="bg-guidance-lightBlue/20 p-6 rounded-lg text-center">
-              <SplitSquareVertical className="h-12 w-12 mx-auto text-guidance-blue mb-3" />
-              <h3 className="text-xl font-medium text-guidance-blue mb-2">Inget att jämföra än</h3>
-              <p className="text-gray-600 max-w-md mx-auto mb-4">
-                Klicka på jämförelseknappen på program eller skolor för att lägga till dem här för jämförelse.
-              </p>
-              <Button
-                onClick={() => setViewMode('programs')}
-                className="bg-guidance-blue hover:bg-guidance-blue/90"
-              >
-                <Search className="mr-2 h-4 w-4" />
-                Utforska program
-              </Button>
-            </div>
-          ) : (
-            <div>
-              {compareItems.programs.length > 0 && (
-                <div className="mb-8">
-                  <h4 className="text-lg font-medium text-guidance-blue mb-4">Programjämförelse</h4>
-                  <div className="overflow-x-auto">
-                    <div className="min-w-[800px]">
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="bg-gray-100 p-4 rounded">
-                          <h5 className="font-semibold mb-8 text-gray-700">Egenskaper</h5>
-                          <div className="space-y-6">
-                            <div className="h-10 flex items-center font-medium">Beskrivning</div>
-                            <div className="h-10 flex items-center font-medium">Meritpoäng</div>
-                            <div className="h-10 flex items-center font-medium">Inriktningar</div>
-                            <div className="h-10 flex items-center font-medium">Obligatoriska kurser</div>
-                            <div className="h-10 flex items-center font-medium">Yrken</div>
-                          </div>
-                        </div>
-                        
-                        {compareItems.programs.map(programId => {
-                          const program = getProgramById(programId);
-                          return program ? (
-                            <Card key={program.id} className="overflow-hidden">
-                              <div className="bg-guidance-blue text-white p-3 flex justify-between items-center">
-                                <h5 className="font-semibold">{program.name}</h5>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-8 hover:bg-guidance-blue/50 text-white p-0 px-2"
-                                  onClick={() => toggleCompareProgram(program.id)}
-                                >
-                                  <span className="sr-only">Ta bort</span>
-                                  ✕
-                                </Button>
-                              </div>
-                              <CardContent className="p-3 space-y-4">
-                                <div className="text-sm text-gray-700 line-clamp-2 h-10">
-                                  {program.description}
-                                </div>
-                                <div className="h-10 flex items-center">
-                                  <span className="bg-guidance-lightPurple text-guidance-purple px-2 py-1 rounded text-sm">
-                                    {program.merit}
-                                  </span>
-                                </div>
-                                <div className="h-10 flex items-center">
-                                  <span className="text-sm text-gray-700">
-                                    {program.specializations.length} inriktningar
-                                  </span>
-                                </div>
-                                <div className="h-10 flex items-center">
-                                  <span className="text-sm text-gray-700">
-                                    {program.requiredCourses.length} kurser
-                                  </span>
-                                </div>
-                                <div className="h-10 flex items-center">
-                                  <div className="flex flex-wrap gap-1">
-                                    {program.careers.slice(0, 2).map((career, i) => (
-                                      <span key={i} className="text-xs bg-guidance-lightBlue px-2 py-0.5 rounded">
-                                        {career}
-                                      </span>
-                                    ))}
-                                    {program.careers.length > 2 && (
-                                      <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">
-                                        +{program.careers.length - 2}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ) : null;
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {compareItems.schools.length > 0 && (
-                <div>
-                  <h4 className="text-lg font-medium text-guidance-green mb-4">Skoljämförelse</h4>
-                  <div className="overflow-x-auto">
-                    <div className="min-w-[800px]">
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="bg-gray-100 p-4 rounded">
-                          <h5 className="font-semibold mb-8 text-gray-700">Egenskaper</h5>
-                          <div className="space-y-6">
-                            <div className="h-10 flex items-center font-medium">Program</div>
-                            <div className="h-10 flex items-center font-medium">Adress</div>
-                            <div className="h-10 flex items-center font-medium">Antagningspoäng</div>
-                            <div className="h-10 flex items-center font-medium">Genomsnittsbetyg</div>
-                            <div className="h-10 flex items-center font-medium">Behöriga lärare</div>
-                            <div className="h-10 flex items-center font-medium">Nöjdhetsgrad</div>
-                            <div className="h-10 flex items-center font-medium">Öppet hus</div>
-                          </div>
-                        </div>
-                        
-                        {compareItems.schools.map(schoolId => {
-                          const school = getSchoolById(schoolId);
-                          return school ? (
-                            <Card key={school.id} className="overflow-hidden">
-                              <div className="bg-guidance-green text-white p-3 flex justify-between items-center">
-                                <h5 className="font-semibold">{school.name}</h5>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-8 hover:bg-guidance-green/50 text-white p-0 px-2"
-                                  onClick={() => toggleCompareSchool(school.id)}
-                                >
-                                  <span className="sr-only">Ta bort</span>
-                                  ✕
-                                </Button>
-                              </div>
-                              <CardContent className="p-3 space-y-4">
-                                <div className="h-10 flex items-center">
-                                  <div className="flex flex-wrap gap-1">
-                                    {school.programs.slice(0, 2).map((programId, i) => {
-                                      const program = getProgramById(programId);
-                                      return program ? (
-                                        <span key={i} className="text-xs bg-guidance-lightBlue px-2 py-0.5 rounded">
-                                          {program.name.split(" ")[0]}
-                                        </span>
-                                      ) : null;
-                                    })}
-                                    {school.programs.length > 2 && (
-                                      <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">
-                                        +{school.programs.length - 2}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="h-10 flex items-center">
-                                  <span className="text-sm text-gray-700">{school.location.address}</span>
-                                </div>
-                                <div className="h-10 flex items-center">
-                                  {selectedProgram && school.admissionScores[selectedProgram.id] ? (
-                                    <span className="text-sm font-medium text-guidance-blue">
-                                      {school.admissionScores[selectedProgram.id]} poäng
-                                    </span>
-                                  ) : (
-                                    <span className="text-sm text-gray-500">Varierar</span>
-                                  )}
-                                </div>
-                                <div className="h-10 flex items-center">
-                                  <span className="text-sm font-medium">{school.statistics.averageGrade}</span>
-                                </div>
-                                <div className="h-10 flex items-center">
-                                  <span className="text-sm font-medium">{school.statistics.qualifiedTeachers}%</span>
-                                </div>
-                                <div className="h-10 flex items-center">
-                                  <span className="text-sm font-medium">{school.statistics.satisfactionRate}%</span>
-                                </div>
-                                <div className="h-10 flex items-center">
-                                  {school.events[0] ? (
-                                    <span className="text-xs text-guidance-green">
-                                      {new Date(school.events[0].date).toLocaleDateString('sv-SE')}
-                                    </span>
-                                  ) : (
-                                    <span className="text-xs text-gray-500">Inga planerade</span>
-                                  )}
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ) : null;
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-      
-      {viewMode === 'tree' && (
-        <div>
-          <h3 className="text-xl font-semibold text-guidance-blue mb-4">Utbildningsvägar och karriärmöjligheter</h3>
-          <p className="text-gray-600 mb-6">
-            Utforska hur gymnasieprogram, högskoleprogram och yrken hänger ihop i ett interaktivt karriärträd.
-          </p>
-          <TreeDiagram 
-            program={selectedProgram.name}
-            specializations={selectedProgram.specializations}
-            educationPaths={selectedProgram.furtherEducation.map(edu => edu.name)}
-            careers={selectedProgram.careers}
-            selectedProgram={selectedProgram.id}
-          />
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default CareerMap;
+            {programData
