@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -698,4 +699,693 @@ const CareerMap = () => {
 
       {viewMode === 'programs' && (
         <div>
-          <
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+            {programData.map((program) => (
+              <Card 
+                key={program.id} 
+                className={`cursor-pointer transition-all hover:shadow-md ${selectedProgram.id === program.id ? 'border-2 border-guidance-blue' : ''}`}
+                onClick={() => setSelectedProgram(program)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-medium">{program.name}</h3>
+                    <Heart 
+                      className={`h-5 w-5 cursor-pointer ${selectedProgram.id === program.id ? 'text-guidance-blue' : 'text-gray-300'}`} 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSaveProgram();
+                      }}
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 line-clamp-2">{program.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Card className="mb-6 overflow-hidden">
+                <Tabs defaultValue="info">
+                  <TabsList className="w-full bg-guidance-lightBlue rounded-none">
+                    <TabsTrigger value="info" className="flex-1">Programinfo</TabsTrigger>
+                    <TabsTrigger value="courses" className="flex-1">Kurser</TabsTrigger>
+                    <TabsTrigger value="further" className="flex-1">Vidare studier</TabsTrigger>
+                    <TabsTrigger value="schools" className="flex-1">Skolor</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="info" className="p-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+                      <h2 className="text-2xl font-bold text-guidance-blue mb-2 sm:mb-0">{selectedProgram.name}</h2>
+                      <div className="flex items-center">
+                        <span className="bg-guidance-purple/20 text-guidance-purple text-xs font-semibold px-2.5 py-1 rounded-full">
+                          Meritpoäng: {selectedProgram.merit}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <p className="text-gray-700 mb-6">{selectedProgram.description}</p>
+                    
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-2 text-guidance-blue">Inriktningar</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {selectedProgram.specializations.map((spec, index) => (
+                          <div key={index} className="bg-guidance-lightGreen/30 p-2 rounded flex items-center">
+                            <div className="bg-guidance-green rounded-full p-1 mr-2">
+                              <GraduationCap className="h-4 w-4 text-white" />
+                            </div>
+                            <span>{spec}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2 text-guidance-blue">Vanliga yrken</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedProgram.careers.slice(0, 8).map((career, index) => (
+                          <span key={index} className="bg-gray-100 px-3 py-1 rounded-full text-sm">
+                            {career}
+                          </span>
+                        ))}
+                        {selectedProgram.careers.length > 8 && (
+                          <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">
+                            +{selectedProgram.careers.length - 8} fler
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="courses" className="p-6">
+                    <h3 className="text-lg font-semibold mb-4 text-guidance-blue">Kurser på programmet</h3>
+                    
+                    <div className="mb-6">
+                      <h4 className="font-medium text-guidance-green mb-3 flex items-center">
+                        <Star className="mr-2 h-5 w-5" />
+                        Obligatoriska kurser
+                      </h4>
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {selectedProgram.requiredCourses.map((course, index) => (
+                          <li key={index} className="bg-guidance-lightGreen/20 p-3 rounded">
+                            {course}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-guidance-purple mb-3 flex items-center">
+                        <Info className="mr-2 h-5 w-5" />
+                        Rekommenderade kurser
+                      </h4>
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {selectedProgram.recommendedCourses.map((course, index) => (
+                          <li key={index} className="bg-guidance-lightPurple/20 p-3 rounded">
+                            {course}
+                          </li>
+                        ))}
+                      </ul>
+                      
+                      <div className="mt-6 bg-gray-50 p-4 rounded border border-gray-200">
+                        <p className="text-sm text-gray-600">
+                          <strong>Tips!</strong> Om du vill läsa vidare på högskola eller universitet, 
+                          kan du behöva vissa specifika kurser. Prata med din SYV för att planera rätt!
+                        </p>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="further" className="p-6">
+                    <h3 className="text-lg font-semibold mb-4 text-guidance-blue">
+                      Vidare utbildning efter {selectedProgram.name}
+                    </h3>
+                    
+                    <div className="space-y-4 mb-6">
+                      {selectedProgram.furtherEducation.map((edu, index) => (
+                        <Card key={index} className="border-l-4 border-indigo-400">
+                          <CardContent className="p-4">
+                            <h4 className="font-medium text-lg">{edu.name}</h4>
+                            <p className="text-sm text-gray-600 mb-2">{edu.description}</p>
+                            <div className="bg-indigo-50 p-2 rounded">
+                              <p className="text-sm flex items-start">
+                                <span className="bg-indigo-200 p-1 rounded-full mr-2 flex-shrink-0 mt-0.5">
+                                  <GraduationCap className="h-3 w-3 text-indigo-700" />
+                                </span>
+                                <span>
+                                  <strong>Särskild behörighet:</strong> {edu.meritRequirements}
+                                </span>
+                              </p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                    
+                    <div className="bg-guidance-lightPurple/30 p-4 rounded">
+                      <h4 className="font-medium mb-2 text-guidance-purple flex items-center">
+                        <School className="mr-2 h-5 w-5" />
+                        Universitet och högskolor
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedProgram.universities.map((uni, index) => (
+                          <span key={index} className="bg-white px-3 py-1 rounded text-sm border border-guidance-purple/20">
+                            {uni}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="schools" className="p-6">
+                    <h3 className="text-lg font-semibold mb-4 text-guidance-blue">
+                      Skolor som erbjuder {selectedProgram.name}
+                    </h3>
+                    
+                    {schoolsWithSelectedProgram.length === 0 ? (
+                      <p className="text-gray-600">Ingen skola i vår databas erbjuder detta program för tillfället.</p>
+                    ) : (
+                      <div className="space-y-4">
+                        {schoolsWithSelectedProgram.map((school) => (
+                          <Card 
+                            key={school.id} 
+                            className={`transition-all hover:shadow-md ${selectedSchool === school.id ? 'border-2 border-guidance-green' : ''}`}
+                            onClick={() => setSelectedSchool(school.id)}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex justify-between">
+                                <h4 className="font-medium text-lg">{school.name}</h4>
+                                <div className="space-x-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleCompareSchool(school.id);
+                                    }}
+                                  >
+                                    <SplitSquareVertical className="h-4 w-4 mr-1" />
+                                    Jämför
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    className="bg-guidance-green hover:bg-guidance-green/90"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSaveProgram(school.name);
+                                    }}
+                                  >
+                                    <Heart className="h-4 w-4 mr-1" />
+                                    Spara
+                                  </Button>
+                                </div>
+                              </div>
+                              
+                              <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                  <p className="text-sm text-gray-500 mb-1">Antagningspoäng</p>
+                                  <p className="font-medium">{school.admissionScores[selectedProgram.id as keyof typeof school.admissionScores]} meritpoäng</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm text-gray-500 mb-1">Adress</p>
+                                  <p className="text-sm">{school.location.address}</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm text-gray-500 mb-1">Kommunikationer</p>
+                                  <p className="text-sm">{school.location.commute}</p>
+                                </div>
+                              </div>
+                              
+                              <div className="mt-3">
+                                <p className="text-sm text-gray-500 mb-1">Betyg & omdömen</p>
+                                <div className="flex items-center space-x-4">
+                                  <div className="flex items-center">
+                                    <div className="h-2 w-16 bg-gray-200 rounded-full overflow-hidden">
+                                      <div 
+                                        className="h-full bg-guidance-green" 
+                                        style={{width: `${school.statistics.satisfactionRate}%`}}
+                                      />
+                                    </div>
+                                    <span className="ml-2 text-sm">{school.statistics.satisfactionRate}% nöjda elever</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <div className="h-2 w-16 bg-gray-200 rounded-full overflow-hidden">
+                                      <div 
+                                        className="h-full bg-guidance-blue" 
+                                        style={{width: `${(school.statistics.averageGrade / 20) * 100}%`}}
+                                      />
+                                    </div>
+                                    <span className="ml-2 text-sm">{school.statistics.averageGrade} snittbetyg</span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {school.events.length > 0 && (
+                                <div className="mt-4 bg-guidance-lightBlue/20 p-2 rounded flex items-center">
+                                  <Calendar className="h-4 w-4 text-guidance-blue mr-2" />
+                                  <span className="text-sm">
+                                    <strong>Nästa öppet hus:</strong> {school.events[0].date}, {school.events[0].time}
+                                  </span>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </Card>
+            </div>
+            
+            <div>
+              <Card className="mb-6">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-3 flex items-center text-guidance-blue">
+                    <Map className="mr-2 h-5 w-5" />
+                    Upptäck din väg
+                  </h3>
+                  
+                  <TreeDiagram 
+                    program={selectedProgram.name}
+                    specializations={selectedProgram.specializations} 
+                    educationPaths={selectedProgram.furtherEducation.map(edu => edu.name)}
+                    careers={selectedProgram.careers}
+                  />
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center text-guidance-blue">
+                    <Search className="mr-2 h-5 w-5" />
+                    Snabbfakta om {selectedProgram.name}
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium text-guidance-green mb-2">Huvudämnen</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedProgram.subjects.map((subject, index) => (
+                          <span key={index} className="bg-guidance-lightGreen px-3 py-1 rounded-full text-sm">
+                            {subject}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-guidance-green mb-2">Meritpoäng för högskola</h4>
+                      <p className="text-sm">{selectedProgram.meritDescription}</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-guidance-green mb-2">Längd och omfattning</h4>
+                      <p className="text-sm">{selectedProgram.educationDescription}</p>
+                    </div>
+                    
+                    <div className="pt-4 border-t border-gray-200">
+                      <Button 
+                        className="w-full bg-guidance-purple hover:bg-guidance-purple/90" 
+                        onClick={() => handleSaveProgram()}
+                      >
+                        <Heart className="mr-2 h-4 w-4" />
+                        Spara program till Min profil
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {viewMode === 'compare' && (
+        <div>
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold mb-4 text-guidance-blue">Jämför program</h3>
+            
+            <div className="flex flex-wrap gap-2 mb-4">
+              {programData.map(program => (
+                <button
+                  key={program.id}
+                  className={`px-3 py-1.5 rounded-lg text-sm ${
+                    compareItems.programs.includes(program.id)
+                      ? 'bg-guidance-blue text-white'
+                      : 'bg-gray-100 hover:bg-gray-200'
+                  }`}
+                  onClick={() => toggleCompareProgram(program.id)}
+                >
+                  {program.name}
+                </button>
+              ))}
+            </div>
+            
+            {compareItems.programs.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="text-left p-3 bg-guidance-lightBlue/40">Program</th>
+                      {compareItems.programs.map(programId => {
+                        const program = getProgramById(programId);
+                        return program ? (
+                          <th key={programId} className="p-3 bg-guidance-lightBlue/40">
+                            {program.name}
+                          </th>
+                        ) : null;
+                      })}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border p-3 font-medium">Fokusområden</td>
+                      {compareItems.programs.map(programId => {
+                        const program = getProgramById(programId);
+                        return program ? (
+                          <td key={programId} className="border p-3">
+                            {program.subjects.join(', ')}
+                          </td>
+                        ) : null;
+                      })}
+                    </tr>
+                    <tr>
+                      <td className="border p-3 font-medium">Meritpoäng</td>
+                      {compareItems.programs.map(programId => {
+                        const program = getProgramById(programId);
+                        return program ? (
+                          <td key={programId} className="border p-3">
+                            {program.merit}
+                          </td>
+                        ) : null;
+                      })}
+                    </tr>
+                    <tr>
+                      <td className="border p-3 font-medium">Inriktningar</td>
+                      {compareItems.programs.map(programId => {
+                        const program = getProgramById(programId);
+                        return program ? (
+                          <td key={programId} className="border p-3">
+                            <ul className="list-disc pl-4">
+                              {program.specializations.map((spec, index) => (
+                                <li key={index}>{spec}</li>
+                              ))}
+                            </ul>
+                          </td>
+                        ) : null;
+                      })}
+                    </tr>
+                    <tr>
+                      <td className="border p-3 font-medium">Obligatoriska kurser</td>
+                      {compareItems.programs.map(programId => {
+                        const program = getProgramById(programId);
+                        return program ? (
+                          <td key={programId} className="border p-3">
+                            <ul className="list-disc pl-4">
+                              {program.requiredCourses.slice(0, 5).map((course, index) => (
+                                <li key={index}>{course}</li>
+                              ))}
+                              {program.requiredCourses.length > 5 && (
+                                <li>+ {program.requiredCourses.length - 5} till</li>
+                              )}
+                            </ul>
+                          </td>
+                        ) : null;
+                      })}
+                    </tr>
+                    <tr>
+                      <td className="border p-3 font-medium">Möjliga yrken</td>
+                      {compareItems.programs.map(programId => {
+                        const program = getProgramById(programId);
+                        return program ? (
+                          <td key={programId} className="border p-3">
+                            <ul className="list-disc pl-4">
+                              {program.careers.slice(0, 5).map((career, index) => (
+                                <li key={index}>{career}</li>
+                              ))}
+                              {program.careers.length > 5 && (
+                                <li>+ {program.careers.length - 5} till</li>
+                              )}
+                            </ul>
+                          </td>
+                        ) : null;
+                      })}
+                    </tr>
+                    <tr>
+                      <td className="border p-3 font-medium">Vidare studier</td>
+                      {compareItems.programs.map(programId => {
+                        const program = getProgramById(programId);
+                        return program ? (
+                          <td key={programId} className="border p-3">
+                            <ul className="list-disc pl-4">
+                              {program.furtherEducation.map((edu, index) => (
+                                <li key={index}>{edu.name}</li>
+                              ))}
+                            </ul>
+                          </td>
+                        ) : null;
+                      })}
+                    </tr>
+                    <tr>
+                      <td className="border p-3 font-medium">Skolor</td>
+                      {compareItems.programs.map(programId => {
+                        const program = getProgramById(programId);
+                        const schoolsWithProgram = schoolsData.filter(
+                          school => school.programs.includes(programId)
+                        );
+                        return program ? (
+                          <td key={programId} className="border p-3">
+                            <ul className="list-disc pl-4">
+                              {schoolsWithProgram.map((school, index) => (
+                                <li key={index}>{school.name}</li>
+                              ))}
+                            </ul>
+                          </td>
+                        ) : null;
+                      })}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="bg-gray-50 p-6 text-center rounded-lg border border-gray-200">
+                <p className="text-gray-500">Välj minst ett program ovan för att jämföra</p>
+              </div>
+            )}
+          </div>
+          
+          <div>
+            <h3 className="text-xl font-semibold mb-4 text-guidance-blue">Jämför skolor</h3>
+            
+            <div className="flex flex-wrap gap-2 mb-4">
+              {schoolsData.map(school => (
+                <button
+                  key={school.id}
+                  className={`px-3 py-1.5 rounded-lg text-sm ${
+                    compareItems.schools.includes(school.id)
+                      ? 'bg-guidance-green text-white'
+                      : 'bg-gray-100 hover:bg-gray-200'
+                  }`}
+                  onClick={() => toggleCompareSchool(school.id)}
+                >
+                  {school.name}
+                </button>
+              ))}
+            </div>
+            
+            {compareItems.schools.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="text-left p-3 bg-guidance-lightGreen/40">Skola</th>
+                      {compareItems.schools.map(schoolId => {
+                        const school = getSchoolById(schoolId);
+                        return school ? (
+                          <th key={schoolId} className="p-3 bg-guidance-lightGreen/40">
+                            {school.name}
+                          </th>
+                        ) : null;
+                      })}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border p-3 font-medium">Program</td>
+                      {compareItems.schools.map(schoolId => {
+                        const school = getSchoolById(schoolId);
+                        return school ? (
+                          <td key={schoolId} className="border p-3">
+                            <ul className="list-disc pl-4">
+                              {school.programs.map((programId) => {
+                                const program = getProgramById(programId);
+                                return program ? <li key={programId}>{program.name}</li> : null;
+                              })}
+                            </ul>
+                          </td>
+                        ) : null;
+                      })}
+                    </tr>
+                    <tr>
+                      <td className="border p-3 font-medium">Adress</td>
+                      {compareItems.schools.map(schoolId => {
+                        const school = getSchoolById(schoolId);
+                        return school ? (
+                          <td key={schoolId} className="border p-3">
+                            {school.location.address}
+                          </td>
+                        ) : null;
+                      })}
+                    </tr>
+                    <tr>
+                      <td className="border p-3 font-medium">Kommunikationer</td>
+                      {compareItems.schools.map(schoolId => {
+                        const school = getSchoolById(schoolId);
+                        return school ? (
+                          <td key={schoolId} className="border p-3">
+                            {school.location.commute}
+                          </td>
+                        ) : null;
+                      })}
+                    </tr>
+                    <tr>
+                      <td className="border p-3 font-medium">Antagningspoäng</td>
+                      {compareItems.schools.map(schoolId => {
+                        const school = getSchoolById(schoolId);
+                        return school ? (
+                          <td key={schoolId} className="border p-3">
+                            <ul className="list-disc pl-4">
+                              {Object.entries(school.admissionScores).map(([programId, score]) => {
+                                const program = getProgramById(programId);
+                                return program ? (
+                                  <li key={programId}>{program.name}: {score}</li>
+                                ) : null;
+                              })}
+                            </ul>
+                          </td>
+                        ) : null;
+                      })}
+                    </tr>
+                    <tr>
+                      <td className="border p-3 font-medium">Statistik</td>
+                      {compareItems.schools.map(schoolId => {
+                        const school = getSchoolById(schoolId);
+                        return school ? (
+                          <td key={schoolId} className="border p-3">
+                            <ul className="list-disc pl-4">
+                              <li>Snittbetyg: {school.statistics.averageGrade}</li>
+                              <li>Fullföljd utbildning: {school.statistics.completionRate}%</li>
+                              <li>Behöriga lärare: {school.statistics.qualifiedTeachers}%</li>
+                              <li>Nöjda elever: {school.statistics.satisfactionRate}%</li>
+                            </ul>
+                          </td>
+                        ) : null;
+                      })}
+                    </tr>
+                    <tr>
+                      <td className="border p-3 font-medium">Faciliteter</td>
+                      {compareItems.schools.map(schoolId => {
+                        const school = getSchoolById(schoolId);
+                        return school ? (
+                          <td key={schoolId} className="border p-3">
+                            <ul className="list-disc pl-4">
+                              {Object.entries(school.facilities).map(([key, value]) => (
+                                <li key={key}>{value}</li>
+                              ))}
+                            </ul>
+                          </td>
+                        ) : null;
+                      })}
+                    </tr>
+                    <tr>
+                      <td className="border p-3 font-medium">Extracurricular</td>
+                      {compareItems.schools.map(schoolId => {
+                        const school = getSchoolById(schoolId);
+                        return school ? (
+                          <td key={schoolId} className="border p-3">
+                            <ul className="list-disc pl-4">
+                              {school.extracurricular.map((activity, index) => (
+                                <li key={index}>{activity}</li>
+                              ))}
+                            </ul>
+                          </td>
+                        ) : null;
+                      })}
+                    </tr>
+                    <tr>
+                      <td className="border p-3 font-medium">Kommande event</td>
+                      {compareItems.schools.map(schoolId => {
+                        const school = getSchoolById(schoolId);
+                        return school ? (
+                          <td key={schoolId} className="border p-3">
+                            <ul className="list-disc pl-4">
+                              {school.events.map((event, index) => (
+                                <li key={index}>
+                                  {event.name}: {event.date}, {event.time}
+                                </li>
+                              ))}
+                            </ul>
+                          </td>
+                        ) : null;
+                      })}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="bg-gray-50 p-6 text-center rounded-lg border border-gray-200">
+                <p className="text-gray-500">Välj minst en skola ovan för att jämföra</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {viewMode === 'tree' && (
+        <div>
+          <div className="mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+              {programData.map((program) => (
+                <Card 
+                  key={program.id} 
+                  className={`cursor-pointer transition-all hover:shadow-md ${selectedProgram.id === program.id ? 'border-2 border-guidance-blue' : ''}`}
+                  onClick={() => setSelectedProgram(program)}
+                >
+                  <CardContent className="p-4">
+                    <h3 className="font-medium">{program.name}</h3>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            
+            <h3 className="text-xl font-semibold mb-4 text-guidance-blue">Karriärträd för {selectedProgram.name}</h3>
+            
+            <Card>
+              <CardContent className="p-6">
+                <TreeDiagram 
+                  program={selectedProgram.name}
+                  specializations={selectedProgram.specializations} 
+                  educationPaths={selectedProgram.furtherEducation.map(edu => edu.name)}
+                  careers={selectedProgram.careers}
+                />
+                
+                <div className="mt-6 p-4 bg-guidance-lightPurple/20 rounded">
+                  <h4 className="font-medium mb-3 text-guidance-purple">Visste du?</h4>
+                  <p className="text-sm text-gray-700">
+                    Efter gymnasiet kan du välja att antingen läsa vidare eller börja jobba direkt. 
+                    De flesta yrkesprogram förbereder dig för att jobba direkt efter studenten, 
+                    medan högskoleförberedande program ger dig grundläggande behörighet till högskola och universitet.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CareerMap;
+
