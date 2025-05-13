@@ -1,13 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/context/UserContext';
 import { toast } from '@/components/ui/use-toast';
 import { SplitSquareVertical } from 'lucide-react';
 
-// Data imports (keep the programData and schoolsData intact)
-// ... keep existing code (program data and schools data)
+// Import the data
+import { programData } from '@/data/programData';
+import { schoolsData } from '@/data/schoolsData';
 
-// Import the new components
+// Import the components
 import ProgramCard from '@/components/career/ProgramCard';
 import ProgramDetail from '@/components/career/ProgramDetail';
 import SchoolList from '@/components/career/SchoolList';
