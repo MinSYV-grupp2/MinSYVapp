@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -681,6 +682,18 @@ const CareerMap = () => {
     setViewMode('tree');
   };
   
+  const handleViewCompare = () => {
+    if (compareItems.programs.length === 0 && compareItems.schools.length === 0) {
+      toast({
+        title: "Inget att jämföra",
+        description: "Välj minst ett program eller en skola att jämföra.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setViewMode('compare');
+  };
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -746,7 +759,35 @@ const CareerMap = () => {
         <div id="program-detail">
           <Card className="mb-8 border-l-4 border-guidance-blue">
             <CardContent className="p-6">
-              <h2 className="text-2xl font-bold text-guidance-blue mb-3">{selectedProgram.name}</h2>
+              <div className="flex justify-between items-start mb-6">
+                <h2 className="text-2xl font-bold text-guidance-blue">{selectedProgram.name}</h2>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="border-guidance-green text-guidance-green hover:bg-guidance-lightGreen flex gap-2 h-10"
+                    onClick={() => toggleCompareProgram(selectedProgram.id)}
+                  >
+                    <SplitSquareVertical className="h-4 w-4" />
+                    <span>Jämför</span>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="border-guidance-purple text-guidance-purple hover:bg-guidance-lightPurple flex gap-2 h-10"
+                    onClick={() => handleViewCareerTree()}
+                  >
+                    <TreeDeciduous className="h-4 w-4" />
+                    <span>Karriärträd</span>
+                  </Button>
+                  <Button 
+                    className="bg-guidance-purple hover:bg-guidance-purple/90 text-white flex gap-2 h-10"
+                    onClick={() => handleSaveProgram()}
+                  >
+                    <Heart className="h-4 w-4" />
+                    <span>Spara</span>
+                  </Button>
+                </div>
+              </div>
+              
               <p className="text-gray-700 mb-6">{selectedProgram.description}</p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
@@ -826,32 +867,6 @@ const CareerMap = () => {
                     </span>
                   ))}
                 </div>
-              </div>
-              
-              <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
-                <Button 
-                  variant="outline" 
-                  className="border-guidance-green text-guidance-green hover:bg-guidance-lightGreen flex gap-2"
-                  onClick={() => toggleCompareProgram(selectedProgram.id)}
-                >
-                  <SplitSquareVertical className="h-4 w-4" />
-                  <span>Jämför</span>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="border-guidance-purple text-guidance-purple hover:bg-guidance-lightPurple flex gap-2"
-                  onClick={() => handleViewCareerTree()}
-                >
-                  <TreeDeciduous className="h-4 w-4" />
-                  <span>Karriärträd</span>
-                </Button>
-                <Button 
-                  className="bg-guidance-purple hover:bg-guidance-purple/90 text-white flex gap-2"
-                  onClick={() => handleSaveProgram()}
-                >
-                  <Heart className="h-4 w-4" />
-                  <span>Spara</span>
-                </Button>
               </div>
             </CardContent>
           </Card>
@@ -976,8 +991,151 @@ const CareerMap = () => {
 
       {viewMode === 'compare' && (
         <div className="space-y-8">
-          {/* Compare view content would go here */}
-          <p>Compare view is under development</p>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-guidance-blue">Jämför program</h2>
+                <Button 
+                  variant="outline" 
+                  onClick={handleBackToPrograms} 
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Tillbaka
+                </Button>
+              </div>
+              
+              {compareItems.programs.length > 0 ? (
+                <div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {compareItems.programs.map(programId => {
+                      const program = getProgramById(programId);
+                      if (!program) return null;
+                      
+                      return (
+                        <Card key={programId} className="border-l-4 border-guidance-purple">
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="text-lg font-semibold">{program.name}</h3>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => toggleCompareProgram(programId)}
+                                className="text-red-500 hover:bg-red-50"
+                              >
+                                <span className="sr-only">Ta bort</span>
+                                &times;
+                              </Button>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <div>
+                                <span className="font-medium text-sm">Meritpoäng: </span>
+                                <span className="text-sm">{program.merit}</span>
+                              </div>
+                              
+                              <div>
+                                <span className="font-medium text-sm block">Inriktningar: </span>
+                                <ul className="list-disc list-inside text-xs">
+                                  {program.specializations?.slice(0, 3).map((spec, i) => (
+                                    <li key={i}>{spec}</li>
+                                  ))}
+                                  {program.specializations && program.specializations.length > 3 && (
+                                    <li>+{program.specializations.length - 3} fler</li>
+                                  )}
+                                </ul>
+                              </div>
+                              
+                              <div>
+                                <span className="font-medium text-sm block">Vidare studier: </span>
+                                <ul className="list-disc list-inside text-xs">
+                                  {program.furtherEducation?.slice(0, 2).map((edu, i) => (
+                                    <li key={i}>{edu.name}</li>
+                                  ))}
+                                  {program.furtherEducation && program.furtherEducation.length > 2 && (
+                                    <li>+{program.furtherEducation.length - 2} fler</li>
+                                  )}
+                                </ul>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>Inga program valda för jämförelse</p>
+                  <p className="text-sm">Klicka på "Jämför" knappen på ett program för att lägga till det här</p>
+                </div>
+              )}
+              
+              <div className="mt-8">
+                <h2 className="text-xl font-bold text-guidance-blue mb-4">Jämför skolor</h2>
+                
+                {compareItems.schools.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {compareItems.schools.map(schoolId => {
+                      const school = getSchoolById(schoolId);
+                      if (!school) return null;
+                      
+                      return (
+                        <Card key={schoolId} className="border-l-4 border-guidance-green">
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="text-lg font-semibold">{school.name}</h3>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => toggleCompareSchool(schoolId)}
+                                className="text-red-500 hover:bg-red-50"
+                              >
+                                <span className="sr-only">Ta bort</span>
+                                &times;
+                              </Button>
+                            </div>
+                            
+                            <div className="space-y-3 text-sm">
+                              <p className="text-gray-600">{school.location.address}</p>
+                              
+                              <div>
+                                <span className="font-medium">Program: </span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {school.programs.map(id => {
+                                    const program = getProgramById(id);
+                                    return program && (
+                                      <span key={id} className="bg-guidance-lightBlue text-guidance-blue text-xs px-2 py-0.5 rounded">
+                                        {program.name}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <span className="font-medium">Statistik: </span>
+                                <ul className="mt-1 space-y-1 text-xs">
+                                  <li>Genomsnittligt betyg: {school.statistics.averageGrade}</li>
+                                  <li>Fullföljd utbildning: {school.statistics.completionRate}%</li>
+                                  <li>Nöjda elever: {school.statistics.satisfactionRate}%</li>
+                                </ul>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>Inga skolor valda för jämförelse</p>
+                    <p className="text-sm">Klicka på "Jämför" knappen på en skola för att lägga till den här</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>
