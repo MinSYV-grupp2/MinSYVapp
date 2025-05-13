@@ -1,5 +1,5 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { AIInsight } from '@/services/openai';
 
 type InterestArea = "tech" | "nature" | "art" | "social" | "physical" | "analytical";
 
@@ -50,6 +50,12 @@ interface UserProfile {
   importantDates: ImportantDate[];
   discussionQuestions: DiscussionQuestion[];
   quizCompleted: boolean;
+  aiInsights: AIInsight[]; // New field for AI insights
+  chatHistory: { role: 'user' | 'assistant'; content: string }[]; // Chat history
+  insightPermissions: {
+    showToParents: boolean;
+    showToCounselor: boolean;
+  };
 }
 
 interface UserContextType {
@@ -71,6 +77,12 @@ interface UserContextType {
   addDiscussionQuestion: (question: string) => void;
   removeDiscussionQuestion: (questionId: string) => void;
   markQuizCompleted: () => void;
+  // New methods for AI insights
+  addAIInsight: (insight: AIInsight) => void;
+  removeAIInsight: (insightId: string) => void;
+  updateAIInsight: (insightId: string, updates: Partial<AIInsight>) => void;
+  addChatMessage: (role: 'user' | 'assistant', content: string) => void;
+  updateInsightPermissions: (permissions: Partial<UserProfile['insightPermissions']>) => void;
 }
 
 const defaultProfile: UserProfile = {
@@ -84,6 +96,12 @@ const defaultProfile: UserProfile = {
   importantDates: [],
   discussionQuestions: [],
   quizCompleted: false,
+  aiInsights: [],
+  chatHistory: [],
+  insightPermissions: {
+    showToParents: false,
+    showToCounselor: true,
+  }
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -217,6 +235,46 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }));
   };
 
+  const addAIInsight = (insight: AIInsight) => {
+    setProfile(prev => ({
+      ...prev,
+      aiInsights: [...prev.aiInsights, insight]
+    }));
+  };
+
+  const removeAIInsight = (insightId: string) => {
+    setProfile(prev => ({
+      ...prev,
+      aiInsights: prev.aiInsights.filter(insight => insight.id !== insightId)
+    }));
+  };
+
+  const updateAIInsight = (insightId: string, updates: Partial<AIInsight>) => {
+    setProfile(prev => ({
+      ...prev,
+      aiInsights: prev.aiInsights.map(insight => 
+        insight.id === insightId ? { ...insight, ...updates } : insight
+      )
+    }));
+  };
+
+  const addChatMessage = (role: 'user' | 'assistant', content: string) => {
+    setProfile(prev => ({
+      ...prev,
+      chatHistory: [...prev.chatHistory, { role, content }]
+    }));
+  };
+
+  const updateInsightPermissions = (permissions: Partial<UserProfile['insightPermissions']>) => {
+    setProfile(prev => ({
+      ...prev,
+      insightPermissions: {
+        ...prev.insightPermissions,
+        ...permissions
+      }
+    }));
+  };
+
   return (
     <UserContext.Provider value={{
       profile,
@@ -236,7 +294,12 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       removeImportantDate,
       addDiscussionQuestion,
       removeDiscussionQuestion,
-      markQuizCompleted
+      markQuizCompleted,
+      addAIInsight,
+      removeAIInsight,
+      updateAIInsight,
+      addChatMessage,
+      updateInsightPermissions
     }}>
       {children}
     </UserContext.Provider>

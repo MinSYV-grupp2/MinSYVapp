@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
@@ -7,51 +7,11 @@ import SYlVester from '@/components/SYlVester';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/components/ui/use-toast';
 import { useSYlVester } from '@/context/SYlVesterContext';
-
-// Sample AI responses for different education-related queries
-const aiResponseDatabase = {
-  programs: [
-    "Det finns många olika gymnasieprogram att välja mellan. De huvudsakliga kategorierna är högskoleförberedande program (som Naturvetenskapsprogrammet, Samhällsvetenskapsprogrammet, Ekonomiprogrammet) och yrkesprogram (som Bygg- och anläggningsprogrammet, Vård- och omsorgsprogrammet).",
-    "Högskoleförberedande program ger grundläggande behörighet till högskola/universitet, medan yrkesprogram förbereder dig för att börja jobba direkt efter gymnasiet.",
-  ],
-  naturvetenskap: [
-    "Naturvetenskapsprogrammet är ett högskoleförberedande program med fokus på matematik, fysik, kemi och biologi.",
-    "Det passar dig som är intresserad av vetenskap, forskning, medicin eller ingenjörsyrken.",
-    "Efter programmet kan du studera vidare inom områden som medicin, ingenjörsvetenskap, naturvetenskap m.m."
-  ],
-  samhällsvetenskap: [
-    "Samhällsvetenskapsprogrammet ger dig kunskaper om samhällsförhållanden i Sverige och världen.",
-    "Det passar dig som är intresserad av människor, samhälle, historia, och kultur.",
-    "Efter programmet kan du studera vidare inom områden som juridik, psykologi, media, lärare, polis m.m."
-  ],
-  ekonomi: [
-    "Ekonomiprogrammet ger dig kunskaper inom företagsekonomi, entreprenörskap och juridik.",
-    "Det passar dig som är intresserad av ekonomi, företagande och samhällsfrågor.",
-    "Efter programmet kan du studera vidare inom områden som ekonomi, marknadsföring, juridik m.m."
-  ],
-  teknik: [
-    "Teknikprogrammet ger dig kunskap om teknikutveckling och tekniska processer.",
-    "Det passar dig som är intresserad av datorer, programmering, design eller ingenjörsyrken.",
-    "Efter programmet kan du studera vidare inom områden som ingenjörsvetenskap, arkitektur, datavetenskap m.m."
-  ],
-  betyg: [
-    "Betygen från grundskolan är viktiga för att komma in på önskat gymnasieprogram.",
-    "Det är dina 17 bästa betyg från grundskolan som räknas och ger ditt meritvärde.",
-    "Olika gymnasieprogram och skolor har olika antagningspoäng beroende på hur många som söker."
-  ],
-  after_gymnasium: [
-    "Efter gymnasiet har du flera alternativ: studera vidare på högskola/universitet, börja jobba, starta eget företag, eller ta ett sabbatsår för att fundera på vad du vill göra.",
-    "Om du gått ett högskoleförberedande program har du grundläggande behörighet till högskola/universitet.",
-    "Om du gått ett yrkesprogram kan du börja jobba direkt, eller komplettera med kurser för högskolebehörighet."
-  ],
-  default: [
-    "Jag är här för att hjälpa dig med frågor om gymnasieval, utbildning och framtida karriärvägar.",
-    "Du kan fråga mig om olika gymnasieprogram, behörighetskrav, eller vad olika utbildningar kan leda till.",
-    "Om du vill ha mer personlig vägledning rekommenderar jag att du bokar ett möte med en studie- och yrkesvägledare."
-  ]
-};
+import { useUser } from '@/context/UserContext';
+import { openaiService, ChatMessage, AIInsight } from '@/services/openai';
+import AIInsightsPreview from '@/components/AIInsightsPreview';
 
 // Common questions that students might ask
 const suggestedQuestions = [
@@ -66,59 +26,72 @@ const suggestedQuestions = [
 ];
 
 const AIChatPage = () => {
-  const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>([
-    { text: "Hej! Jag är SYlVester, din digitala studie- och yrkesvägledare. Jag kan svara på frågor om gymnasieprogram, utbildningar och karriärvägar. Vad undrar du över?", isUser: false }
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { role: 'assistant', content: "Hej! Jag är SYlVester, din digitala studie- och yrkesvägledare. Jag kan svara på frågor om gymnasieprogram, utbildningar och karriärvägar. Vad undrar du över?" }
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [pendingInsights, setPendingInsights] = useState<AIInsight[]>([]);
   const { setMood } = useSYlVester();
+  const { addChatMessage, addAIInsight } = useUser();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSendMessage = () => {
+  // Scroll to bottom of messages when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
     // Add user message to chat
-    const newUserMessage = { text: inputMessage, isUser: true };
-    setMessages([...messages, newUserMessage]);
+    const userMessage: ChatMessage = { role: 'user', content: inputMessage };
+    setMessages(prev => [...prev, userMessage]);
+    addChatMessage('user', inputMessage);
     setInputMessage("");
     
     // Simulate AI thinking
     setIsTyping(true);
     setMood('thinking');
-    
-    setTimeout(() => {
-      // Find appropriate response based on keywords in the user's message
-      const userMessageLower = inputMessage.toLowerCase();
-      let responseText: string[] = [];
+
+    try {
+      // Prepare context for the AI
+      const context: ChatMessage = {
+        role: 'system',
+        content: "Du är SYlVester, en digital studie- och yrkesvägledare för gymnasieelever i Sverige. " +
+                 "Du hjälper elever att utforska olika gymnasieprogram, förstå sina intressen och " +
+                 "planera sina framtida utbildnings- och karriärvägar. Du är positiv, uppmuntrande " +
+                 "och pedagogisk. Du svarar alltid på svenska."
+      };
       
-      if (userMessageLower.includes("program") || userMessageLower.includes("gymnasie")) {
-        responseText = aiResponseDatabase.programs;
-      } else if (userMessageLower.includes("naturvetenskap") || userMessageLower.includes("natur")) {
-        responseText = aiResponseDatabase.naturvetenskap;
-      } else if (userMessageLower.includes("samhällsvetenskap") || userMessageLower.includes("samhäll")) {
-        responseText = aiResponseDatabase.samhällsvetenskap;
-      } else if (userMessageLower.includes("ekonomi")) {
-        responseText = aiResponseDatabase.ekonomi;
-      } else if (userMessageLower.includes("teknik")) {
-        responseText = aiResponseDatabase.teknik;
-      } else if (userMessageLower.includes("betyg") || userMessageLower.includes("poäng")) {
-        responseText = aiResponseDatabase.betyg;
-      } else if (userMessageLower.includes("efter gymnasiet") || userMessageLower.includes("universitet") || 
-                userMessageLower.includes("högskola") || userMessageLower.includes("jobb")) {
-        responseText = aiResponseDatabase.after_gymnasium;
-      } else if (userMessageLower.includes("boka") || userMessageLower.includes("träffa") || 
-                userMessageLower.includes("syv") || userMessageLower.includes("vägledare")) {
-        responseText = ["Du kan boka tid med en studie- och yrkesvägledare under fliken 'Boka SYV' i menyn, eller genom att klicka på knappen nedan."];
-      } else {
-        responseText = aiResponseDatabase.default;
+      // Get chat history for context but limit it to last 10 messages
+      const recentMessages = [...messages.slice(-10), userMessage];
+      
+      // Generate AI response
+      const aiContent = await openaiService.generateChatCompletion([context, ...recentMessages]);
+      
+      // Add AI response to chat
+      const aiMessage: ChatMessage = { role: 'assistant', content: aiContent };
+      setMessages(prev => [...prev, aiMessage]);
+      addChatMessage('assistant', aiContent);
+      
+      // Extract insights from the conversation
+      const insights = await openaiService.extractInsightsFromConversation([...recentMessages, aiMessage]);
+      
+      if (insights.length > 0) {
+        setPendingInsights(insights);
       }
-      
-      // Join response paragraphs with line breaks
-      const aiResponse = { text: responseText.join("\n\n"), isUser: false };
-      setMessages(prevMessages => [...prevMessages, aiResponse]);
-      
+    } catch (error) {
+      console.error('Error in chat:', error);
+      toast({
+        title: "Ett fel uppstod",
+        description: "Kunde inte processa ditt meddelande. Försök igen senare.",
+        variant: "destructive"
+      });
+    } finally {
       setIsTyping(false);
       setMood('happy');
-    }, 1000);
+    }
   };
 
   const handleSuggestedQuestion = (question: string) => {
@@ -148,6 +121,22 @@ const AIChatPage = () => {
     setTimeout(() => {
       handleSendMessage();
     }, 100);
+  };
+
+  const handleApproveInsight = (insightId: string) => {
+    const insight = pendingInsights.find(i => i.id === insightId);
+    if (insight) {
+      addAIInsight({...insight, approved: true});
+      setPendingInsights(prev => prev.filter(i => i.id !== insightId));
+      toast({
+        title: "Insikt sparad",
+        description: `"${insight.content}" har sparats till din profil.`,
+      });
+    }
+  };
+
+  const handleRejectInsight = (insightId: string) => {
+    setPendingInsights(prev => prev.filter(i => i.id !== insightId));
   };
 
   return (
@@ -181,12 +170,21 @@ const AIChatPage = () => {
                 
                 {/* Chat Messages */}
                 <div className="flex-grow overflow-y-auto mb-4 space-y-4 p-2">
+                  {/* AI Insights Preview */}
+                  {pendingInsights.length > 0 && (
+                    <AIInsightsPreview 
+                      insights={pendingInsights}
+                      onApprove={handleApproveInsight}
+                      onReject={handleRejectInsight}
+                    />
+                  )}
+                
                   {messages.map((message, index) => (
                     <div 
                       key={index}
-                      className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                      {!message.isUser && (
+                      {message.role === 'assistant' && (
                         <div className="mr-2 flex-shrink-0">
                           <div className="w-8 h-8 bg-guidance-lightPurple rounded-full flex items-center justify-center">
                             <SYlVester size="sm" className="m-0 p-0" />
@@ -195,12 +193,12 @@ const AIChatPage = () => {
                       )}
                       <div 
                         className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                          message.isUser 
+                          message.role === 'user' 
                             ? 'bg-guidance-blue text-white' 
                             : 'bg-gray-100 text-gray-800'
                         }`}
                       >
-                        {message.text.split("\n\n").map((paragraph, i) => (
+                        {message.content.split("\n\n").map((paragraph, i) => (
                           <p key={i} className={i > 0 ? 'mt-2' : ''}>
                             {paragraph}
                           </p>
@@ -220,6 +218,7 @@ const AIChatPage = () => {
                       </div>
                     </div>
                   )}
+                  <div ref={messagesEndRef} />
                 </div>
                 
                 {/* Chat Input */}

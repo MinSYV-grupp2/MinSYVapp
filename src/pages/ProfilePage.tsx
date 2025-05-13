@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
@@ -14,7 +13,8 @@ import FavoriteSchools from '@/components/FavoriteSchools';
 import DiscussionQuestions from '@/components/DiscussionQuestions';
 import SavedPrograms from '@/components/SavedPrograms';
 import ImportantDates from '@/components/ImportantDates';
-import { User, Heart, FileHeart, FileText, Calendar } from 'lucide-react';
+import AIInsightsSection from '@/components/AIInsightsSection';
+import { User, Heart, FileHeart, FileText, Calendar, Brain } from 'lucide-react';
 
 const interestEmojis: Record<string, string> = {
   tech: '💻',
@@ -93,6 +93,7 @@ const ProfilePage = () => {
     { id: 'programs', label: 'Program', icon: <FileHeart className="h-5 w-5" /> },
     { id: 'notes', label: 'Anteckningar', icon: <FileText className="h-5 w-5" /> },
     { id: 'dates', label: 'Datum', icon: <Calendar className="h-5 w-5" /> },
+    { id: 'insights', label: 'AI Insikter', icon: <Brain className="h-5 w-5" /> }, // New tab
   ];
 
   return (
@@ -327,6 +328,11 @@ const ProfilePage = () => {
                 {/* Dates and Appointments - Always visible on desktop, conditional on mobile */}
                 {(activeTab === 'dates' || window.innerWidth >= 768) && (
                   <ImportantDates />
+                )}
+                
+                {/* AI Insights - New section */}
+                {(activeTab === 'insights' || window.innerWidth >= 768) && (
+                  <AIInsightsSection />
                 )}
               </div>
             </div>
