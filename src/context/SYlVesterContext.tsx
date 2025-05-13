@@ -1,75 +1,76 @@
-
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 
 type Mood = 'happy' | 'thinking' | 'excited';
-type Tip = { text: string; seen: boolean };
+
+interface Tip {
+  text: string;
+}
 
 interface SYlVesterContextType {
   mood: Mood;
   setMood: (mood: Mood) => void;
-  tips: Record<string, Tip[]>;
-  addTip: (page: string, tip: string) => void;
-  markTipAsSeen: (page: string, tipText: string) => void;
   greeting: string;
   setGreeting: (greeting: string) => void;
+  tips: Record<string, Tip[]>;
+  addTip: (path: string, tip: Tip) => void;
+  removeTip: (path: string, index: number) => void;
   isVisible: boolean;
-  setIsVisible: (visible: boolean) => void;
-  getPageTips: (page: string) => string[];
+  setIsVisible: (isVisible: boolean) => void;
+  getPageTips: (path: string) => string[];
+  currentPath: string;
 }
 
 const defaultContext: SYlVesterContextType = {
   mood: 'happy',
   setMood: () => {},
+  greeting: 'Hej! Jag är SYlVester, din guide genom gymnasievalet!',
+  setGreeting: () => {},
   tips: {},
   addTip: () => {},
-  markTipAsSeen: () => {},
-  greeting: "Hej! Jag är SYlVester, din guide genom gymnasievalet!",
-  setGreeting: () => {},
+  removeTip: () => {},
   isVisible: true,
   setIsVisible: () => {},
   getPageTips: () => [],
+  currentPath: '/',
+};
+
+const defaultTips: Record<string, Tip[]> = {
+  '/': [
+    { text: 'Hur fungerar quizen?' },
+    { text: 'Hur sparar jag program?' },
+    { text: 'Vad är en SYV?' },
+  ],
+  '/career-map': [
+    { text: 'Vad är en karriärkarta?' },
+    { text: 'Hur hittar jag rätt program?' },
+  ],
+  '/profile': [
+    { text: 'Hur sparar jag mina val?' },
+    { text: 'Vad kan jag göra här?' },
+  ],
+  '/booking': [
+    { text: 'Hur bokar jag en tid?' },
+    { text: 'Vad kan jag fråga?' },
+  ],
+  '/ai-chat': [
+    { text: 'Vad kan jag fråga AI:n?' },
+    { text: 'Är AI:n alltid korrekt?' },
+  ],
 };
 
 const SYlVesterContext = createContext<SYlVesterContextType>(defaultContext);
 
 export const useSYlVester = () => useContext(SYlVesterContext);
 
-interface SYlVesterProviderProps {
-  children: React.ReactNode;
-}
-
-const defaultTips: Record<string, Tip[]> = {
-  '/': [
-    { text: 'Hur fungerar quizen?', seen: false },
-    { text: 'Hur sparar jag program?', seen: false },
-    { text: 'Vad är en SYV?', seen: false },
-  ],
-  '/ai-chat': [
-    { text: 'Vad kan jag fråga om?', seen: false },
-    { text: 'Hur fungerar chatten?', seen: false },
-    { text: 'Vilka program finns?', seen: false },
-  ],
-  '/profile': [
-    { text: 'Hur sparar jag mina resultat?', seen: false },
-    { text: 'Vad betyder mina resultat?', seen: false },
-    { text: 'Hur jämför jag program?', seen: false },
-  ],
-  '/career-map': [
-    { text: 'Hur använder jag karriärkartan?', seen: false },
-    { text: 'Vilka jobb passar mig?', seen: false },
-    { text: 'Vad betyder de olika färgerna?', seen: false },
-  ]
-};
-
-export const SYlVesterProvider: React.FC<SYlVesterProviderProps> = ({ children }) => {
-  const [mood, setMood] = useState<Mood>('happy');
+export const SYlVesterProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [mood, setMood] = useState<Mood>(defaultContext.mood);
   const [tips, setTips] = useState<Record<string, Tip[]>>(defaultTips);
   const [greeting, setGreeting] = useState(defaultContext.greeting);
   const [isVisible, setIsVisible] = useState(true);
   const [currentPath, setCurrentPath] = useState('/');
   
-  // Use location hook safely inside a useEffect
+  // Use location hook inside a useEffect to avoid router context issues
   const location = useLocation();
   
   // Update greeting based on current route
@@ -79,74 +80,68 @@ export const SYlVesterProvider: React.FC<SYlVesterProviderProps> = ({ children }
     
     let newGreeting = defaultContext.greeting;
     let newMood: Mood = 'happy';
-
-    switch(path) {
-      case '/':
-        newGreeting = "Välkommen till Gymnasieväljaren! Jag är SYlVester och hjälper dig att välja rätt!";
-        newMood = 'excited';
-        break;
-      case '/ai-chat':
-        newGreeting = "Här kan du ställa frågor till mig! Jag vet mycket om gymnasieprogram och utbildningar!";
-        newMood = 'happy';
-        break;
-      case '/profile':
-        newGreeting = "Det här är din profil! Här samlas allt du sparat och dina resultat.";
-        newMood = 'happy';
-        break;
-      case '/career-map':
-        newGreeting = "Karriärkartan visar dig olika vägar till framtida jobb och utbildningar!";
-        newMood = 'thinking';
-        break;
-      default:
-        newGreeting = "Jag är SYlVester! Klicka på mig om du behöver hjälp!";
+    
+    // Set specific greetings for different pages
+    if (path === '/') {
+      newGreeting = 'Välkommen! Utforska olika gymnasieprogram som passar dig!';
+      newMood = 'excited';
+    } else if (path === '/profile') {
+      newGreeting = 'Här är din profil! Jag hjälper dig att hålla koll på dina favoriter.';
+      newMood = 'happy';
+    } else if (path === '/booking') {
+      newGreeting = 'Boka tid med en studie- och yrkesvägledare för mer hjälp!';
+      newMood = 'thinking';
+    } else if (path === '/career-map') {
+      newGreeting = 'Utforska olika karriärvägar och vad de kräver för utbildning!';
+      newMood = 'excited';
+    } else if (path === '/ai-chat') {
+      newGreeting = 'Ställ frågor till vår AI för att lära dig mer om gymnasievalet!';
+      newMood = 'thinking';
     }
-
+    
     setGreeting(newGreeting);
     setMood(newMood);
-  }, [location]);
+  }, [location.pathname]);
 
-  const addTip = (page: string, tipText: string) => {
-    setTips(prev => {
-      const pageTips = prev[page] || [];
-      if (!pageTips.some(tip => tip.text === tipText)) {
-        return {
-          ...prev,
-          [page]: [...pageTips, { text: tipText, seen: false }]
-        };
+  const addTip = (path: string, tip: Tip) => {
+    setTips(prevTips => {
+      const updatedTips = { ...prevTips };
+      if (!updatedTips[path]) {
+        updatedTips[path] = [];
       }
-      return prev;
+      updatedTips[path] = [...updatedTips[path], tip];
+      return updatedTips;
     });
   };
 
-  const markTipAsSeen = (page: string, tipText: string) => {
-    setTips(prev => {
-      const pageTips = prev[page] || [];
-      return {
-        ...prev,
-        [page]: pageTips.map(tip => 
-          tip.text === tipText ? { ...tip, seen: true } : tip
-        )
-      };
+  const removeTip = (path: string, index: number) => {
+    setTips(prevTips => {
+      const updatedTips = { ...prevTips };
+      if (updatedTips[path]) {
+        updatedTips[path] = updatedTips[path].filter((_, i) => i !== index);
+      }
+      return updatedTips;
     });
   };
 
-  const getPageTips = (page: string): string[] => {
-    const pageTips = tips[page] || [];
-    return pageTips.filter(tip => !tip.seen).map(tip => tip.text);
+  const getPageTips = (path: string): string[] => {
+    if (!tips[path]) return [];
+    return tips[path].map(tip => tip.text);
   };
 
   return (
     <SYlVesterContext.Provider value={{
       mood,
       setMood,
-      tips,
-      addTip,
-      markTipAsSeen,
       greeting,
       setGreeting,
+      tips,
+      addTip,
+      removeTip,
       isVisible,
       setIsVisible,
       getPageTips,
+      currentPath
     }}>
       {children}
     </SYlVesterContext.Provider>

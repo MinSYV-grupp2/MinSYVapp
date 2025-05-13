@@ -2,15 +2,13 @@
 import React from 'react';
 import SYlVester from './SYlVester';
 import { useSYlVester } from '@/context/SYlVesterContext';
-import { useLocation } from 'react-router-dom';
 
 const FloatingSYlVester: React.FC = () => {
-  const { mood, greeting, isVisible, getPageTips } = useSYlVester();
-  const location = useLocation();
+  const { mood, greeting, isVisible, getPageTips, currentPath } = useSYlVester();
   
   if (!isVisible) return null;
 
-  const currentPageTips = getPageTips(location.pathname);
+  const currentPageTips = getPageTips(currentPath);
 
   return (
     <SYlVester 
