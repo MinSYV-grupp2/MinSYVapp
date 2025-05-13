@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0">
             <Link to="/" className="text-xl font-bold text-guidance-blue flex items-center gap-1">
-              <span className="text-guidance-green">Väg</span>ledning
+              <span className="text-guidance-green">Min</span>SYV
             </Link>
             <p className="text-gray-600 text-sm mt-1">
               Utforska dina intressen och styrkor inför framtiden
@@ -30,7 +30,7 @@ const Footer = () => {
         </div>
         
         <div className="mt-8 pt-6 border-t border-gray-200 text-center text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} Vägledning. Alla rättigheter förbehållna.
+          &copy; {new Date().getFullYear()} MinSYV. Alla rättigheter förbehållna.
         </div>
       </div>
     </footer>

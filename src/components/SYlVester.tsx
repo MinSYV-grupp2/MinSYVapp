@@ -18,6 +18,7 @@ interface SYlVesterProps {
   size?: 'sm' | 'md' | 'lg';
   mood?: 'happy' | 'thinking' | 'excited';
   className?: string;
+  useCustomImage?: boolean;
 }
 
 const SYlVester: React.FC<SYlVesterProps> = ({
@@ -28,6 +29,7 @@ const SYlVester: React.FC<SYlVesterProps> = ({
   size = 'md',
   mood = 'happy',
   className,
+  useCustomImage = false,
 }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -63,6 +65,78 @@ const SYlVester: React.FC<SYlVesterProps> = ({
       return () => clearTimeout(timer);
     }
   }, [floatingMode]);
+
+  // Custom image for SYlVester
+  if (useCustomImage) {
+    return (
+      <div className={cn(containerClasses, className)}>
+        <div className="relative">
+          <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className={cn(
+                  "rounded-full p-0 transition-all hover:scale-110",
+                  isAnimating && "animate-bounce",
+                  floatingMode && "shadow-lg bg-white hover:bg-white"
+                )}
+                onMouseEnter={handleHover}
+              >
+                <div className={cn("relative", mood === 'excited' && "animate-pulse")}>
+                  <img 
+                    src="/lovable-uploads/cc9b64c2-abad-4051-adf0-7ec48e9ed633.png" 
+                    alt="SYlVester" 
+                    className={cn(
+                      sizeClasses[size],
+                      "transition-transform",
+                      isAnimating && "animate-bounce"
+                    )}
+                  />
+                  {floatingMode && (
+                    <Badge className="absolute -top-1 -right-1 bg-guidance-purple text-[10px] h-5">
+                      ?
+                    </Badge>
+                  )}
+                </div>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-72 p-4 bg-white rounded-xl shadow-lg border border-guidance-lightBlue">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <img 
+                    src="/lovable-uploads/cc9b64c2-abad-4051-adf0-7ec48e9ed633.png" 
+                    alt="SYlVester" 
+                    className="w-8 h-8"
+                  />
+                  <p className="font-bold text-guidance-blue">SYlVester</p>
+                </div>
+                <p className="text-sm">{greeting}</p>
+                
+                {tips.length > 0 && (
+                  <div className="pt-2 space-y-2">
+                    <p className="text-xs font-semibold text-guidance-purple">Vad vill du veta?</p>
+                    <div className="flex flex-wrap gap-2">
+                      {tips.map((tip, index) => (
+                        <Button 
+                          key={index} 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-xs py-1 h-auto border-guidance-lightPurple text-guidance-purple"
+                          onClick={() => onTipClick && onTipClick(tip)}
+                        >
+                          {tip}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+    );
+  }
 
   // SVG paths for the cartoon cat based on mood
   const getCatSvg = () => {

@@ -18,13 +18,16 @@ const FloatingSYlVester: React.FC = () => {
   const currentPageTips = getPageTips(currentPath);
 
   return (
-    <SYlVester 
-      greeting={greeting}
-      mood={mood}
-      tips={currentPageTips}
-      floatingMode={true}
-      size="md"
-    />
+    <div className="fixed bottom-4 right-4 z-50">
+      <SYlVester 
+        greeting={greeting}
+        mood={mood}
+        tips={currentPageTips}
+        floatingMode={true}
+        size="lg"
+        useCustomImage={true}
+      />
+    </div>
   );
 };
 
