@@ -3,15 +3,27 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/context/UserContext';
+import SYlVester from './SYlVester';
+import { useSYlVester } from '@/context/SYlVesterContext';
 
 const NavBar = () => {
   const { profile } = useUser();
+  const { mood } = useSYlVester();
   
   return (
     <header className="bg-white shadow-sm">
       <div className="container mx-auto py-4 px-4 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold text-guidance-blue flex items-center gap-2">
-          <span className="text-guidance-green">Väg</span>ledning
+        <Link to="/" className="flex items-center gap-2">
+          <SYlVester 
+            size="md" 
+            mood={mood}
+            greeting="Välkommen till Vägledning! Klicka här för att gå till startsidan."
+            className="ml-[-8px]"
+          />
+          <span className="text-2xl font-bold ml-1">
+            <span className="text-guidance-green">Väg</span>
+            <span className="text-guidance-blue">ledning</span>
+          </span>
         </Link>
         
         <nav className="hidden md:flex items-center space-x-6">
