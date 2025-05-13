@@ -1,4 +1,3 @@
-
 import React from 'react';
 import NavBar from '@/components/NavBar';
 import QuizSection from '@/components/QuizSection';
@@ -66,7 +65,6 @@ const Index = () => {
     toast({
       title: "SYlVester säger:",
       description: message,
-      duration: 5000,
     });
   };
 
