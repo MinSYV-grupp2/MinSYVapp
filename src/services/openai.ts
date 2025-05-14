@@ -41,8 +41,8 @@ export interface AIInsight {
 }
 
 // Azure OpenAI Configuration - Detta skulle hanteras mer säkert i en produktionsmiljö
-const AZURE_API_KEY = "O0Ab3KvNpRLHlusupPmB5qR5lpZER6UjjnhISU916OakyVXqNbzEJQQJ99BEACHYHv6XJ3w3AAAAACOGAowq"; // Skulle hanteras via en säker miljövariabel
-const AZURE_ENDPOINT = "https://gusha-manpzb78-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview"; // t.ex. "https://your-resource-name.openai.azure.com"
+const AZURE_API_KEY = "A10s5la45Z0ufx07nMX7hWp2pvoCVHePJJqgV4zHSsbcD4slhwBnJQQJ99BEACfhMk5XJ3w3AAABACOGuECz"; // Skulle hanteras via en säker miljövariabel
+const AZURE_ENDPOINT = "https://minsyv.openai.azure.com"; // Uppdaterad endpoint utan efterföljande /
 const AZURE_DEPLOYMENT_NAME = "gpt-4o"; // Namn på din Azure GPT-4o deployment
 const AZURE_API_VERSION = "2025-01-01-preview";
 
@@ -79,6 +79,7 @@ export const openaiService = {
         'api-key': AZURE_API_KEY
       },
       body: JSON.stringify({
+        model: AZURE_DEPLOYMENT_NAME,
         messages,
         max_tokens: 800,
         temperature: 0.7,
@@ -141,6 +142,7 @@ export const openaiService = {
             'api-key': AZURE_API_KEY
           },
           body: JSON.stringify({
+            model: AZURE_DEPLOYMENT_NAME,
             messages: [systemPrompt, userPrompt],
             max_tokens: 1000,
             temperature: 0.3, // Lägre temperatur för mer konsekvent output
