@@ -56,13 +56,19 @@ const SYlVester: React.FC<SYlVesterProps> = ({
   };
 
   useEffect(() => {
-    // Show greeting animation when component mounts
+    // Only show greeting animation when component mounts for the first time
     if (!floatingMode) {
-      setIsOpen(true);
-      const timer = setTimeout(() => {
-        setIsOpen(false);
-      }, 5000);
-      return () => clearTimeout(timer);
+      // Check if this is the first visit
+      const hasSeenGreeting = sessionStorage.getItem('sylvesterGreetingShown');
+      if (!hasSeenGreeting) {
+        setIsOpen(true);
+        // Mark that the greeting has been shown
+        sessionStorage.setItem('sylvesterGreetingShown', 'true');
+        const timer = setTimeout(() => {
+          setIsOpen(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
     }
   }, [floatingMode]);
 
