@@ -43,7 +43,7 @@ export interface AIInsight {
 // Azure OpenAI Configuration - Detta skulle hanteras mer säkert i en produktionsmiljö
 const AZURE_API_KEY = "ECSV7jHLYe625k8RdkeR1wEHVFuVj8QjKuqwpBUfngOIZs1Ivw97JQQJ99BEACfhMk5XJ3w3AAABACOGIBaw"; // Skulle hanteras via en säker miljövariabel
 const AZURE_ENDPOINT = "https://minsyv.openai.azure.com/"; // t.ex. "https://your-resource-name.openai.azure.com"
-const AZURE_DEPLOYMENT_NAME = "gpt-4o"; // Namn på din Azure GPT-4o deployment
+const AZURE_DEPLOYMENT_NAME = "SkolAppAI"; // Namn på din Azure GPT-4o deployment
 const AZURE_API_VERSION = "2024-04-01-preview";
 
 // OpenAI API service
