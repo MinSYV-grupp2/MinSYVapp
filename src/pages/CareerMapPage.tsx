@@ -46,6 +46,46 @@ const CareerMapPage = () => {
             </CardContent>
           </Card>
 
+          <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+            <h2 className="text-2xl font-bold text-guidance-blue mb-4 md:mb-0">Välj ett program nedan</h2>
+            <div className="flex flex-wrap gap-2 md:gap-4 justify-center">
+              <div className="flex items-center bg-guidance-lightBlue p-2 rounded-md">
+                <div className="bg-guidance-blue p-1.5 rounded-full mr-2">
+                  <Book className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-sm">Program</span>
+              </div>
+              <div className="flex items-center bg-guidance-lightGreen p-2 rounded-md">
+                <div className="bg-guidance-green p-1.5 rounded-full mr-2">
+                  <Layers className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-sm">Inriktning</span>
+              </div>
+              <div className="flex items-center bg-guidance-lightPurple p-2 rounded-md">
+                <div className="bg-guidance-purple p-1.5 rounded-full mr-2">
+                  <School className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-sm">Skola</span>
+              </div>
+              <div className="flex items-center bg-indigo-50 p-2 rounded-md border border-indigo-200">
+                <div className="bg-indigo-300 p-1.5 rounded-full mr-2">
+                  <GraduationCap className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-sm">Utbildning</span>
+              </div>
+              <div className="flex items-center bg-gray-100 p-2 rounded-md">
+                <div className="bg-gray-500 p-1.5 rounded-full mr-2">
+                  <Briefcase className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-sm">Yrken</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <CareerMap />
+        
+        <div className="container mx-auto px-4 py-8">
           <Card className="mb-8 border-l-4 border-guidance-green">
             <CardContent className="p-6">
               <h2 className="text-xl font-semibold mb-3 text-guidance-green">Vad ska jag tänka på när jag väljer gymnasieprogram?</h2>
@@ -113,43 +153,7 @@ const CareerMapPage = () => {
           </Card>
           
           <div className="flex flex-col sm:flex-row items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-guidance-blue mb-4 sm:mb-0">Välj ett program nedan</h2>
-            <div className="flex flex-wrap gap-2 md:gap-4 justify-center">
-              <div className="flex items-center bg-guidance-lightBlue p-2 rounded-md">
-                <div className="bg-guidance-blue p-1.5 rounded-full mr-2">
-                  <Book className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-sm">Program</span>
-              </div>
-              <div className="flex items-center bg-guidance-lightGreen p-2 rounded-md">
-                <div className="bg-guidance-green p-1.5 rounded-full mr-2">
-                  <Layers className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-sm">Inriktning</span>
-              </div>
-              <div className="flex items-center bg-guidance-lightPurple p-2 rounded-md">
-                <div className="bg-guidance-purple p-1.5 rounded-full mr-2">
-                  <School className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-sm">Skola</span>
-              </div>
-              <div className="flex items-center bg-indigo-50 p-2 rounded-md border border-indigo-200">
-                <div className="bg-indigo-300 p-1.5 rounded-full mr-2">
-                  <GraduationCap className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-sm">Utbildning</span>
-              </div>
-              <div className="flex items-center bg-gray-100 p-2 rounded-md">
-                <div className="bg-gray-500 p-1.5 rounded-full mr-2">
-                  <Briefcase className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-sm">Yrken</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold text-guidance-blue mb-4 md:mb-0">Din framtida karriärväg</h2>
+            <h2 className="text-2xl font-bold text-guidance-blue mb-4 sm:mb-0">Din framtida karriärväg</h2>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button 
                 asChild
@@ -176,8 +180,6 @@ const CareerMapPage = () => {
             </div>
           </div>
         </div>
-        
-        <CareerMap />
       </div>
       <Footer />
     </div>
