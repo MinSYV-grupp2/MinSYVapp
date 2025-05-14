@@ -44,7 +44,7 @@ export interface AIInsight {
 const AZURE_API_KEY = "O0Ab3KvNpRLHlusupPmB5qR5lpZER6UjjnhISU916OakyVXqNbzEJQQJ99BEACHYHv6XJ3w3AAAAACOGAowq"; // Skulle hanteras via en säker miljövariabel
 const AZURE_ENDPOINT = "https://gusha-manpzb78-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview"; // t.ex. "https://your-resource-name.openai.azure.com"
 const AZURE_DEPLOYMENT_NAME = "gpt-4o"; // Namn på din Azure GPT-4o deployment
-const AZURE_API_VERSION = "2024-11-20";
+const AZURE_API_VERSION = "2024-11-20-preview";
 
 // OpenAI API service
 export const openaiService = {
