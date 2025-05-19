@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { useState } from 'react';
-import { BookOpen, MessageSquare, CalendarClock, HelpCircle } from 'lucide-react';
+import { BookOpen, MessageSquare, CalendarClock, HelpCircle, UserCircle } from 'lucide-react';
 import { useSYlVester } from '@/context/SYlVesterContext';
 import { toast } from '@/components/ui/use-toast';
 
@@ -273,7 +273,7 @@ const Index = () => {
               <Card className="flex-1 hover:shadow-lg transition-shadow border-2 border-guidance-purple">
                 <CardContent className="p-6 flex flex-col items-center">
                   <div className="bg-guidance-lightPurple text-guidance-purple p-3 rounded-full mb-4">
-                    <CircleUser className="h-8 w-8" />
+                    <UserCircle className="h-8 w-8" />
                   </div>
                   <h3 className="text-xl font-bold mb-2">Personliga intressen</h3>
                   <p className="text-gray-600 mb-6">
