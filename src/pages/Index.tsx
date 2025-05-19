@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { useState } from 'react';
-import { BookOpen, MessageSquare, CircleUser, HelpCircle } from 'lucide-react';
+import { BookOpen, MessageSquare, CalendarClock, HelpCircle } from 'lucide-react';
 import { useSYlVester } from '@/context/SYlVesterContext';
 import { toast } from '@/components/ui/use-toast';
 
@@ -207,24 +207,24 @@ const Index = () => {
               <CardContent className="p-6 flex flex-col flex-grow">
                 <div className="flex items-center justify-center mb-4 text-guidance-green">
                   <div className="bg-guidance-lightGreen p-3 rounded-full">
-                    <CircleUser className="h-8 w-8" />
+                    <CalendarClock className="h-8 w-8" />
                   </div>
                 </div>
-                <h3 className="text-xl font-bold mb-2 text-center">Min profil</h3>
+                <h3 className="text-xl font-bold mb-2 text-center">Förbered för utvecklingssamtal</h3>
                 <p className="text-gray-600 mb-6 flex-grow text-center">
                   <span className="font-medium block mb-2">Vad är detta?</span>
-                  Din personliga sida där du kan spara program, skolor och resultat från quiz för att komma ihåg dem senare.
+                  Verktyg som hjälper dig att förbereda, dokumentera och följa upp dina utvecklingssamtal med lärare och föräldrar.
                 </p>
                 <p className="text-guidance-green mb-4 text-sm">
                   <span className="font-semibold">Varför ska du använda det?</span>
                   <ul className="list-disc pl-4 mt-1 space-y-1">
-                    <li>Samla alla program och skolor du gillar på ett ställe</li>
-                    <li>Se dina personliga quiz-resultat</li>
-                    <li>Dela din profil med föräldrar eller SYV för att få hjälp</li>
+                    <li>Skriv ner frågor och tankar inför utvecklingssamtalet</li>
+                    <li>Samla mål och önskemål från tidigare samtal</li>
+                    <li>Följ upp och se din utveckling över tid</li>
                   </ul>
                 </p>
                 <Button asChild className="bg-guidance-green hover:bg-guidance-green/90">
-                  <Link to="/profile">Gå till min profil</Link>
+                  <Link to="/utvecklingssamtal">Förbered ditt samtal</Link>
                 </Button>
               </CardContent>
             </Card>
