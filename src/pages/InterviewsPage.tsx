@@ -19,7 +19,7 @@ const interviews: Interview[] = [
     id: '1',
     title: 'Mina två år på Teknikprogrammet',
     description: 'Emil berättar om sina erfarenheter från Teknikprogrammet och vad han lärt sig.',
-    videoId: 'dQw4w9WgXcQ', // This is a placeholder video ID
+    videoId: 'naZMOG85tE8', // Updated to the new YouTube video ID
     category: 'student',
     tags: ['Teknikprogrammet', 'Programmering', 'Matematik']
   },
@@ -27,7 +27,7 @@ const interviews: Interview[] = [
     id: '2',
     title: 'Från Naturprogrammet till Läkarlinjen',
     description: 'Sofia delar sin resa från gymnasiet till läkarstudier.',
-    videoId: 'dQw4w9WgXcQ', // This is a placeholder video ID
+    videoId: 'naZMOG85tE8', // Updated to the new YouTube video ID
     category: 'student',
     tags: ['Naturvetenskap', 'Medicin', 'Högskola']
   },
@@ -35,7 +35,7 @@ const interviews: Interview[] = [
     id: '3',
     title: 'Min vardag som Civilingenjör',
     description: 'Anders berättar om hur en vanlig arbetsdag ser ut som ingenjör.',
-    videoId: 'dQw4w9WgXcQ', // This is a placeholder video ID
+    videoId: 'naZMOG85tE8', // Updated to the new YouTube video ID
     category: 'professional',
     tags: ['Ingenjör', 'Teknik', 'Arbetsliv']
   },
@@ -43,7 +43,7 @@ const interviews: Interview[] = [
     id: '4',
     title: 'Att jobba med människor i vården',
     description: 'Maria delar sin upplevelse av att jobba som sjuksköterska.',
-    videoId: 'dQw4w9WgXcQ', // This is a placeholder video ID
+    videoId: 'naZMOG85tE8', // Updated to the new YouTube video ID
     category: 'professional',
     tags: ['Vård', 'Omvårdnad', 'Arbetsliv']
   },
@@ -51,7 +51,7 @@ const interviews: Interview[] = [
     id: '5',
     title: 'Så hjälper vi dig hitta rätt',
     description: 'Peter, studie- och yrkesvägledare, berättar om hur vägledningsprocessen går till.',
-    videoId: 'dQw4w9WgXcQ', // This is a placeholder video ID
+    videoId: 'naZMOG85tE8', // Updated to the new YouTube video ID
     category: 'counselor',
     tags: ['SYV', 'Vägledning', 'Gymnasieval']
   }

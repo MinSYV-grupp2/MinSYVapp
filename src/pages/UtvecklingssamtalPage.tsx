@@ -62,7 +62,7 @@ const UtvecklingssamtalPage = () => {
             <div className="absolute top-0 right-0 transform -translate-y-1/2">
               <SYlVester 
                 size="md" 
-                mood="thoughtful" 
+                mood="thinking" 
                 greeting="Förbered dig inför ditt utvecklingssamtal!"
                 tips={["Tips för förberedelse", "Under samtalet", "Efter samtalet"]}
                 onTipClick={handleSYlVesterTip}
