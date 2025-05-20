@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useUser } from '@/context/UserContext';
 import { toast } from '@/components/ui/use-toast';
-import { Check } from 'lucide-react';
+import { Check, Percent, Award, Trophy } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 interface QuizOption {
   id: string;
@@ -117,7 +118,7 @@ const quizOptions: QuizOption[] = [
 const QuizSection = () => {
   const { addInterest, profile, markQuizCompleted, updateProfile } = useUser();
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-  const [recommendedPrograms, setRecommendedPrograms] = useState<string[]>([]);
+  const [recommendedPrograms, setRecommendedPrograms] = useState<{name: string, match: number}[]>([]);
   const [showResults, setShowResults] = useState(false);
 
   const handleOptionToggle = (optionId: string, category: "tech" | "nature" | "art" | "social" | "physical" | "analytical") => {
@@ -146,27 +147,52 @@ const QuizSection = () => {
       return;
     }
 
-    // Generate recommendations based on selected options
-    const programs = new Set<string>();
-    selectedOptions.forEach(optionId => {
-      const option = quizOptions.find(opt => opt.id === optionId);
-      if (option) {
-        option.relatedPrograms.forEach(program => programs.add(program));
-      }
-    });
-    
-    setRecommendedPrograms([...programs]);
-    
-    // Save a personalized summary to the user's profile
+    // Collect all selected categories
     const selectedCategories = selectedOptions.map(optionId => 
       quizOptions.find(opt => opt.id === optionId)?.category || ""
     ).filter(Boolean);
+    
+    // Count occurrences of each category
+    const categoryCounts: Record<string, number> = {};
+    selectedCategories.forEach(category => {
+      categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+    });
+
+    // Generate program recommendations with match percentages
+    const allPrograms = new Set<string>();
+    const programMatches: Record<string, {count: number, total: number}> = {};
+    
+    selectedOptions.forEach(optionId => {
+      const option = quizOptions.find(opt => opt.id === optionId);
+      if (option) {
+        option.relatedPrograms.forEach(program => {
+          allPrograms.add(program);
+          if (!programMatches[program]) {
+            programMatches[program] = { count: 1, total: 1 };
+          } else {
+            programMatches[program].count += 1;
+          }
+        });
+      }
+    });
+    
+    // Calculate match percentages
+    const totalSelections = selectedOptions.length;
+    const recommendationsWithPercentages = Array.from(allPrograms).map(program => {
+      const match = Math.round((programMatches[program].count / totalSelections) * 100);
+      return { name: program, match };
+    });
+    
+    // Sort by match percentage (highest first)
+    recommendationsWithPercentages.sort((a, b) => b.match - a.match);
+    
+    setRecommendedPrograms(recommendationsWithPercentages);
     
     // Create unique categories array
     const uniqueCategories = [...new Set(selectedCategories)];
     
     // Generate summary based on interests
-    const summary = generateSummary(uniqueCategories);
+    const summary = generateSummary(uniqueCategories, recommendationsWithPercentages);
     
     // Add to user's profile reflections
     updateProfile({
@@ -185,7 +211,7 @@ const QuizSection = () => {
     });
   };
 
-  const generateSummary = (categories: string[]): string => {
+  const generateSummary = (categories: string[], recommendations: {name: string, match: number}[]): string => {
     const date = new Date().toLocaleDateString('sv-SE');
     
     let summary = `Quiz-resultat (${date}): Baserat på dina val verkar du vara intresserad av `;
@@ -211,8 +237,8 @@ const QuizSection = () => {
     }
     
     summary += " Detta kan passa bra med utbildningar inom " + 
-      [...recommendedPrograms].slice(0, 3).join(", ") + 
-      (recommendedPrograms.length > 3 ? " och liknande områden." : ".");
+      recommendations.slice(0, 3).map(r => r.name).join(", ") + 
+      (recommendations.length > 3 ? " och liknande områden." : ".");
     
     return summary;
   };
@@ -227,7 +253,7 @@ const QuizSection = () => {
     <div className="py-8" id="quiz">
       <div className="container mx-auto px-4">
         <h2 className="section-title">Vad gillar du?</h2>
-        <p className="text-lg text-gray-600 mb-8">
+        <p className="text-lg text-gray-600 mb-8 max-w-3xl mx-auto text-center">
           Välj några av alternativen nedan som du tycker om eller är intresserad av.
           Detta hjälper dig att börja utforska dina intressen och hitta möjliga utbildningsvägar.
         </p>
@@ -238,9 +264,9 @@ const QuizSection = () => {
               {quizOptions.map((option) => (
                 <Card 
                   key={option.id}
-                  className={`quiz-card cursor-pointer transition-all ${
+                  className={`quiz-card cursor-pointer transition-all hover:shadow-lg ${
                     selectedOptions.includes(option.id)
-                      ? 'border-4 border-guidance-blue scale-105'
+                      ? 'border-4 border-guidance-blue scale-105 bg-guidance-blue/5'
                       : 'border border-gray-200 hover:border-guidance-blue/50'
                   }`}
                   onClick={() => handleOptionToggle(option.id, option.category)}
@@ -253,8 +279,8 @@ const QuizSection = () => {
                         <p className="text-sm text-gray-500 mt-1">{option.description}</p>
                       </div>
                       {selectedOptions.includes(option.id) && (
-                        <div className="ml-2 bg-guidance-blue text-white p-1 rounded-full">
-                          <Check className="h-4 w-4" />
+                        <div className="ml-2 bg-guidance-blue text-white p-2 rounded-full">
+                          <Check className="h-5 w-5" />
                         </div>
                       )}
                     </div>
@@ -266,55 +292,96 @@ const QuizSection = () => {
             <div className="flex justify-center mt-8">
               <Button 
                 onClick={handleSubmit}
-                className="bg-guidance-green hover:bg-guidance-green/90 text-white font-medium px-8 py-2 text-lg"
+                className="bg-guidance-green hover:bg-guidance-green/90 text-white font-medium px-8 py-3 text-lg rounded-full shadow-md hover:shadow-lg transition-all"
               >
-                Spara mina intressen
+                Visa mina resultat
               </Button>
             </div>
           </>
         ) : (
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto">
-            <div className="bg-guidance-lightGreen text-guidance-green p-4 rounded-md mb-6 text-center">
+          <div className="bg-gradient-to-br from-white to-guidance-lightBlue/30 rounded-xl shadow-lg p-8 max-w-3xl mx-auto">
+            <div className="bg-guidance-lightGreen text-guidance-green p-5 rounded-lg mb-6 text-center">
+              <div className="flex justify-center mb-2">
+                <Trophy className="h-8 w-8" />
+              </div>
               <h3 className="text-xl font-bold mb-2">Tack för dina svar!</h3>
-              <p>Vi har sparat dina intressen i din profil</p>
+              <p>Vi har analyserat dina intressen och hittat utbildningar som passar dig</p>
             </div>
             
-            <h3 className="text-xl font-semibold text-guidance-blue mb-4">Baserat på dina val rekommenderar vi följande utbildningar:</h3>
+            <h3 className="text-2xl font-semibold text-guidance-blue mb-6 text-center">
+              Dina bästa matchningar
+            </h3>
             
-            <div className="mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {recommendedPrograms.slice(0, 6).map((program, index) => (
-                  <div key={index} className="bg-guidance-lightBlue/30 p-3 rounded-md flex items-center">
-                    <div className="bg-guidance-blue text-white p-2 rounded-full mr-3">
-                      {index + 1}
+            <div className="space-y-5 mb-8">
+              {recommendedPrograms.slice(0, 5).map((program, index) => (
+                <div key={index} className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
+                        index === 0 
+                          ? 'bg-amber-500 text-white' 
+                          : index === 1 
+                            ? 'bg-gray-300 text-gray-800' 
+                            : index === 2 
+                              ? 'bg-amber-700 text-white' 
+                              : 'bg-guidance-blue/10 text-guidance-blue'
+                      }`}>
+                        {index < 3 ? <Award className="h-5 w-5" /> : (index + 1)}
+                      </div>
+                      <span className="font-semibold text-lg">{program.name}</span>
                     </div>
-                    <span className="font-medium">{program}</span>
+                    <div className="flex items-center bg-guidance-blue/10 px-3 py-1 rounded-full">
+                      <Percent className="h-4 w-4 text-guidance-blue mr-1" />
+                      <span className="font-bold text-guidance-blue">{program.match}</span>
+                    </div>
                   </div>
-                ))}
-              </div>
+                  <div className="mt-2">
+                    <Progress 
+                      value={program.match} 
+                      className="h-2 bg-gray-200" 
+                      indicatorClassName={
+                        index === 0 
+                          ? 'bg-amber-500' 
+                          : index === 1 
+                            ? 'bg-gray-400' 
+                            : index === 2 
+                              ? 'bg-amber-700' 
+                              : 'bg-guidance-blue'
+                      }
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
             
             <div className="border-t border-gray-200 pt-6 mt-6">
               <h4 className="font-semibold text-guidance-purple mb-3">Reflektera över resultatet:</h4>
               <p className="text-gray-600 mb-4">
-                Bekanta dig med dessa utbildningsområden genom att utforska karriärkartan. 
+                Utforska dessa utbildningsområden genom att klicka på karriärkartan. 
                 Du kan också boka ett möte med en SYV för att diskutera dessa alternativ närmare.
               </p>
               
-              <div className="flex justify-between mt-8">
+              <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8">
                 <Button
                   onClick={resetQuiz}
                   variant="outline"
-                  className="border-guidance-blue text-guidance-blue"
+                  className="border-guidance-blue text-guidance-blue rounded-full"
                 >
                   Gör om testet
                 </Button>
                 
                 <Button
                   asChild
-                  className="bg-guidance-purple hover:bg-guidance-purple/90"
+                  className="bg-guidance-purple hover:bg-guidance-purple/90 rounded-full"
                 >
-                  <a href="#profile">Gå till min profil</a>
+                  <a href="/career-map">Utforska karriärkartan</a>
+                </Button>
+                
+                <Button
+                  asChild
+                  className="bg-guidance-green hover:bg-guidance-green/90 rounded-full"
+                >
+                  <a href="#profile">Se min profil</a>
                 </Button>
               </div>
             </div>
