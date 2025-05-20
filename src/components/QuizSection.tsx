@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -6,6 +5,7 @@ import { useUser } from '@/context/UserContext';
 import { toast } from '@/components/ui/use-toast';
 import { Check, Percent, Award, Trophy } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 
 interface QuizOption {
   id: string;
@@ -338,16 +338,13 @@ const QuizSection = () => {
                   <div className="mt-2">
                     <Progress 
                       value={program.match} 
-                      className="h-2 bg-gray-200" 
-                      indicatorClassName={
-                        index === 0 
-                          ? 'bg-amber-500' 
-                          : index === 1 
-                            ? 'bg-gray-400' 
-                            : index === 2 
-                              ? 'bg-amber-700' 
-                              : 'bg-guidance-blue'
-                      }
+                      className={cn(
+                        "h-2 bg-gray-200",
+                        index === 0 ? "bg-amber-500" : 
+                        index === 1 ? "bg-gray-400" : 
+                        index === 2 ? "bg-amber-700" : 
+                        "bg-guidance-blue"
+                      )}
                     />
                   </div>
                 </div>
