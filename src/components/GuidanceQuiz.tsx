@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,11 +6,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { PlayCircle } from 'lucide-react';
+import { PlayCircle, MapPin, ExternalLink } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
 import { toast } from '@/components/ui/sonner';
+import { Link } from 'react-router-dom';
 
 interface QuizQuestion {
   id: number;
@@ -334,8 +334,6 @@ const GuidanceQuiz = () => {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showResults, setShowResults] = useState(false);
   const [matchedSchools, setMatchedSchools] = useState<SchoolProgram[]>([]);
-  const [userName, setUserName] = useState("");
-  const [grades, setGrades] = useState("");
   const [error, setError] = useState("");
   const [profileScores, setProfileScores] = useState<Record<string, number>>({
     A: 0, B: 0, C: 0, D: 0, E: 0, F: 0, G: 0, H: 0
@@ -363,13 +361,7 @@ const GuidanceQuiz = () => {
     if (currentQuestion < quizQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      // Last question completed
-      if (!userName.trim()) {
-        setError("Ange ditt namn innan du fortsätter");
-        return;
-      }
-      
-      // Calculate results
+      // Last question completed - calculate results directly without requiring name/merit
       calculateResults();
       setShowResults(true);
       
@@ -411,21 +403,6 @@ const GuidanceQuiz = () => {
       return matchingProfiles.length > 0;
     });
     
-    // If we have grade information, filter further
-    if (grades) {
-      const numericGrade = parseFloat(grades.replace(',', '.'));
-      
-      matches = matches.filter(school => {
-        if (!school.points) return true;
-        
-        // Extract the lower limit from the points range
-        const lowerLimit = parseFloat(school.points.split(' - ')[0].replace(',', '.'));
-        
-        // If student's grade is higher than the school's lower limit, include it
-        return !lowerLimit || numericGrade >= lowerLimit;
-      });
-    }
-    
     // Sort by match strength (number of matching profiles)
     matches.sort((a, b) => {
       const aMatches = a.profiles.filter(profile => sortedProfiles.includes(profile)).length;
@@ -460,6 +437,21 @@ const GuidanceQuiz = () => {
     return descriptions[profile] || profile;
   };
 
+  const calculateMatchPercentage = (school: SchoolProgram) => {
+    // Find top 3 profiles
+    const sortedProfiles = Object.entries(profileScores)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(entry => entry[0]);
+    
+    const matchingProfiles = school.profiles.filter(profile => 
+      sortedProfiles.includes(profile)
+    );
+    
+    // Calculate percentage based on matching profiles (up to 3)
+    return Math.round((matchingProfiles.length / 3) * 100);
+  };
+
   return (
     <div className="max-w-3xl mx-auto p-4" id="quiz">
       {!showResults ? (
@@ -470,28 +462,6 @@ const GuidanceQuiz = () => {
               Gymnasievägledningsquiz
             </h2>
           </div>
-          
-          {currentQuestion === quizQuestions.length - 1 && (
-            <div className="mb-6">
-              <Label htmlFor="userName" className="block mb-2">Ditt namn</Label>
-              <Input 
-                id="userName"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                placeholder="Ange ditt namn"
-                className="w-full"
-              />
-              
-              <Label htmlFor="grades" className="block mt-4 mb-2">Ditt meritvärde (valfritt)</Label>
-              <Input 
-                id="grades"
-                value={grades}
-                onChange={(e) => setGrades(e.target.value)}
-                placeholder="T.ex. 250,5"
-                className="w-full"
-              />
-            </div>
-          )}
           
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
@@ -567,7 +537,7 @@ const GuidanceQuiz = () => {
               Dina rekommenderade gymnasieskolor
             </h2>
             <p className="text-gray-600">
-              Baserat på dina svar, {userName}, här är gymnasieprogrammen som passar dig bäst:
+              Baserat på dina svar, här är gymnasieprogrammen som passar dig bäst:
             </p>
           </div>
 
@@ -596,40 +566,67 @@ const GuidanceQuiz = () => {
           
           {matchedSchools.length > 0 ? (
             <div className="space-y-4 mb-8">
-              {matchedSchools.map((school, index) => (
-                <Collapsible key={index}>
-                  <Card className="border-guidance-blue/20 hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <CollapsibleTrigger className="w-full text-left flex justify-between items-center">
-                        <div>
-                          <h3 className="font-bold text-lg">{index + 1}. {school.school}</h3>
-                          <p className="text-guidance-blue">{school.program}</p>
-                        </div>
-                        <span className="text-gray-400 text-sm">Mer info</span>
-                      </CollapsibleTrigger>
-                      
-                      <CollapsibleContent className="mt-4 pt-4 border-t">
-                        {school.points && (
+              {matchedSchools.map((school, index) => {
+                const matchPercentage = calculateMatchPercentage(school);
+                return (
+                  <Collapsible key={index}>
+                    <Card className="border-guidance-blue/20 hover:shadow-md transition-shadow">
+                      <CardContent className="p-4">
+                        <CollapsibleTrigger className="w-full text-left flex justify-between items-center">
+                          <div>
+                            <h3 className="font-bold text-lg">{index + 1}. {school.school}</h3>
+                            <p className="text-guidance-blue">{school.program}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="bg-guidance-blue/10 px-2 py-1 rounded-full text-guidance-blue font-medium">
+                              {matchPercentage}% match
+                            </span>
+                            <span className="text-gray-400 text-sm">Mer info</span>
+                          </div>
+                        </CollapsibleTrigger>
+                        
+                        <CollapsibleContent className="mt-4 pt-4 border-t">
+                          {school.points && (
+                            <p className="mb-2">
+                              <span className="font-medium">Antagningspoäng:</span> {school.points}
+                            </p>
+                          )}
                           <p className="mb-2">
-                            <span className="font-medium">Antagningspoäng:</span> {school.points}
+                            <span className="font-medium">Inriktning:</span> {school.category.join(', ')}
                           </p>
-                        )}
-                        <p className="mb-2">
-                          <span className="font-medium">Inriktning:</span> {school.category.join(', ')}
-                        </p>
-                        <p className="mb-2">
-                          <span className="font-medium">Passar dig som är:</span> {
-                            school.profiles.slice(0, 3).map(p => getProfileDescription(p)).join(', ')
-                          }
-                        </p>
-                        <p className="text-sm text-gray-600 mt-4">
-                          Kontakta skolan för mer information om programmet och antagningskrav.
-                        </p>
-                      </CollapsibleContent>
-                    </CardContent>
-                  </Card>
-                </Collapsible>
-              ))}
+                          <p className="mb-2">
+                            <span className="font-medium">Passar dig som är:</span> {
+                              school.profiles.slice(0, 3).map(p => getProfileDescription(p)).join(', ')
+                            }
+                          </p>
+                          
+                          <div className="mt-3">
+                            <p className="mb-1 font-medium">Match med din profil:</p>
+                            <div className="flex items-center gap-2">
+                              <Progress value={matchPercentage} className="h-2 flex-1" />
+                              <span className="text-sm font-medium">{matchPercentage}%</span>
+                            </div>
+                          </div>
+                          
+                          <div className="mt-4 flex justify-end">
+                            <Button 
+                              asChild
+                              variant="outline" 
+                              className="flex items-center gap-1 text-guidance-blue"
+                            >
+                              <Link to="/career-map">
+                                <MapPin className="h-4 w-4" />
+                                Se mer information
+                                <ExternalLink className="h-3 w-3 ml-1" />
+                              </Link>
+                            </Button>
+                          </div>
+                        </CollapsibleContent>
+                      </CardContent>
+                    </Card>
+                  </Collapsible>
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-8">
@@ -647,14 +644,25 @@ const GuidanceQuiz = () => {
             >
               Gör om quizet
             </Button>
-            <Button 
-              className="bg-guidance-purple hover:bg-guidance-purple/90"
-              onClick={() => {
-                window.location.href = "/booking";
-              }}
-            >
-              Boka samtal med SYV
-            </Button>
+            <div className="flex gap-3">
+              <Button 
+                asChild
+                className="bg-guidance-blue hover:bg-guidance-blue/90"
+              >
+                <Link to="/career-map" className="flex items-center gap-2">
+                  Utforska karriärkartan
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button 
+                className="bg-guidance-purple hover:bg-guidance-purple/90"
+                onClick={() => {
+                  window.location.href = "/booking";
+                }}
+              >
+                Boka samtal med SYV
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -663,4 +671,3 @@ const GuidanceQuiz = () => {
 };
 
 export default GuidanceQuiz;
-
