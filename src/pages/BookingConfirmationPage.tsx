@@ -4,12 +4,12 @@ import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useUser } from '@/context/UserContext';
 import { Calendar, Clock, MessageSquare, User } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface BookingData {
   date: string;
@@ -33,43 +33,103 @@ interface BookingData {
 
 const BookingConfirmationPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const appointmentId = searchParams.get('id');
   const { profile } = useUser();
   const [bookingData, setBookingData] = useState<BookingData | null>(null);
   const [chatMessage, setChatMessage] = useState('');
   const [chatMessages, setChatMessages] = useState<{text: string, sender: 'user' | 'counselor', timestamp: Date}[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedData = sessionStorage.getItem('bookingData');
-    if (!storedData) {
+    
+    if (appointmentId) {
+      // When we have authentication implemented, we'd fetch from Supabase
+      // Here we're just showing the UI
+      setLoading(true);
+      
+      // This is where we would get appointment details from Supabase
+      // For now, just use mock data
+      const mockAppointment = {
+        date: '2025-05-25',
+        time: '13:00',
+        name: 'Anna Andersson',
+        email: 'anna.andersson@skola.se',
+        counselor: {
+          id: '1',
+          name: 'Anna Andersson'
+        },
+        profile: {
+          interests: ['Teknik', 'Programmering', 'Design'],
+          strengths: ['Analytisk förmåga', 'Kreativitet', 'Samarbete'],
+          reflections: ['Jag vill jobba med teknik i framtiden'],
+          favoriteSchools: [{name: 'Teknikgymnasiet'}],
+          discussionQuestions: [{question: 'Vilka kurser är viktiga för teknikprogram?'}]
+        }
+      };
+      
+      setBookingData(mockAppointment);
+      
+      // Add sample welcome message from the counselor
+      setChatMessages([
+        {
+          text: `Hej ${profile.name || 'där'}! Jag ser fram emot vårt möte. Om du har några frågor innan dess, är det bara att skriva här!`,
+          sender: 'counselor',
+          timestamp: new Date()
+        }
+      ]);
+      
+      setLoading(false);
+      
+    } else if (storedData) {
+      setBookingData(JSON.parse(storedData));
+      
+      // Add sample welcome message from the counselor
+      setChatMessages([
+        {
+          text: `Hej ${profile.name || 'där'}! Jag ser fram emot vårt möte. Om du har några frågor innan dess, är det bara att skriva här!`,
+          sender: 'counselor',
+          timestamp: new Date()
+        }
+      ]);
+    } else {
       navigate('/booking');
       return;
     }
-    setBookingData(JSON.parse(storedData));
-    
-    // Add sample welcome message from the counselor
-    setChatMessages([
-      {
-        text: `Hej ${profile.name || 'där'}! Jag ser fram emot vårt möte. Om du har några frågor innan dess, är det bara att skriva här!`,
-        sender: 'counselor',
-        timestamp: new Date()
-      }
-    ]);
-  }, [navigate, profile.name]);
+  }, [navigate, profile.name, appointmentId]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!chatMessage.trim()) return;
 
-    // Add user message
-    setChatMessages(prev => [
-      ...prev, 
-      {
-        text: chatMessage,
-        sender: 'user',
-        timestamp: new Date()
-      }
-    ]);
+    // Add user message to chat
+    const newMessage = {
+      text: chatMessage,
+      sender: 'user' as const,
+      timestamp: new Date()
+    };
     
+    setChatMessages(prev => [...prev, newMessage]);
     setChatMessage('');
+    
+    // When we have Supabase auth set up, we could save the message:
+    /*
+    try {
+      // Save message to chat_history
+      const { error } = await supabase
+        .from('chat_history')
+        .insert({
+          student_id: profile.studentId, // Would be the student_profile ID
+          role: 'student',
+          content: chatMessage
+        });
+      
+      if (error) throw error;
+      
+    } catch (error) {
+      console.error('Error saving message:', error);
+    }
+    */
     
     // Simulate counselor response after a short delay
     setTimeout(() => {
@@ -84,8 +144,38 @@ const BookingConfirmationPage = () => {
     }, 1000);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <NavBar />
+        <div className="flex-grow flex items-center justify-center">
+          <p>Laddar bokning...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   if (!bookingData) {
-    return <div>Laddar bokning...</div>;
+    return (
+      <div className="min-h-screen flex flex-col">
+        <NavBar />
+        <div className="flex-grow flex items-center justify-center">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Ingen bokning hittades</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4">Det verkar som att det inte finns någon bokningsinformation.</p>
+              <Button asChild>
+                <Link to="/booking">Gör en ny bokning</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
   return (
