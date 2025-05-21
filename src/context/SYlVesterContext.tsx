@@ -93,7 +93,7 @@ export const SYlVesterProvider: React.FC<{ children: ReactNode }> = ({ children 
       newGreeting = 'Utforska olika karriärvägar och vad de kräver för utbildning!';
       newMood = 'excited';
     } else if (path === '/ai-chat') {
-      newGreeting = 'Ställ frågor till vår AI för att lära dig mer om gymnasievalet!';
+      newGreeting = 'Ställ frågor till mig för att lära dig mer om gymnasievalet!';
       newMood = 'thinking';
     }
     
