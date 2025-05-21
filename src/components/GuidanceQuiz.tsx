@@ -6,12 +6,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { PlayCircle, MapPin, ExternalLink } from 'lucide-react';
+import { PlayCircle, MapPin, ExternalLink, School, BookOpen, Award, Users } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Progress } from '@/components/ui/progress';
 import { toast } from '@/components/ui/sonner';
 import { Link } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
 
 interface QuizQuestion {
   id: number;
@@ -329,11 +330,23 @@ const quizQuestions: QuizQuestion[] = [
   }
 ];
 
+// New interface for grouped program results
+interface ProgramResult {
+  program: string;
+  matchPercentage: number;
+  description: string;
+  schools: {
+    name: string;
+    points?: string;
+  }[];
+}
+
 const GuidanceQuiz = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showResults, setShowResults] = useState(false);
   const [matchedSchools, setMatchedSchools] = useState<SchoolProgram[]>([]);
+  const [programResults, setProgramResults] = useState<ProgramResult[]>([]);
   const [error, setError] = useState("");
   const [profileScores, setProfileScores] = useState<Record<string, number>>({
     A: 0, B: 0, C: 0, D: 0, E: 0, F: 0, G: 0, H: 0
@@ -365,7 +378,7 @@ const GuidanceQuiz = () => {
       calculateResults();
       setShowResults(true);
       
-      toast.success("Quiz slutfört! Här är dina matchande gymnasieskolor.", {
+      toast.success("Quiz slutfört! Här är dina resultat!", {
         duration: 5000
       });
     }
@@ -379,17 +392,22 @@ const GuidanceQuiz = () => {
   };
 
   const calculateResults = () => {
-    // Calculate profile scores based on answers
+    // Calculate profile scores based on answers with weighted values
     const scores = { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0, G: 0, H: 0 };
     
+    // Total number of questions answered to calculate percentages
+    const totalQuestions = Object.keys(answers).length;
+    
     Object.entries(answers).forEach(([questionId, answer]) => {
-      // Add 1 to the profile score for each answer
-      scores[answer as keyof typeof scores] += 1;
+      // Add weighted score - questions later in the quiz have slightly higher weight
+      const questionIndex = parseInt(questionId);
+      const weight = 1 + (questionIndex / 20); // Slight weight increase for later questions
+      scores[answer as keyof typeof scores] += weight;
     });
     
     setProfileScores(scores);
     
-    // Find top 3 profiles
+    // Find top 3 profiles with weighted scoring
     const sortedProfiles = Object.entries(scores)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
@@ -403,14 +421,113 @@ const GuidanceQuiz = () => {
       return matchingProfiles.length > 0;
     });
     
-    // Sort by match strength (number of matching profiles)
-    matches.sort((a, b) => {
-      const aMatches = a.profiles.filter(profile => sortedProfiles.includes(profile)).length;
-      const bMatches = b.profiles.filter(profile => sortedProfiles.includes(profile)).length;
-      return bMatches - aMatches;
+    // Calculate match strength with improved algorithm
+    matches.forEach(school => {
+      // Count matching profiles and their position in the sorted list
+      let matchStrength = 0;
+      school.profiles.forEach(profile => {
+        const profileIndex = sortedProfiles.indexOf(profile);
+        if (profileIndex !== -1) {
+          // Give more weight to higher ranked profiles
+          matchStrength += (3 - profileIndex) * 2;
+        }
+      });
+      
+      // Assign a custom property for sorting
+      (school as any).matchStrength = matchStrength;
     });
     
-    setMatchedSchools(matches.slice(0, 5));
+    // Sort by match strength (highest first)
+    matches.sort((a, b) => (b as any).matchStrength - (a as any).matchStrength);
+    
+    setMatchedSchools(matches);
+    
+    // Group results by program instead of school
+    const programMap = new Map<string, ProgramResult>();
+    
+    matches.forEach(school => {
+      if (!programMap.has(school.program)) {
+        const matchPercentage = calculateMatchPercentage(school);
+        
+        programMap.set(school.program, {
+          program: school.program,
+          matchPercentage,
+          description: getProgramDescription(school.program, school.category),
+          schools: [{
+            name: school.school,
+            points: school.points
+          }]
+        });
+      } else {
+        const existing = programMap.get(school.program);
+        if (existing) {
+          existing.schools.push({
+            name: school.school,
+            points: school.points
+          });
+        }
+      }
+    });
+    
+    // Convert map to array and sort by match percentage
+    const results = Array.from(programMap.values())
+      .sort((a, b) => b.matchPercentage - a.matchPercentage);
+    
+    setProgramResults(results.slice(0, 5));  // Top 5 programs
+  };
+  
+  const getProgramDescription = (program: string, categories: string[]): string => {
+    const descriptions: Record<string, string> = {
+      "Ekonomiprogrammet": "För dig som gillar siffror, affärer och samhällsfrågor! Du får lära dig om företag, ekonomi och hur samhället fungerar.",
+      "Naturvetenskapsprogrammet": "För dig som gillar kemi, fysik och matte! Du får göra spännande experiment och lära dig hur världen fungerar.",
+      "Samhällsvetenskapsprogrammet": "För dig som är intresserad av människor och samhälle! Du får lära dig om politik, psykologi och världsfrågor.",
+      "Teknikprogrammet": "För dig som gillar att bygga, programmera och lösa problem! Du får arbeta med teknik, design och datorer.",
+      "Estetiska programmet - Musik": "För dig som älskar musik! Du får spela instrument, sjunga och lära dig om musikskapande.",
+      "Estetiska programmet - Bild och formgivning": "För dig som älskar att rita och skapa! Du får utveckla din kreativitet genom konst och design.",
+      "Barn- och fritidsprogrammet": "För dig som tycker om att jobba med barn och unga! Du får lära dig om ledarskap och pedagogik.",
+      "Vård- och omsorgsprogrammet": "För dig som vill hjälpa människor! Du lär dig ta hand om andra och kan jobba inom vård direkt efter studenten.",
+      "Restaurang- och livsmedelsprogrammet": "För dig som gillar mat och matlagning! Du lär dig laga mat, baka och kan jobba i kök eller restaurang.",
+      "Bygg- och anläggningsprogrammet": "För dig som vill bygga och skapa med händerna! Du lär dig byggteknik och kommer ut i arbete direkt.",
+      "El- och energiprogrammet": "För dig som gillar el och teknik! Du lär dig om elinstallationer och kan börja jobba direkt efter gymnasiet.",
+      "Fordons- och transportprogrammet": "För dig som gillar bilar och fordon! Du lär dig att laga och underhålla fordon och kan börja jobba direkt.",
+      "Naturbruksprogrammet": "För dig som gillar djur och natur! Du får jobba med djur, växter eller skog och kan få jobb direkt efter gymnasiet."
+    };
+    
+    // If program has a specific description, use it
+    if (descriptions[program]) {
+      return descriptions[program];
+    }
+    
+    // Otherwise generate based on categories
+    const catMap: Record<string, string> = {
+      "ekonomi": "handel och ekonomi",
+      "business": "företagande",
+      "företagande": "ekonomi och affärer",
+      "natur": "vetenskap och natur",
+      "matematik": "matte och logiskt tänkande",
+      "vetenskap": "forskning och upptäckter",
+      "teknik": "tekniska lösningar",
+      "programmering": "datorer och kodning",
+      "design": "skapande och design",
+      "musik": "musik och ljudproduktion",
+      "estetik": "kreativt skapande",
+      "konst": "konst och design",
+      "samhälle": "samhällsfrågor",
+      "politik": "politik och samhälle",
+      "språk": "kommunikation",
+      "barn": "arbete med barn och unga",
+      "pedagogik": "lärande och undervisning",
+      "vård": "att hjälpa andra människor",
+      "omsorg": "omvårdnad och omsorg",
+      "djur": "arbete med djur",
+      "häst": "hästar och hästskötsel"
+    };
+    
+    const catDescriptions = categories.map(cat => catMap[cat] || cat).slice(0, 3);
+    let description = `För dig som är intresserad av ${catDescriptions.join(', ')}! `;
+    description += "Detta program passar dina intressen och kan leda till spännande jobbmöjligheter.";
+    
+    return description;
   };
 
   const restartQuiz = () => {
@@ -418,23 +535,38 @@ const GuidanceQuiz = () => {
     setAnswers({});
     setShowResults(false);
     setMatchedSchools([]);
+    setProgramResults([]);
     setError("");
     setProfileScores({ A: 0, B: 0, C: 0, D: 0, E: 0, F: 0, G: 0, H: 0 });
   };
 
   const getProfileDescription = (profile: string) => {
     const descriptions: Record<string, string> = {
-      A: "Vetenskaplig och analytisk",
-      B: "Kreativ och konstnärlig",
-      C: "Praktisk och handlingskraftig",
-      D: "Kommunikativ och samhällsengagerad",
-      E: "Teknisk och problemlösande",
-      F: "Omvårdande och människoorienterad",
-      G: "Entreprenöriell och affärsdriven",
-      H: "Aktiv och fysisk"
+      A: "Nyfiken utforskare",
+      B: "Kreativ skapare",
+      C: "Praktisk fixare",
+      D: "Social kommunikatör",
+      E: "Digital problemlösare",
+      F: "Hjälpsam lagspelare",
+      G: "Driven entreprenör",
+      H: "Aktiv organisatör"
     };
     
-    return descriptions[profile] || profile;
+    const detailDescriptions: Record<string, string> = {
+      A: "Du gillar att undersöka hur saker fungerar och lösa kluriga problem.",
+      B: "Du älskar att uttrycka dig kreativt och skapa nya saker.",
+      C: "Du föredrar att jobba praktiskt och se konkreta resultat.",
+      D: "Du är bra på att kommunicera och samarbeta med andra.",
+      E: "Du gillar teknik och att hitta smarta lösningar med datorer.",
+      F: "Du bryr dig om andra och vill göra skillnad i människors liv.",
+      G: "Du har koll på läget och gillar att leda projekt.",
+      H: "Du trivs med fysisk aktivitet och att jobba i team."
+    };
+    
+    return {
+      title: descriptions[profile] || profile,
+      detail: detailDescriptions[profile] || ""
+    };
   };
 
   const calculateMatchPercentage = (school: SchoolProgram) => {
@@ -444,12 +576,34 @@ const GuidanceQuiz = () => {
       .slice(0, 3)
       .map(entry => entry[0]);
     
-    const matchingProfiles = school.profiles.filter(profile => 
-      sortedProfiles.includes(profile)
-    );
+    // Calculate match with weighted values for better spread
+    let matchScore = 0;
+    let maxScore = 0;
     
-    // Calculate percentage based on matching profiles (up to 3)
-    return Math.round((matchingProfiles.length / 3) * 100);
+    sortedProfiles.forEach((profile, index) => {
+      // Higher ranked profiles have higher weight
+      const weight = 3 - index;
+      
+      if (school.profiles.includes(profile)) {
+        // Add weighted match points
+        matchScore += weight * 2;
+      }
+      
+      // Add to max possible score
+      maxScore += weight * 2;
+    });
+    
+    // Scale to get better spread between 50-100% instead of 0-100%
+    // This makes the results more encouraging
+    const rawPercentage = Math.round((matchScore / maxScore) * 100);
+    return Math.min(100, Math.max(55, 55 + Math.floor(rawPercentage * 0.45)));
+  };
+
+  // New function to get badge color based on match percentage
+  const getMatchBadgeColor = (percentage: number) => {
+    if (percentage >= 85) return "bg-green-500 hover:bg-green-600";
+    if (percentage >= 70) return "bg-blue-500 hover:bg-blue-600";
+    return "bg-purple-500 hover:bg-purple-600";
   };
 
   return (
@@ -463,6 +617,7 @@ const GuidanceQuiz = () => {
             </h2>
           </div>
           
+          {/* Question section - keep existing code */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-medium">
@@ -531,102 +686,153 @@ const GuidanceQuiz = () => {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-lg p-6">
+        <div className="bg-gradient-to-br from-white to-guidance-lightBlue/20 rounded-xl shadow-lg p-6">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-guidance-blue mb-2">
-              Dina rekommenderade gymnasieskolor
+              Dina resultat!
             </h2>
-            <p className="text-gray-600">
-              Baserat på dina svar, här är gymnasieprogrammen som passar dig bäst:
+            <p className="text-gray-700">
+              Baserat på dina svar har vi hittat gymnasieprogram som verkar passa dig perfekt:
             </p>
           </div>
 
-          <div className="mb-6 p-4 bg-guidance-blue/10 rounded-lg">
-            <h3 className="font-semibold mb-2">Din personlighetsprofil:</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          {/* Personality Profile - redesigned for teenagers */}
+          <div className="mb-8 p-5 bg-gradient-to-br from-guidance-lightBlue/30 to-guidance-lightBlue/10 rounded-lg border border-guidance-lightBlue/30">
+            <h3 className="font-bold text-lg mb-3 text-guidance-blue">Din personlighetsprofil:</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               {Object.entries(profileScores)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 3)
-                .map(([profile, score], index) => (
-                  <div 
-                    key={profile} 
-                    className={`p-2 rounded-md text-center ${
-                      index === 0 
-                        ? 'bg-guidance-green/20 border border-guidance-green' 
-                        : 'bg-guidance-blue/10'
-                    }`}
-                  >
-                    <span className="font-bold block">{getProfileDescription(profile)}</span>
-                    <span className="text-sm">{score} poäng</span>
-                  </div>
-                ))
+                .map(([profile, score], index) => {
+                  const profileDesc = getProfileDescription(profile);
+                  return (
+                    <div 
+                      key={profile} 
+                      className={`p-4 rounded-md text-center ${
+                        index === 0 
+                          ? 'bg-guidance-green/20 border border-guidance-green' 
+                          : 'bg-guidance-blue/10'
+                      }`}
+                    >
+                      <span className="font-bold block text-lg mb-1">{profileDesc.title}</span>
+                      <span className="text-sm block mb-2">{profileDesc.detail}</span>
+                      <div className="flex items-center justify-center gap-1 text-xs">
+                        <Award className="h-4 w-4" />
+                        <span>{Math.round((score / quizQuestions.length) * 100)}% matchning</span>
+                      </div>
+                    </div>
+                  );
+                })
               }
             </div>
+            
+            <p className="text-sm text-guidance-blue mt-3">
+              Det här är dina främsta styrkor! De hjälper dig att hitta rätt gymnasieprogram.
+            </p>
           </div>
           
-          {matchedSchools.length > 0 ? (
-            <div className="space-y-4 mb-8">
-              {matchedSchools.map((school, index) => {
-                const matchPercentage = calculateMatchPercentage(school);
-                return (
-                  <Collapsible key={index}>
-                    <Card className="border-guidance-blue/20 hover:shadow-md transition-shadow">
-                      <CardContent className="p-4">
-                        <CollapsibleTrigger className="w-full text-left flex justify-between items-center">
+          {/* Program Results - Now grouped by program first */}
+          {programResults.length > 0 ? (
+            <div>
+              <h3 className="font-bold text-xl mb-4 text-guidance-purple">Rekommenderade program för dig:</h3>
+              
+              <div className="space-y-6 mb-8">
+                {programResults.map((programResult, index) => (
+                  <Card key={index} className="border-guidance-blue/20 overflow-hidden">
+                    <div className={`h-2 ${index === 0 ? 'bg-green-500' : index === 1 ? 'bg-blue-500' : 'bg-purple-500'}`}></div>
+                    <CardContent className="p-5">
+                      <div className="flex flex-col md:flex-row justify-between mb-3">
+                        <div className="flex items-center gap-2 mb-2 md:mb-0">
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center mr-1 ${
+                            index === 0 
+                              ? 'bg-green-500 text-white' 
+                              : index === 1 
+                                ? 'bg-blue-500 text-white' 
+                                : 'bg-purple-500 text-white'
+                          }`}>
+                            <span className="font-bold">{index + 1}</span>
+                          </div>
                           <div>
-                            <h3 className="font-bold text-lg">{index + 1}. {school.school}</h3>
-                            <p className="text-guidance-blue">{school.program}</p>
+                            <h3 className="font-bold text-lg">{programResult.program}</h3>
+                            <Badge 
+                              className={`${getMatchBadgeColor(programResult.matchPercentage)} text-white mt-1`}
+                            >
+                              {programResult.matchPercentage}% matchning med din profil
+                            </Badge>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="bg-guidance-blue/10 px-2 py-1 rounded-full text-guidance-blue font-medium">
-                              {matchPercentage}% match
-                            </span>
-                            <span className="text-gray-400 text-sm">Mer info</span>
-                          </div>
+                        </div>
+                        <div className="mt-2 md:mt-0">
+                          <Button 
+                            asChild
+                            variant="outline" 
+                            size="sm"
+                            className="flex items-center gap-1 text-guidance-blue"
+                          >
+                            <Link to="/career-map">
+                              <MapPin className="h-4 w-4" />
+                              Läs mer
+                              <ExternalLink className="h-3 w-3 ml-1" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {/* Program description */}
+                      <div className="mb-4 text-gray-700">
+                        <p>{programResult.description}</p>
+                      </div>
+
+                      {/* Progress bar */}
+                      <div className="mb-4">
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="font-medium">Hur väl matchar programmet dig?</span>
+                          <span className="font-bold">{programResult.matchPercentage}%</span>
+                        </div>
+                        <Progress 
+                          value={programResult.matchPercentage} 
+                          className="h-2"
+                        />
+                      </div>
+                      
+                      {/* Schools offering this program */}
+                      <Collapsible className="mt-4 border-t pt-3">
+                        <CollapsibleTrigger className="flex items-center gap-2 text-guidance-blue font-medium">
+                          <School className="h-4 w-4" />
+                          <span>Skolor som erbjuder detta program ({programResult.schools.length})</span>
                         </CollapsibleTrigger>
                         
-                        <CollapsibleContent className="mt-4 pt-4 border-t">
-                          {school.points && (
-                            <p className="mb-2">
-                              <span className="font-medium">Antagningspoäng:</span> {school.points}
-                            </p>
-                          )}
-                          <p className="mb-2">
-                            <span className="font-medium">Inriktning:</span> {school.category.join(', ')}
-                          </p>
-                          <p className="mb-2">
-                            <span className="font-medium">Passar dig som är:</span> {
-                              school.profiles.slice(0, 3).map(p => getProfileDescription(p)).join(', ')
-                            }
-                          </p>
-                          
-                          <div className="mt-3">
-                            <p className="mb-1 font-medium">Match med din profil:</p>
-                            <div className="flex items-center gap-2">
-                              <Progress value={matchPercentage} className="h-2 flex-1" />
-                              <span className="text-sm font-medium">{matchPercentage}%</span>
+                        <CollapsibleContent className="mt-3 pl-6 space-y-2">
+                          {programResult.schools.map((school, i) => (
+                            <div key={i} className="flex justify-between items-center py-2 border-b border-dashed border-gray-200 last:border-0">
+                              <span className="font-medium">{school.name}</span>
+                              {school.points && (
+                                <span className="text-sm text-gray-600">
+                                  Antagningspoäng: {school.points}
+                                </span>
+                              )}
                             </div>
-                          </div>
-                          
-                          <div className="mt-4 flex justify-end">
-                            <Button 
-                              asChild
-                              variant="outline" 
-                              className="flex items-center gap-1 text-guidance-blue"
-                            >
-                              <Link to="/career-map">
-                                <MapPin className="h-4 w-4" />
-                                Se mer information
-                                <ExternalLink className="h-3 w-3 ml-1" />
-                              </Link>
-                            </Button>
-                          </div>
+                          ))}
                         </CollapsibleContent>
-                      </CardContent>
-                    </Card>
-                  </Collapsible>
-                );
-              })}
+                      </Collapsible>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              
+              <div className="bg-guidance-lightGreen/30 border border-guidance-green/30 rounded-lg p-4 mb-6">
+                <div className="flex gap-3">
+                  <BookOpen className="text-guidance-green h-5 w-5 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-guidance-green">Vad betyder detta?</h4>
+                    <p className="text-sm mt-1">
+                      Matchningen visar hur väl programmet passar dina intressen baserat på 
+                      dina svar. Ju högre procent, desto bättre kan programmet passa dig! 
+                      Men kom ihåg att detta bara är en vägledning - du väljer själv vad som känns rätt.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="text-center py-8">
@@ -637,30 +843,32 @@ const GuidanceQuiz = () => {
             </div>
           )}
           
-          <div className="flex justify-between">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
             <Button 
               variant="outline"
               onClick={restartQuiz}
+              className="w-full sm:w-auto"
             >
               Gör om quizet
             </Button>
-            <div className="flex gap-3">
+            <div className="flex gap-3 w-full sm:w-auto">
               <Button 
                 asChild
-                className="bg-guidance-blue hover:bg-guidance-blue/90"
+                className="bg-guidance-blue hover:bg-guidance-blue/90 flex-1 sm:flex-auto"
               >
-                <Link to="/career-map" className="flex items-center gap-2">
-                  Utforska karriärkartan
-                  <ExternalLink className="h-4 w-4" />
+                <Link to="/career-map" className="flex items-center justify-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Utforska kartan
                 </Link>
               </Button>
               <Button 
-                className="bg-guidance-purple hover:bg-guidance-purple/90"
-                onClick={() => {
-                  window.location.href = "/booking";
-                }}
+                asChild
+                className="bg-guidance-purple hover:bg-guidance-purple/90 flex-1 sm:flex-auto"
               >
-                Boka samtal med SYV
+                <Link to="/booking" className="flex items-center justify-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Prata med SYV
+                </Link>
               </Button>
             </div>
           </div>
