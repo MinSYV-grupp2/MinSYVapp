@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { useUser } from '@/context/UserContext';
 import { toast } from '@/components/ui/use-toast';
 import { SplitSquareVertical } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 // Import the data
 import { programData } from '@/data/programData';
-import { schoolsData } from '@/data/schoolsData';
+// Import the school service
+import { getSchools } from '@/services/schoolService';
 
 // Import the components
 import ProgramCard from '@/components/career/ProgramCard';
@@ -15,7 +17,7 @@ import ProgramDetail from '@/components/career/ProgramDetail';
 import SchoolList from '@/components/career/SchoolList';
 import CareerTree from '@/components/career/CareerTree';
 import CompareView from '@/components/career/CompareView';
-import { ViewMode, CompareItems } from '@/components/career/types';
+import { ViewMode, CompareItems, School } from '@/components/career/types';
 
 const CareerMap = () => {
   const { addSavedProgram } = useUser();
@@ -27,6 +29,12 @@ const CareerMap = () => {
     programs: []
   });
   
+  // Fetch schools from Supabase
+  const { data: schoolsData, isLoading, error } = useQuery({
+    queryKey: ['schools'],
+    queryFn: getSchools
+  });
+
   // Auto-scroll to info section when a program is selected
   useEffect(() => {
     if (viewMode === 'programDetail') {
@@ -38,13 +46,17 @@ const CareerMap = () => {
   }, [viewMode]);
   
   // Filter schools that offer the selected program
-  const schoolsWithSelectedProgram = schoolsData.filter(
-    school => school.programs.includes(selectedProgram.id)
-  );
+  const schoolsWithSelectedProgram = schoolsData ? (
+    schoolsData.filter(school => {
+      // This is a simple filter since we don't have program associations yet
+      // In a real implementation, you'd check if the school offers the program
+      return true;
+    })
+  ) : [];
   
   // Get school by id
   const getSchoolById = (id: string) => {
-    return schoolsData.find(school => school.id === id);
+    return schoolsData?.find(school => school.id === id);
   };
   
   // Get program by id
@@ -144,6 +156,30 @@ const CareerMap = () => {
     }
     setViewMode('compare');
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-guidance-blue mx-auto mb-4"></div>
+            <p className="text-gray-600">Laddar skoldata...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
+          <h3 className="text-lg font-medium mb-2">Ett fel uppstod</h3>
+          <p>Det gick inte att ladda skoldata. Vänligen försök igen senare.</p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="container mx-auto px-4 py-8">

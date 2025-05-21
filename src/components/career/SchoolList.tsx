@@ -19,16 +19,6 @@ interface SchoolListProps {
 }
 
 const SchoolList = ({ schools, toggleCompareSchool, handleSaveProgram, selectedProgramName }: SchoolListProps) => {
-  // Find the selected program ID based on the schools data
-  const findProgramId = (selectedProgramName: string, school: School): string | undefined => {
-    for (const programId of school.programs) {
-      if (programId && school.admissionScores && school.admissionScores[programId]) {
-        return programId;
-      }
-    }
-    return undefined;
-  };
-
   return (
     <Card>
       <CardContent className="p-6">
@@ -37,12 +27,13 @@ const SchoolList = ({ schools, toggleCompareSchool, handleSaveProgram, selectedP
           Skolor som erbjuder {selectedProgramName}
         </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {schools.map((school) => {
-            // Find the correct program ID for this school and the selected program
-            const selectedProgramId = school.programs[0]; // Default to first program if can't determine
-            
-            return (
+        {schools.length === 0 ? (
+          <div className="p-4 text-center">
+            <p className="text-gray-500">Inga skolor hittades som erbjuder detta program.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {schools.map((school) => (
               <Card key={school.id} className="hover:shadow-md transition-shadow border-l-4 border-guidance-green">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start">
@@ -90,26 +81,11 @@ const SchoolList = ({ schools, toggleCompareSchool, handleSaveProgram, selectedP
                   <div className="text-xs text-gray-500 mb-2">
                     {school.location.commute}
                   </div>
-                  
-                  <div className="flex justify-between items-center mt-2">
-                    {school.admissionScores && selectedProgramId && school.admissionScores[selectedProgramId] ? (
-                      <span className="bg-guidance-lightPurple text-guidance-purple text-xs px-2 py-1 rounded-full">
-                        Antagning: {school.admissionScores[selectedProgramId]}
-                      </span>
-                    ) : (
-                      <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                        Antagningspoäng saknas
-                      </span>
-                    )}
-                    <span className="text-xs text-gray-500">
-                      {school.statistics.satisfactionRate}% nöjda elever
-                    </span>
-                  </div>
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

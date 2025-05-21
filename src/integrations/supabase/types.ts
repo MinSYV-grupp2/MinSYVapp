@@ -239,7 +239,7 @@ export type Database = {
             columns: ["municipality_id"]
             isOneToOne: false
             referencedRelation: "municipalities"
-            referencedColumns: ["id"]
+            referencedColumns: ["municipalities_id"]
           },
         ]
       }
@@ -268,7 +268,7 @@ export type Database = {
             columns: ["municipality_id"]
             isOneToOne: false
             referencedRelation: "municipalities"
-            referencedColumns: ["id"]
+            referencedColumns: ["municipalities_id"]
           },
           {
             foreignKeyName: "external_student_map_student_id_fkey"
@@ -304,7 +304,7 @@ export type Database = {
             columns: ["municipality_id"]
             isOneToOne: false
             referencedRelation: "municipalities"
-            referencedColumns: ["id"]
+            referencedColumns: ["municipalities_id"]
           },
           {
             foreignKeyName: "external_syv_map_syv_id_fkey"
@@ -407,7 +407,7 @@ export type Database = {
           contact_email: string | null
           created_at: string
           external_system: string | null
-          id: string
+          municipalities_id: string
           name: string
           region_id: string | null
         }
@@ -415,7 +415,7 @@ export type Database = {
           contact_email?: string | null
           created_at?: string
           external_system?: string | null
-          id?: string
+          municipalities_id?: string
           name: string
           region_id?: string | null
         }
@@ -423,7 +423,7 @@ export type Database = {
           contact_email?: string | null
           created_at?: string
           external_system?: string | null
-          id?: string
+          municipalities_id?: string
           name?: string
           region_id?: string | null
         }
@@ -740,8 +740,9 @@ export type Database = {
           contact_email: string | null
           created_at: string
           id: string
-          municipality_id: string | null
+          municipalities_id: string | null
           name: string
+          skol_enhets_kod: string | null
           updated_at: string
           website: string | null
         }
@@ -750,8 +751,9 @@ export type Database = {
           contact_email?: string | null
           created_at?: string
           id?: string
-          municipality_id?: string | null
+          municipalities_id?: string | null
           name: string
+          skol_enhets_kod?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -760,20 +762,13 @@ export type Database = {
           contact_email?: string | null
           created_at?: string
           id?: string
-          municipality_id?: string | null
+          municipalities_id?: string | null
           name?: string
+          skol_enhets_kod?: string | null
           updated_at?: string
           website?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "schools_municipality_id_fkey"
-            columns: ["municipality_id"]
-            isOneToOne: false
-            referencedRelation: "municipalities"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       student_documents: {
         Row: {
@@ -919,7 +914,7 @@ export type Database = {
           profile_id: string
           program: string | null
           quiz_completed: boolean | null
-          school_id: string | null
+          school_id: string
           updated_at: string
         }
         Insert: {
@@ -930,7 +925,7 @@ export type Database = {
           profile_id: string
           program?: string | null
           quiz_completed?: boolean | null
-          school_id?: string | null
+          school_id: string
           updated_at?: string
         }
         Update: {
@@ -941,7 +936,7 @@ export type Database = {
           profile_id?: string
           program?: string | null
           quiz_completed?: boolean | null
-          school_id?: string | null
+          school_id?: string
           updated_at?: string
         }
         Relationships: [
