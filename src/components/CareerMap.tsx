@@ -277,6 +277,7 @@ const CareerMap = () => {
                 }
               }
             }
+            // Pass the correct arguments to getProgramById - programData as the second argument
             return getProgramById(id, programData);
           }}
           getSchoolById={(id) => getSchoolById(schoolsData, id)}

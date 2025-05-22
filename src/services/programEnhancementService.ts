@@ -7,7 +7,7 @@ import { toast } from '@/components/ui/use-toast';
 const programInfoCache: Record<string, {
   description?: string;
   educationDescription?: string;
-  furtherEducation?: {name: string; description: string}[];
+  furtherEducation?: {name: string; description: string; meritRequirements: string}[];
   careers?: string[];
   requiredCourses?: string[];
   recommendedCourses?: string[];
@@ -117,7 +117,7 @@ function constructAIPrompt(program: Program, needs: {
   }
   
   if (needs.needsFurtherEducation) {
-    prompt += `- "furtherEducation": En array med objekt som innehåller "name" och "description" för 3-5 möjliga vidareutbildningar efter gymnasiet\n`;
+    prompt += `- "furtherEducation": En array med objekt som innehåller "name", "description" och "meritRequirements" för 3-5 möjliga vidareutbildningar efter gymnasiet\n`;
   }
   
   if (needs.needsCareers) {
@@ -141,9 +141,11 @@ async function requestAIEnhancement(prompt: string): Promise<string> {
   try {
     // Use the existing openaiService to get AI-generated content
     const systemPrompt = "Du är en expert på svenska gymnasieprogram och svarar med korrekt och relevant information i det format som efterfrågas.";
+    
+    // Fix the ChatMessage type issue by explicitly defining the role types
     const messages = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: prompt }
+      { role: 'system' as const, content: systemPrompt },
+      { role: 'user' as const, content: prompt }
     ];
     
     const response = await openaiService.generateChatCompletion(messages);
@@ -165,7 +167,7 @@ async function requestAIEnhancement(prompt: string): Promise<string> {
 function parseAIResponse(response: string): {
   description?: string;
   educationDescription?: string;
-  furtherEducation?: {name: string; description: string}[];
+  furtherEducation?: {name: string; description: string; meritRequirements: string}[];
   careers?: string[];
   requiredCourses?: string[];
   recommendedCourses?: string[];
@@ -177,6 +179,16 @@ function parseAIResponse(response: string): {
     
     if (match && match[0]) {
       const jsonData = JSON.parse(match[0]);
+      
+      // Ensure the furtherEducation has the required meritRequirements field
+      if (jsonData.furtherEducation) {
+        jsonData.furtherEducation = jsonData.furtherEducation.map((edu: any) => ({
+          name: edu.name,
+          description: edu.description,
+          meritRequirements: edu.meritRequirements || "Information saknas"
+        }));
+      }
+      
       return {
         description: jsonData.description,
         educationDescription: jsonData.educationDescription,

@@ -52,6 +52,12 @@ const ProgramDetailsView = ({
     fetchEnhancedProgram();
   }, [selectedProgram.id]);
 
+  // This function is needed for the SchoolsList component
+  const toggleCompareSchool = (schoolId: string) => {
+    // This function is a prop stub - the actual implementation is in CareerMap.tsx
+    console.log("toggleCompareSchool called with:", schoolId);
+  };
+
   // Display program data either from enhancement or fallback to the original
   const displayProgram = enhancedProgram || selectedProgram;
 
@@ -100,7 +106,5 @@ const ProgramDetailsView = ({
     </div>
   );
 };
-
-const toggleCompareSchool = (schoolId: string) => {};
 
 export default ProgramDetailsView;
