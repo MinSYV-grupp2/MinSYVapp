@@ -3,15 +3,17 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, TreeDeciduous, SplitSquareVertical, GraduationCap, School, BookOpen, Map, Star } from 'lucide-react';
+import { Program, Specialization } from '../types';
 
 interface ProgramDetailProps {
-  selectedProgram: any;
+  selectedProgram: Program;
+  programSpecializations?: Specialization[];
   handleViewCareerTree: () => void;
   toggleCompareProgram: (programId: string) => void;
   handleSaveProgram: (school?: string) => void;
 }
 
-const ProgramDetail = ({ selectedProgram, handleViewCareerTree, toggleCompareProgram, handleSaveProgram }: ProgramDetailProps) => {
+const ProgramDetail = ({ selectedProgram, programSpecializations, handleViewCareerTree, toggleCompareProgram, handleSaveProgram }: ProgramDetailProps) => {
   return (
     <Card className="mb-8 border-l-4 border-guidance-blue">
       <CardContent className="p-6">
