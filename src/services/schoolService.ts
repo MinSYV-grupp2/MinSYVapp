@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { School, Program, Specialization } from '@/components/career/types';
 
@@ -32,7 +33,7 @@ export const isProgramMatch = (programName1: string, programName2: string): bool
   return false;
 };
 
-// New function to fetch all programs from the database
+// Function to fetch all programs from the database
 export async function getPrograms(): Promise<Program[]> {
   console.log('Fetching programs data from Supabase...');
   
@@ -47,6 +48,7 @@ export async function getPrograms(): Promise<Program[]> {
   }
 
   console.log(`Fetched ${programsData?.length || 0} programs from database`);
+  console.log('Sample program data:', programsData ? programsData[0] : 'No programs found');
 
   // Get specializations for each program
   const programs: Program[] = await Promise.all((programsData || []).map(async (program) => {
@@ -70,10 +72,11 @@ export async function getPrograms(): Promise<Program[]> {
     };
   }));
 
+  console.log(`Transformed ${programs.length} programs`);
   return programs;
 }
 
-// New function to fetch specializations (inriktningar) for a program
+// Function to fetch specializations (inriktningar) for a program
 export async function getProgramSpecializations(programId: string): Promise<Specialization[]> {
   console.log(`Fetching specializations for program ID: ${programId}`);
   
@@ -96,7 +99,7 @@ export async function getProgramSpecializations(programId: string): Promise<Spec
   }));
 }
 
-// Add the missing function for fetching unique programs
+// Function to fetch unique programs from schools_programs table
 export async function getUniquePrograms() {
   console.log('Fetching unique programs data from schools_programs table...');
   
@@ -127,6 +130,7 @@ export async function getUniquePrograms() {
   }
   
   console.log(`Found ${uniquePrograms.length} unique programs`);
+  console.log('Sample unique program:', uniquePrograms.length > 0 ? uniquePrograms[0] : 'No unique programs found');
   return uniquePrograms;
 }
 
@@ -168,6 +172,7 @@ export async function getSchoolsByProgram(programId: string): Promise<School[]> 
   }
 
   console.log(`Found ${data?.length || 0} entries for program ID: ${programId}`);
+  console.log('Sample school data:', data && data.length > 0 ? data[0] : 'No school data found');
   
   // Transform the data to match our School interface
   const schools: School[] = [];
@@ -216,7 +221,9 @@ export async function getSchoolsByProgram(programId: string): Promise<School[]> 
     }
   });
 
-  return Array.from(schoolsMap.values());
+  const result = Array.from(schoolsMap.values());
+  console.log(`Transformed ${result.length} schools for program ID: ${programId}`);
+  return result;
 }
 
 // Fallback function to get all schools with the program added
@@ -247,6 +254,8 @@ async function getAllSchoolsWithFallbackProgram(programId: string): Promise<Scho
     console.error('Error fetching all schools:', schoolsError);
     throw schoolsError;
   }
+  
+  console.log(`Fetched ${schoolsData?.length || 0} schools as fallback`);
   
   // Transform to School objects with the program added
   return (schoolsData || []).map(school => ({
@@ -486,7 +495,7 @@ export const findAdmissionScore = (school: School, programName: string): number 
   return matchingKey ? school.admissionScores[matchingKey] : null;
 };
 
-// New function to get specialization name by code
+// Function to get specialization name by code
 export async function getSpecializationNameByCode(code: string): Promise<string> {
   if (!code) return "Ingen specifik inriktning";
   
