@@ -73,7 +73,7 @@ export async function getPrograms(): Promise<Program[]> {
   return programs;
 }
 
-// New function to fetch specializations (inriktningar) for a program
+// Function to fetch specializations (inriktningar) for a program
 export async function getProgramSpecializations(programId: string): Promise<Specialization[]> {
   console.log(`Fetching specializations for program ID: ${programId}`);
   
