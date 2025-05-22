@@ -13,6 +13,13 @@ export interface Program {
   universities: string[];
   subjects: string[];
   merit: string;
+  category?: string;
+}
+
+export interface Specialization {
+  id: string;
+  name: string;
+  programId: string;
 }
 
 export interface FurtherEducation {
@@ -25,6 +32,7 @@ export interface School {
   id: string;
   name: string;
   programs: string[];
+  specializations?: string[];
   location: {
     address: string;
     coordinates: { lat: number; lng: number };

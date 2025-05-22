@@ -1,13 +1,15 @@
 
 import React from 'react';
-import { Program } from '../types';
+import { Program, School, Specialization } from '../types';
 import ProgramDetail from '../ProgramDetail';
 import SchoolsList from '../SchoolsList';
-import { School } from '../types';
+import NoSchoolsMessage from '../NoSchoolsMessage';
 
 interface ProgramDetailsViewProps {
   selectedProgram: Program;
-  schoolsByProgram: School[] | undefined;
+  schoolsByProgram: School[] | null;
+  programSpecializations?: Specialization[];
+  isLoadingSchoolsByProgram?: boolean;
   handleViewCareerTree: () => void;
   toggleCompareProgram: (programId: string) => void;
   handleSaveProgram: (schoolName?: string) => void;
@@ -16,6 +18,8 @@ interface ProgramDetailsViewProps {
 const ProgramDetailsView = ({
   selectedProgram,
   schoolsByProgram,
+  programSpecializations,
+  isLoadingSchoolsByProgram,
   handleViewCareerTree,
   toggleCompareProgram,
   handleSaveProgram
@@ -24,17 +28,28 @@ const ProgramDetailsView = ({
     <div id="program-detail">
       <ProgramDetail 
         selectedProgram={selectedProgram}
+        programSpecializations={programSpecializations}
         handleViewCareerTree={handleViewCareerTree}
         toggleCompareProgram={toggleCompareProgram}
         handleSaveProgram={handleSaveProgram}
       />
       
-      {schoolsByProgram && (
+      {isLoadingSchoolsByProgram ? (
+        <NoSchoolsMessage 
+          selectedProgramName={selectedProgram.name} 
+          selectedProgramId={selectedProgram.id} 
+        />
+      ) : schoolsByProgram ? (
         <SchoolsList 
           schools={schoolsByProgram}
           toggleCompareSchool={toggleCompareSchool}
           handleSaveProgram={handleSaveProgram}
           selectedProgramName={selectedProgram.name}
+        />
+      ) : (
+        <NoSchoolsMessage 
+          selectedProgramName={selectedProgram.name}
+          selectedProgramId={selectedProgram.id}
         />
       )}
     </div>

@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { useUser } from '@/context/UserContext';
 import { toast } from '@/components/ui/use-toast';
 import { programData } from '@/data/programData';
-import { findAdmissionScore } from '@/services/schoolService';
-import { ViewMode, CompareItems } from '@/components/career/types';
+import { findAdmissionScore, getPrograms } from '@/services/schoolService';
+import { ViewMode, CompareItems, Program } from '@/components/career/types';
 import { useSchoolsData } from '@/components/career/hooks/useSchoolsData';
 import { useProgramSchools } from '@/components/career/hooks/useProgramSchools';
 import { getSchoolById, getProgramById } from '@/components/career/utils/careerMapUtils';
@@ -16,15 +16,27 @@ import ProgramDetailsView from '@/components/career/views/ProgramDetailsView';
 import CareerTreeView from '@/components/career/views/CareerTreeView';
 import CompareItemsView from '@/components/career/views/CompareItemsView';
 import { SplitSquareVertical } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 const CareerMap = () => {
   const { addSavedProgram } = useUser();
-  const [selectedProgram, setSelectedProgram] = useState(programData[0]);
+  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('programs');
   const [selectedSchool, setSelectedSchool] = useState<string | null>(null);
   const [compareItems, setCompareItems] = useState<CompareItems>({
     schools: [],
     programs: []
+  });
+  
+  // Fetch programs from database
+  const {
+    data: dbPrograms,
+    isLoading: isLoadingDbPrograms,
+    error: dbProgramsError
+  } = useQuery({
+    queryKey: ['programs'],
+    queryFn: getPrograms,
+    staleTime: 10 * 60 * 1000 // 10 minutes
   });
   
   // Custom hooks for data fetching
@@ -36,10 +48,19 @@ const CareerMap = () => {
     programsError 
   } = useSchoolsData();
   
+  // Initialize selectedProgram when dbPrograms load
+  useEffect(() => {
+    if (dbPrograms && dbPrograms.length > 0 && !selectedProgram) {
+      setSelectedProgram(dbPrograms[0]);
+    }
+  }, [dbPrograms, selectedProgram]);
+  
+  // Only call useProgramSchools if we have a selectedProgram
   const { 
     schoolsByProgram, 
+    programSpecializations,
     isLoadingSchoolsByProgram 
-  } = useProgramSchools(selectedProgram, viewMode);
+  } = useProgramSchools(selectedProgram || (dbPrograms?.[0] as Program), viewMode);
 
   // Auto-scroll to info section when a program is selected
   useEffect(() => {
@@ -52,6 +73,8 @@ const CareerMap = () => {
   }, [viewMode]);
   
   const handleSaveProgram = (schoolName?: string) => {
+    if (!selectedProgram) return;
+    
     const schoolToSave = schoolName || selectedSchool || "Valfri skola";
     const programId = `${Date.now().toString()}-${selectedProgram.id}`;
     
@@ -124,7 +147,7 @@ const CareerMap = () => {
     });
   };
   
-  const handleProgramSelect = (program: any) => {
+  const handleProgramSelect = (program: Program) => {
     setSelectedProgram(program);
     setViewMode('programDetail');
   };
@@ -149,8 +172,9 @@ const CareerMap = () => {
     setViewMode('compare');
   };
 
-  const isLoading = isLoadingSchools || isLoadingPrograms || (viewMode === 'programDetail' && isLoadingSchoolsByProgram);
-  const error = schoolsError || programsError;
+  const isLoading = isLoadingSchools || isLoadingPrograms || isLoadingDbPrograms || 
+                   (viewMode === 'programDetail' && isLoadingSchoolsByProgram && selectedProgram);
+  const error = schoolsError || programsError || dbProgramsError;
 
   if (isLoading) {
     return (
@@ -167,6 +191,9 @@ const CareerMap = () => {
       </div>
     );
   }
+
+  // Fallback to hardcoded data if database programs failed to load
+  const displayPrograms = dbPrograms && dbPrograms.length > 0 ? dbPrograms : programData;
   
   return (
     <div className="container mx-auto px-4 py-8">
@@ -185,7 +212,7 @@ const CareerMap = () => {
           {viewMode === 'programs' && "Välj ett gymnasieprogram nedan för att se vad det innehåller, vilka behörigheter det ger och vilka skolor som erbjuder det."}
           {viewMode === 'compare' && "Jämför olika program och skolor sida vid sida för att hitta det som passar dig bäst."}
           {viewMode === 'tree' && "Utforska hur olika utbildningsvägar hänger ihop med olika karriärval genom ett interaktivt träd."}
-          {viewMode === 'programDetail' && `Utforska ${selectedProgram.name} och se vilka möjligheter det öppnar för din framtid.`}
+          {viewMode === 'programDetail' && selectedProgram && `Utforska ${selectedProgram.name} och se vilka möjligheter det öppnar för din framtid.`}
         </p>
 
         {(compareItems.programs.length > 0 || compareItems.schools.length > 0) && viewMode !== 'compare' && (
@@ -204,22 +231,24 @@ const CareerMap = () => {
 
       {viewMode === 'programs' && (
         <ProgramsGrid 
-          programData={programData} 
+          programData={displayPrograms} 
           onProgramSelect={handleProgramSelect} 
         />
       )}
 
-      {viewMode === 'programDetail' && (
+      {viewMode === 'programDetail' && selectedProgram && (
         <ProgramDetailsView
           selectedProgram={selectedProgram}
           schoolsByProgram={schoolsByProgram}
+          programSpecializations={programSpecializations}
+          isLoadingSchoolsByProgram={isLoadingSchoolsByProgram}
           handleViewCareerTree={handleViewCareerTree}
           toggleCompareProgram={toggleCompareProgram}
           handleSaveProgram={handleSaveProgram}
         />
       )}
       
-      {viewMode === 'tree' && (
+      {viewMode === 'tree' && selectedProgram && (
         <CareerTreeView
           selectedProgram={selectedProgram}
           handleSaveProgram={handleSaveProgram}
@@ -233,7 +262,12 @@ const CareerMap = () => {
           handleBackToPrograms={handleBackToPrograms}
           toggleCompareProgram={toggleCompareProgram}
           toggleCompareSchool={toggleCompareSchool}
-          getProgramById={(id) => getProgramById(programData, id)}
+          getProgramById={(id) => {
+            if (dbPrograms) {
+              return dbPrograms.find(p => p.id === id);
+            }
+            return getProgramById(programData, id);
+          }}
           getSchoolById={(id) => getSchoolById(schoolsData, id)}
         />
       )}

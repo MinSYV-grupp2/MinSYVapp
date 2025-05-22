@@ -5,9 +5,10 @@ import { School as SchoolIcon, Loader } from 'lucide-react';
 
 interface NoSchoolsMessageProps {
   selectedProgramName: string;
+  selectedProgramId?: string;
 }
 
-const NoSchoolsMessage = ({ selectedProgramName }: NoSchoolsMessageProps) => {
+const NoSchoolsMessage = ({ selectedProgramName, selectedProgramId }: NoSchoolsMessageProps) => {
   return (
     <Card>
       <CardContent className="p-6">
@@ -22,6 +23,9 @@ const NoSchoolsMessage = ({ selectedProgramName }: NoSchoolsMessageProps) => {
           <Loader className="h-10 w-10 text-guidance-blue mx-auto animate-spin mb-4" />
           <p className="text-lg text-gray-700 font-medium">Letar efter skolor...</p>
           <p className="text-gray-500 mt-2">Vi använder fallbackdata om inga skolor hittas i databasen.</p>
+          {selectedProgramId && (
+            <p className="text-gray-500 mt-1 text-sm">Program ID: {selectedProgramId}</p>
+          )}
         </div>
       </CardContent>
     </Card>

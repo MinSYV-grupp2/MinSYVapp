@@ -1,6 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { School } from '@/components/career/types';
+import { School, Program, Specialization } from '@/components/career/types';
 
 // Helper function to normalize program names for better matching
 const normalizeForComparison = (str: string): string => {
@@ -33,40 +32,75 @@ export const isProgramMatch = (programName1: string, programName2: string): bool
   return false;
 };
 
-// New function to fetch all unique programs from schools_programs table
-export async function getUniquePrograms(): Promise<{ id: string, name: string }[]> {
-  console.log('Fetching unique programs from schools_programs...');
+// New function to fetch all programs from the database
+export async function getPrograms(): Promise<Program[]> {
+  console.log('Fetching programs data from Supabase...');
   
-  const { data, error } = await supabase
-    .from('schools_programs')
-    .select('program_id, program_name')
-    .order('program_name');
-  
-  if (error) {
-    console.error('Error fetching unique programs:', error);
-    throw error;
+  const { data: programsData, error: programsError } = await supabase
+    .from('educational_programs')
+    .select('*')
+    .order('program_namn');
+
+  if (programsError) {
+    console.error('Error fetching programs:', programsError);
+    throw programsError;
   }
 
-  // Create a map to store unique programs (by ID)
-  const uniquePrograms = new Map();
-  data?.forEach(program => {
-    if (program.program_name && program.program_id) {
-      uniquePrograms.set(program.program_id, {
-        id: program.program_id,
-        name: program.program_name
-      });
-    }
-  });
+  console.log(`Fetched ${programsData?.length || 0} programs from database`);
 
-  console.log(`Found ${uniquePrograms.size} unique programs`);
-  return Array.from(uniquePrograms.values());
+  // Get specializations for each program
+  const programs: Program[] = await Promise.all((programsData || []).map(async (program) => {
+    const specializations = await getProgramSpecializations(program.program_id);
+    
+    return {
+      id: program.program_id,
+      name: program.program_namn,
+      description: `Program inom ${program.kategori || 'okänd kategori'}`,
+      specializations: specializations.map(spec => spec.inriktning),
+      meritDescription: "Se skolans webbsida för information om meritpoäng",
+      educationDescription: "Se skolans webbsida för information om utbildningen",
+      requiredCourses: [],
+      recommendedCourses: [],
+      furtherEducation: [],
+      careers: [],
+      universities: [],
+      subjects: [],
+      merit: "",
+      category: program.kategori || ""
+    };
+  }));
+
+  return programs;
+}
+
+// New function to fetch specializations (inriktningar) for a program
+export async function getProgramSpecializations(programId: string): Promise<Specialization[]> {
+  console.log(`Fetching specializations for program ID: ${programId}`);
+  
+  const { data, error } = await supabase
+    .from('program_inriktningar')
+    .select('*')
+    .eq('program_id', programId);
+
+  if (error) {
+    console.error('Error fetching specializations:', error);
+    return [];
+  }
+
+  console.log(`Found ${data?.length || 0} specializations for program ID: ${programId}`);
+  
+  return (data || []).map(item => ({
+    id: item.inriktningskod,
+    name: item.inriktning || 'Ingen specifik inriktning',
+    programId: item.program_id
+  }));
 }
 
 // Function to get schools that offer a specific program
 export async function getSchoolsByProgram(programId: string): Promise<School[]> {
   console.log(`Fetching schools for program ID: ${programId}`);
   
-  // Fetch data from programData if no results from database
+  // Fetch data from database
   if (!programId) {
     console.error('No program ID provided');
     return [];
@@ -115,6 +149,7 @@ export async function getSchoolsByProgram(programId: string): Promise<School[]> 
         id: schoolId,
         name: entry.schools.name,
         programs: [entry.program_name],
+        specializations: entry.inriktningskod ? [entry.inriktningskod] : [],
         location: {
           address: entry.schools.address || 'Adress saknas',
           coordinates: { lat: 0, lng: 0 },
@@ -139,6 +174,9 @@ export async function getSchoolsByProgram(programId: string): Promise<School[]> 
       const school = schoolsMap.get(schoolId)!;
       if (!school.programs.includes(entry.program_name)) {
         school.programs.push(entry.program_name);
+      }
+      if (entry.inriktningskod && !school.specializations?.includes(entry.inriktningskod)) {
+        school.specializations?.push(entry.inriktningskod);
       }
       school.admissionScores[entry.program_name] = entry.admission_score;
     }
@@ -181,6 +219,7 @@ async function getAllSchoolsWithFallbackProgram(programId: string): Promise<Scho
     id: school.id,
     name: school.name,
     programs: [programName],
+    specializations: [],
     location: {
       address: school.address || 'Adress saknas',
       coordinates: { lat: 0, lng: 0 },
@@ -257,6 +296,7 @@ export async function getSchools(): Promise<School[]> {
       id: schoolData.id,
       name: schoolData.name,
       programs: programs.length > 0 ? programs : [],
+      specializations: [],
       location: {
         address: schoolData.address || 'Adress saknas',
         coordinates: { lat: 0, lng: 0 },
@@ -285,6 +325,7 @@ function createFallbackSchoolData(): School[] {
       id: 'fake-id-1',
       name: 'Polhemsgymnasiet',
       programs: ['Naturvetenskapsprogrammet', 'Teknikprogrammet'],
+      specializations: [],
       location: {
         address: 'Decembergatan 5, Göteborg',
         coordinates: { lat: 57.7, lng: 11.9 },
@@ -309,6 +350,7 @@ function createFallbackSchoolData(): School[] {
       id: 'fake-id-2',
       name: 'Hvitfeldtska gymnasiet',
       programs: ['Naturvetenskapsprogrammet', 'Samhällsvetenskapsprogrammet'],
+      specializations: [],
       location: {
         address: 'Rektorsgatan 2, Göteborg',
         coordinates: { lat: 57.7, lng: 11.95 },
@@ -375,6 +417,7 @@ export async function getSchoolById(id: string): Promise<School | null> {
     id: data.id,
     name: data.name,
     programs: programs,
+    specializations: [],
     location: {
       address: data.address || 'Adress saknas',
       coordinates: { lat: 0, lng: 0 },
@@ -408,3 +451,21 @@ export const findAdmissionScore = (school: School, programName: string): number 
   
   return matchingKey ? school.admissionScores[matchingKey] : null;
 };
+
+// New function to get specialization name by code
+export async function getSpecializationNameByCode(code: string): Promise<string> {
+  if (!code) return "Ingen specifik inriktning";
+  
+  const { data, error } = await supabase
+    .from('program_inriktningar')
+    .select('inriktning')
+    .eq('inriktningskod', code)
+    .maybeSingle();
+    
+  if (error || !data) {
+    console.error('Error fetching specialization name:', error);
+    return "Okänd inriktning";
+  }
+  
+  return data.inriktning || "Ingen specifik inriktning";
+}

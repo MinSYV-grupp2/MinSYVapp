@@ -6,6 +6,7 @@ import { School } from './types';
 import { isGothenburgSchool } from './utils/schoolUtils';
 import SchoolCard from './SchoolCard';
 import NoSchoolsMessage from './NoSchoolsMessage';
+import { getSpecializationNameByCode } from '@/services/schoolService';
 
 interface SchoolListProps {
   schools: School[] | null;
@@ -16,6 +17,31 @@ interface SchoolListProps {
 
 const SchoolsList = ({ schools, toggleCompareSchool, handleSaveProgram, selectedProgramName }: SchoolListProps) => {
   const [expandedSchool, setExpandedSchool] = useState<string | null>(null);
+  const [specializationNames, setSpecializationNames] = useState<Record<string, string>>({});
+  
+  // Load specialization names
+  React.useEffect(() => {
+    async function loadSpecializationNames() {
+      const specializations: Record<string, string> = {};
+      
+      if (schools) {
+        for (const school of schools) {
+          if (school.specializations?.length) {
+            for (const code of school.specializations) {
+              if (!specializationNames[code]) {
+                const name = await getSpecializationNameByCode(code);
+                specializations[code] = name;
+              }
+            }
+          }
+        }
+        
+        setSpecializationNames(prev => ({...prev, ...specializations}));
+      }
+    }
+    
+    loadSpecializationNames();
+  }, [schools]);
   
   // Handle null or empty schools
   if (!schools || schools.length === 0) {
@@ -74,6 +100,7 @@ const SchoolsList = ({ schools, toggleCompareSchool, handleSaveProgram, selected
                   handleSaveProgram={handleSaveProgram}
                   toggleSchoolDetail={toggleSchoolDetail}
                   isGothenburg={true}
+                  specializationNames={specializationNames}
                 />
               ))}
             </div>
@@ -100,6 +127,7 @@ const SchoolsList = ({ schools, toggleCompareSchool, handleSaveProgram, selected
                   handleSaveProgram={handleSaveProgram}
                   toggleSchoolDetail={toggleSchoolDetail}
                   isGothenburg={false}
+                  specializationNames={specializationNames}
                 />
               ))}
             </div>
