@@ -3,23 +3,15 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, TreeDeciduous, SplitSquareVertical, GraduationCap, School, BookOpen, Map, Star } from 'lucide-react';
-import { Specialization } from './types';
 
 interface ProgramDetailProps {
   selectedProgram: any;
-  programSpecializations?: Specialization[];
   handleViewCareerTree: () => void;
   toggleCompareProgram: (programId: string) => void;
   handleSaveProgram: (school?: string) => void;
 }
 
-const ProgramDetail = ({ 
-  selectedProgram, 
-  programSpecializations, 
-  handleViewCareerTree, 
-  toggleCompareProgram, 
-  handleSaveProgram 
-}: ProgramDetailProps) => {
+const ProgramDetail = ({ selectedProgram, handleViewCareerTree, toggleCompareProgram, handleSaveProgram }: ProgramDetailProps) => {
   return (
     <Card className="mb-8 border-l-4 border-guidance-blue">
       <CardContent className="p-6">
@@ -69,6 +61,7 @@ const ProgramDetail = ({
                   <span className="font-medium">Programpoäng:</span> 2500 poäng
                 </div>
               </li>
+              {/* Removed the admission score item that was previously here */}
             </ul>
             
             <h4 className="text-md font-medium text-guidance-blue mt-4 mb-2">Obligatoriska kurser:</h4>
@@ -85,13 +78,7 @@ const ProgramDetail = ({
               Inriktningar
             </h3>
             <ul className="space-y-2">
-              {programSpecializations?.length ? (
-                programSpecializations.map((specialization, index) => (
-                  <li key={index} className="bg-guidance-lightGreen/30 p-2 rounded text-sm">
-                    {specialization.name}
-                  </li>
-                ))
-              ) : selectedProgram.specializations?.map((specialization: string, index: number) => (
+              {selectedProgram.specializations?.map((specialization: string, index: number) => (
                 <li key={index} className="bg-guidance-lightGreen/30 p-2 rounded text-sm">
                   {specialization}
                 </li>

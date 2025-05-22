@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { School, Program, Specialization } from '@/components/career/types';
 
@@ -57,7 +56,7 @@ export async function getPrograms(): Promise<Program[]> {
       id: program.program_id,
       name: program.program_namn,
       description: `Program inom ${program.kategori || 'okänd kategori'}`,
-      specializations: specializations.map(spec => spec.name),
+      specializations: specializations.map(spec => spec.inriktning),
       meritDescription: "Se skolans webbsida för information om meritpoäng",
       educationDescription: "Se skolans webbsida för information om utbildningen",
       requiredCourses: [],
@@ -74,7 +73,7 @@ export async function getPrograms(): Promise<Program[]> {
   return programs;
 }
 
-// Function to fetch specializations (inriktningar) for a program
+// New function to fetch specializations (inriktningar) for a program
 export async function getProgramSpecializations(programId: string): Promise<Specialization[]> {
   console.log(`Fetching specializations for program ID: ${programId}`);
   
@@ -95,31 +94,6 @@ export async function getProgramSpecializations(programId: string): Promise<Spec
     name: item.inriktning || 'Ingen specifik inriktning',
     programId: item.program_id
   }));
-}
-
-// New function to get unique programs from schools_programs table
-export async function getUniquePrograms(): Promise<any[]> {
-  console.log('Fetching unique programs from Supabase...');
-  
-  const { data, error } = await supabase
-    .from('schools_programs')
-    .select('program_id, program_name')
-    .order('program_name');
-
-  if (error) {
-    console.error('Error fetching unique programs:', error);
-    throw error;
-  }
-
-  // Remove duplicates by using a Map with program_id as key
-  const uniquePrograms = new Map();
-  data?.forEach(program => {
-    if (program.program_id && program.program_name) {
-      uniquePrograms.set(program.program_id, program);
-    }
-  });
-
-  return Array.from(uniquePrograms.values());
 }
 
 // Function to get schools that offer a specific program
