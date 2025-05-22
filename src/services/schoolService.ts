@@ -96,6 +96,31 @@ export async function getProgramSpecializations(programId: string): Promise<Spec
   }));
 }
 
+// New function to get unique programs from schools_programs table
+export async function getUniquePrograms(): Promise<any[]> {
+  console.log('Fetching unique programs from Supabase...');
+  
+  const { data, error } = await supabase
+    .from('schools_programs')
+    .select('program_id, program_name')
+    .order('program_name');
+
+  if (error) {
+    console.error('Error fetching unique programs:', error);
+    throw error;
+  }
+
+  // Remove duplicates by using a Map with program_id as key
+  const uniquePrograms = new Map();
+  data?.forEach(program => {
+    if (program.program_id && program.program_name) {
+      uniquePrograms.set(program.program_id, program);
+    }
+  });
+
+  return Array.from(uniquePrograms.values());
+}
+
 // Function to get schools that offer a specific program
 export async function getSchoolsByProgram(programId: string): Promise<School[]> {
   console.log(`Fetching schools for program ID: ${programId}`);
