@@ -44,12 +44,20 @@ const CareerMap = () => {
     }
   }, [viewMode]);
   
+  // Helper function to check if a school offers the selected program
+  const schoolOffersProgram = (school: School, programName: string): boolean => {
+    if (!school.programs || school.programs.length === 0) return false;
+    
+    // Check if any of the school's programs contain the program name
+    // This allows for matching even when database program names have additional codes
+    return school.programs.some(program => 
+      program.toLowerCase().includes(programName.toLowerCase())
+    );
+  };
+  
   // Filter schools that offer the selected program
   const schoolsWithSelectedProgram = schoolsData ? (
-    schoolsData.filter(school => {
-      // Check if the school offers the selected program
-      return school.programs.includes(selectedProgram.name);
-    })
+    schoolsData.filter(school => schoolOffersProgram(school, selectedProgram.name))
   ) : [];
   
   // Get school by id
@@ -72,19 +80,35 @@ const CareerMap = () => {
     if (schoolName) {
       // If a specific school was provided
       const school = schoolsData?.find(s => s.name === schoolName);
-      if (school && school.admissionScores[selectedProgram.name]) {
-        admissionScore = school.admissionScores[selectedProgram.name].toString();
+      if (school) {
+        // Find admission score that matches the program (partial match)
+        const matchingProgramKey = Object.keys(school.admissionScores).find(
+          key => key.toLowerCase().includes(selectedProgram.name.toLowerCase())
+        );
+        
+        if (matchingProgramKey && school.admissionScores[matchingProgramKey]) {
+          admissionScore = school.admissionScores[matchingProgramKey].toString();
+        }
       }
     } else if (schoolsWithSelectedProgram.length > 0) {
       // If no specific school, use average admission score if available
       const scoresSum = schoolsWithSelectedProgram.reduce((sum, school) => {
-        const score = school.admissionScores[selectedProgram.name];
+        // Find admission score that matches the program (partial match)
+        const matchingProgramKey = Object.keys(school.admissionScores).find(
+          key => key.toLowerCase().includes(selectedProgram.name.toLowerCase())
+        );
+        
+        const score = matchingProgramKey ? school.admissionScores[matchingProgramKey] : null;
         return score ? sum + score : sum;
       }, 0);
       
-      const schoolsWithScores = schoolsWithSelectedProgram.filter(
-        school => school.admissionScores[selectedProgram.name]
-      ).length;
+      // Count schools that have scores for this program
+      const schoolsWithScores = schoolsWithSelectedProgram.filter(school => {
+        const matchingProgramKey = Object.keys(school.admissionScores).find(
+          key => key.toLowerCase().includes(selectedProgram.name.toLowerCase())
+        );
+        return matchingProgramKey && school.admissionScores[matchingProgramKey];
+      }).length;
       
       if (schoolsWithScores > 0) {
         admissionScore = (scoresSum / schoolsWithScores).toFixed(1);

@@ -181,6 +181,7 @@ export type Database = {
           inriktning: string | null
           inriktningskod: string
           kategori: string | null
+          program_id: number | null
           program_namn: string
           updated_at: string
         }
@@ -189,6 +190,7 @@ export type Database = {
           inriktning?: string | null
           inriktningskod: string
           kategori?: string | null
+          program_id?: number | null
           program_namn: string
           updated_at?: string
         }
@@ -197,6 +199,7 @@ export type Database = {
           inriktning?: string | null
           inriktningskod?: string
           kategori?: string | null
+          program_id?: number | null
           program_namn?: string
           updated_at?: string
         }

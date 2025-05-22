@@ -15,6 +15,8 @@ export async function getSchools(): Promise<School[]> {
     throw error;
   }
 
+  console.log('Schools data from supabase:', data);
+
   // Transform the Supabase data to match our School interface
   return (data || []).map(schoolData => {
     // Map the programs and admission scores from the joined data
