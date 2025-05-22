@@ -1,6 +1,8 @@
 import { supabase } from '@/integrations/supabase/client';
 import { School, Program, Specialization } from '@/components/career/types';
 import { enhanceProgramWithAI, enhanceProgramListWithAI } from './programEnhancementService';
+import { schoolsData } from '@/data/schoolsData';
+import { getSchoolsForProgram } from '@/components/career/utils/careerMapUtils';
 
 // Helper function to normalize program names for better matching
 const normalizeForComparison = (str: string): string => {
@@ -270,16 +272,12 @@ export async function getSchoolsByProgram(programId: string): Promise<School[]> 
 function createFallbackSchoolsForProgram(programId: string, programName: string): School[] {
   console.log(`Creating fallback schools for program ${programName} (${programId})`);
   
-  // Import directly instead of using require
-  import { schoolsData } from '@/data/schoolsData';
-  
   if (!schoolsData || !Array.isArray(schoolsData)) {
     console.error('Fallback schoolsData is invalid');
     return [];
   }
   
   // Use the more robust getSchoolsForProgram function from careerMapUtils
-  const { getSchoolsForProgram } = require('@/components/career/utils/careerMapUtils');
   return getSchoolsForProgram(schoolsData, programId, programName);
 }
 
