@@ -34,6 +34,9 @@ const SchoolList = ({ schools, toggleCompareSchool, handleSaveProgram, selectedP
         <h3 className="text-xl font-semibold text-guidance-blue mb-4 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mr-2"><path d="M3 10h18"></path><path d="M6 6h12"></path><path d="M10 14h4"></path><circle cx="12" cy="18" r="2"></circle></svg>
           Skolor som erbjuder {selectedProgramName}
+          <span className="ml-2 text-sm font-normal text-gray-500">
+            ({schools.length} {schools.length === 1 ? 'skola' : 'skolor'})
+          </span>
         </h3>
         
         {schools.length === 0 ? (

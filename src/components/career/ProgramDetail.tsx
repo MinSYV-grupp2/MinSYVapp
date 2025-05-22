@@ -61,14 +61,7 @@ const ProgramDetail = ({ selectedProgram, handleViewCareerTree, toggleComparePro
                   <span className="font-medium">Programpoäng:</span> 2500 poäng
                 </div>
               </li>
-              <li className="flex items-start">
-                <span className="bg-guidance-lightBlue p-1 rounded-full mr-2 mt-1">
-                  <Star className="h-3 w-3 text-guidance-blue" />
-                </span>
-                <div>
-                  <span className="font-medium">Antagningspoäng:</span> {selectedProgram.merit ? `${selectedProgram.merit}` : 'Varierar mellan skolor'}
-                </div>
-              </li>
+              {/* Removed the admission score item that was previously here */}
             </ul>
             
             <h4 className="text-md font-medium text-guidance-blue mt-4 mb-2">Obligatoriska kurser:</h4>
