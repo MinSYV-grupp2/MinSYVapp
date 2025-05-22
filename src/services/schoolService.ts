@@ -7,22 +7,40 @@ const normalizeForComparison = (str: string): string => {
   return str.toLowerCase().replace(/\s+/g, ' ').trim();
 };
 
-// Check if two program names match (exact match or one contains the other)
+// Check if two program names match (exact match, one contains the other, or contains program code)
 const isProgramMatch = (programName1: string, programName2: string): boolean => {
   const normalized1 = normalizeForComparison(programName1);
   const normalized2 = normalizeForComparison(programName2);
   
-  return normalized1 === normalized2 || 
-         normalized1.includes(normalized2) || 
-         normalized2.includes(normalized1);
+  // Check for exact match
+  if (normalized1 === normalized2) return true;
+  
+  // Check if one contains the other
+  if (normalized1.includes(normalized2) || normalized2.includes(normalized1)) return true;
+  
+  // Check for program code pattern (e.g. "BA25 - Bygg och anläggning")
+  const codePattern = /^([A-Z]{2}\d{2})\s*-?\s*/i;
+  const match1 = normalized1.match(codePattern);
+  const match2 = normalized2.match(codePattern);
+  
+  // If both have codes and they match
+  if (match1 && match2 && match1[1].toLowerCase() === match2[1].toLowerCase()) return true;
+  
+  // If one has a code, check if it's in the other string
+  if (match1 && normalized2.includes(match1[1].toLowerCase())) return true;
+  if (match2 && normalized1.includes(match2[1].toLowerCase())) return true;
+  
+  return false;
 };
 
 export async function getSchools(): Promise<School[]> {
+  console.log('Fetching schools data from Supabase...');
+  
   const { data, error } = await supabase
     .from('schools')
     .select(`
       *,
-      schools_programs(program_name, admission_score, inriktningskod)
+      schools_programs(program_id, program_name, admission_score, inriktningskod)
     `);
 
   if (error) {
@@ -31,15 +49,28 @@ export async function getSchools(): Promise<School[]> {
   }
 
   console.log('Schools data from supabase:', data);
+  console.log('Number of schools returned:', data?.length || 0);
+  
+  if (data && data.length > 0 && data[0].schools_programs) {
+    console.log('Example school programs:', data[0].schools_programs);
+  }
 
   // Transform the Supabase data to match our School interface
   return (data || []).map(schoolData => {
     // Map the programs and admission scores from the joined data
     const programsMap: Record<string, number> = {};
+    const programs: string[] = [];
+    
     if (schoolData.schools_programs && Array.isArray(schoolData.schools_programs)) {
       schoolData.schools_programs.forEach((prog: any) => {
         if (prog.program_name && prog.admission_score !== null) {
           programsMap[prog.program_name] = Number(prog.admission_score);
+          programs.push(prog.program_name);
+        } else if (prog.program_id && prog.admission_score !== null) {
+          // If we only have program_id but no name, use the ID as a fallback
+          const programKey = `Program ${prog.program_id}`;
+          programsMap[programKey] = Number(prog.admission_score);
+          programs.push(programKey);
         }
       });
     }
@@ -47,8 +78,7 @@ export async function getSchools(): Promise<School[]> {
     return {
       id: schoolData.id,
       name: schoolData.name,
-      programs: schoolData.schools_programs ? 
-        schoolData.schools_programs.map((p: any) => p.program_name).filter(Boolean) : [],
+      programs: programs.length > 0 ? programs : [],
       location: {
         address: schoolData.address || 'Adress saknas',
         coordinates: { lat: 0, lng: 0 },
@@ -74,7 +104,7 @@ export async function getSchoolById(id: string): Promise<School | null> {
     .from('schools')
     .select(`
       *,
-      schools_programs(program_name, admission_score, inriktningskod)
+      schools_programs(program_id, program_name, admission_score, inriktningskod)
     `)
     .eq('id', id)
     .single();
@@ -91,10 +121,18 @@ export async function getSchoolById(id: string): Promise<School | null> {
 
   // Map the programs and admission scores from the joined data
   const programsMap: Record<string, number> = {};
+  const programs: string[] = [];
+  
   if (data.schools_programs && Array.isArray(data.schools_programs)) {
     data.schools_programs.forEach((prog: any) => {
       if (prog.program_name && prog.admission_score !== null) {
         programsMap[prog.program_name] = Number(prog.admission_score);
+        programs.push(prog.program_name);
+      } else if (prog.program_id && prog.admission_score !== null) {
+        // If we only have program_id but no name, use the ID as a fallback
+        const programKey = `Program ${prog.program_id}`;
+        programsMap[programKey] = Number(prog.admission_score);
+        programs.push(programKey);
       }
     });
   }
@@ -103,8 +141,7 @@ export async function getSchoolById(id: string): Promise<School | null> {
   return {
     id: data.id,
     name: data.name,
-    programs: data.schools_programs ? 
-      data.schools_programs.map((p: any) => p.program_name).filter(Boolean) : [],
+    programs: programs,
     location: {
       address: data.address || 'Adress saknas',
       coordinates: { lat: 0, lng: 0 },

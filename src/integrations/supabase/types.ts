@@ -186,7 +186,7 @@ export type Database = {
         Insert: {
           created_at?: string
           kategori?: string | null
-          program_id?: number
+          program_id: number
           program_namn: string
           updated_at?: string
         }
@@ -560,7 +560,15 @@ export type Database = {
           program_id?: number
           program_namn?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "program_inriktningar_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "educational_programs"
+            referencedColumns: ["program_id"]
+          },
+        ]
       }
       quiz_questions: {
         Row: {
