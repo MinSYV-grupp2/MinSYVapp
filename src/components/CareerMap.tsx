@@ -3,22 +3,18 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/context/UserContext';
 import { toast } from '@/components/ui/use-toast';
-import { SplitSquareVertical } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-
-// Import the data
 import { programData } from '@/data/programData';
-// Import the school service
-import { getSchools, getUniquePrograms, getSchoolsByProgram } from '@/services/schoolService';
-
-// Import the components
-import ProgramCard from '@/components/career/ProgramCard';
-import ProgramDetail from '@/components/career/ProgramDetail';
-import SchoolList from '@/components/career/SchoolList';
-import CareerTree from '@/components/career/CareerTree';
-import CompareView from '@/components/career/CompareView';
-import { ViewMode, CompareItems, School } from '@/components/career/types';
-import { isProgramMatch, findAdmissionScore } from '@/services/schoolService';
+import { findAdmissionScore } from '@/services/schoolService';
+import { ViewMode, CompareItems } from '@/components/career/types';
+import { useSchoolsData } from '@/components/career/hooks/useSchoolsData';
+import { useProgramSchools } from '@/components/career/hooks/useProgramSchools';
+import { getSchoolById, getProgramById } from '@/components/career/utils/careerMapUtils';
+import { LoadingState, ErrorState } from '@/components/career/LoadingAndErrorStates';
+import { ViewActions, getCompareToast } from '@/components/career/ViewActions';
+import ProgramsGrid from '@/components/career/views/ProgramsGrid';
+import ProgramDetailsView from '@/components/career/views/ProgramDetailsView';
+import CareerTreeView from '@/components/career/views/CareerTreeView';
+import CompareItemsView from '@/components/career/views/CompareItemsView';
 
 const CareerMap = () => {
   const { addSavedProgram } = useUser();
@@ -30,24 +26,19 @@ const CareerMap = () => {
     programs: []
   });
   
-  // Fetch all schools from Supabase
-  const { data: schoolsData, isLoading: isLoadingSchools, error: schoolsError } = useQuery({
-    queryKey: ['schools'],
-    queryFn: getSchools
-  });
+  // Custom hooks for data fetching
+  const { 
+    schoolsData, 
+    isLoadingSchools, 
+    isLoadingPrograms, 
+    schoolsError, 
+    programsError 
+  } = useSchoolsData();
   
-  // Fetch unique programs from schools_programs table
-  const { data: uniqueProgramsData, isLoading: isLoadingPrograms, error: programsError } = useQuery({
-    queryKey: ['uniquePrograms'],
-    queryFn: getUniquePrograms
-  });
-  
-  // Fetch schools for the selected program
-  const { data: schoolsByProgram, isLoading: isLoadingSchoolsByProgram } = useQuery({
-    queryKey: ['schoolsByProgram', selectedProgram.id],
-    queryFn: () => getSchoolsByProgram(selectedProgram.id),
-    enabled: viewMode === 'programDetail' // Only run when a program is selected
-  });
+  const { 
+    schoolsByProgram, 
+    isLoadingSchoolsByProgram 
+  } = useProgramSchools(selectedProgram, viewMode);
 
   // Auto-scroll to info section when a program is selected
   useEffect(() => {
@@ -58,16 +49,6 @@ const CareerMap = () => {
       }
     }
   }, [viewMode]);
-  
-  // Get school by id
-  const getSchoolById = (id: string) => {
-    return schoolsData?.find(school => school.id === id);
-  };
-  
-  // Get program by id
-  const getProgramById = (id: string) => {
-    return programData.find(program => program.id === id);
-  };
   
   const handleSaveProgram = (schoolName?: string) => {
     const schoolToSave = schoolName || selectedSchool || "Valfri skola";
@@ -110,11 +91,7 @@ const CareerMap = () => {
       } else {
         // Limit to max 3 schools for comparison
         if (prev.schools.length >= 3) {
-          toast({
-            title: "Max antal för jämförelse",
-            description: "Du kan jämföra max 3 skolor samtidigt. Ta bort någon först.",
-            variant: "destructive"
-          });
+          getCompareToast();
           return prev;
         }
         return {
@@ -135,11 +112,7 @@ const CareerMap = () => {
       } else {
         // Limit to max 3 programs for comparison
         if (prev.programs.length >= 3) {
-          toast({
-            title: "Max antal för jämförelse",
-            description: "Du kan jämföra max 3 program samtidigt. Ta bort någon först.",
-            variant: "destructive"
-          });
+          getCompareToast();
           return prev;
         }
         return {
@@ -181,12 +154,7 @@ const CareerMap = () => {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-guidance-blue mx-auto mb-4"></div>
-            <p className="text-gray-600">Laddar data...</p>
-          </div>
-        </div>
+        <LoadingState />
       </div>
     );
   }
@@ -194,11 +162,7 @@ const CareerMap = () => {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
-          <h3 className="text-lg font-medium mb-2">Ett fel uppstod</h3>
-          <p>Det gick inte att ladda data. Vänligen försök igen senare.</p>
-          <p className="text-sm mt-2">Detalj: {error instanceof Error ? error.message : 'Okänt fel'}</p>
-        </div>
+        <ErrorState error={error} />
       </div>
     );
   }
@@ -208,16 +172,12 @@ const CareerMap = () => {
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-guidance-blue">Utforska gymnasieprogram och framtidsvägar</h2>
-          {viewMode !== 'programs' && (
-            <Button 
-              variant="outline"
-              onClick={handleBackToPrograms}
-              className="flex items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
-              Tillbaka till programöversikt
-            </Button>
-          )}
+          <ViewActions 
+            viewMode={viewMode} 
+            compareItems={compareItems}
+            handleBackToPrograms={handleBackToPrograms}
+            handleViewCompare={handleViewCompare}
+          />
         </div>
         
         <p className="text-gray-600 mb-6">
@@ -242,41 +202,24 @@ const CareerMap = () => {
       </div>
 
       {viewMode === 'programs' && (
-        <div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-            {programData.map((program) => (
-              <ProgramCard 
-                key={program.id}
-                program={program}
-                onProgramSelect={handleProgramSelect}
-              />
-            ))}
-          </div>
-        </div>
+        <ProgramsGrid 
+          programData={programData} 
+          onProgramSelect={handleProgramSelect} 
+        />
       )}
 
       {viewMode === 'programDetail' && (
-        <div id="program-detail">
-          <ProgramDetail 
-            selectedProgram={selectedProgram}
-            handleViewCareerTree={handleViewCareerTree}
-            toggleCompareProgram={toggleCompareProgram}
-            handleSaveProgram={handleSaveProgram}
-          />
-          
-          {schoolsByProgram && (
-            <SchoolList 
-              schools={schoolsByProgram}
-              toggleCompareSchool={toggleCompareSchool}
-              handleSaveProgram={handleSaveProgram}
-              selectedProgramName={selectedProgram.name}
-            />
-          )}
-        </div>
+        <ProgramDetailsView
+          selectedProgram={selectedProgram}
+          schoolsByProgram={schoolsByProgram}
+          handleViewCareerTree={handleViewCareerTree}
+          toggleCompareProgram={toggleCompareProgram}
+          handleSaveProgram={handleSaveProgram}
+        />
       )}
       
       {viewMode === 'tree' && (
-        <CareerTree 
+        <CareerTreeView
           selectedProgram={selectedProgram}
           handleSaveProgram={handleSaveProgram}
           setViewMode={setViewMode}
@@ -284,13 +227,13 @@ const CareerMap = () => {
       )}
 
       {viewMode === 'compare' && (
-        <CompareView 
+        <CompareItemsView
           compareItems={compareItems}
           handleBackToPrograms={handleBackToPrograms}
           toggleCompareProgram={toggleCompareProgram}
           toggleCompareSchool={toggleCompareSchool}
-          getProgramById={getProgramById}
-          getSchoolById={getSchoolById}
+          getProgramById={(id) => getProgramById(programData, id)}
+          getSchoolById={(id) => getSchoolById(schoolsData, id)}
         />
       )}
     </div>
