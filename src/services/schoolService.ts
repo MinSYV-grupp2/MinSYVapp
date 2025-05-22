@@ -36,10 +36,13 @@ export const isProgramMatch = (programName1: string, programName2: string): bool
 export async function getSchools(): Promise<School[]> {
   console.log('Fetching schools data from Supabase...');
   
+  // Improved query to get all schools with their programs
   const { data, error } = await supabase
     .from('schools')
     .select(`
-      *,
+      id,
+      name, 
+      address,
       schools_programs(program_id, program_name, admission_score, inriktningskod)
     `);
 

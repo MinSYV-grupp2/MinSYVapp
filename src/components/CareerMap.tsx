@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/context/UserContext';
@@ -45,21 +46,6 @@ const CareerMap = () => {
     }
   }, [viewMode]);
   
-  // Helper function to check if a school offers the selected program
-  const schoolOffersProgram = (school: School, programName: string): boolean => {
-    if (!school.programs || school.programs.length === 0) return false;
-    
-    // Use our improved program matching logic from schoolService
-    return school.programs.some(program => 
-      isProgramMatch(program, programName)
-    );
-  };
-  
-  // Filter schools that offer the selected program
-  const schoolsWithSelectedProgram = schoolsData ? (
-    schoolsData.filter(school => schoolOffersProgram(school, selectedProgram.name))
-  ) : [];
-  
   // Get school by id
   const getSchoolById = (id: string) => {
     return schoolsData?.find(school => school.id === id);
@@ -74,33 +60,16 @@ const CareerMap = () => {
     const schoolToSave = schoolName || selectedSchool || "Valfri skola";
     const programId = `${Date.now().toString()}-${selectedProgram.id}`;
     
-    // Find the school to get its admission score for the selected program
     let admissionScore = "Ej tillgänglig";
     
-    if (schoolName) {
+    if (schoolName && schoolsData) {
       // If a specific school was provided
-      const school = schoolsData?.find(s => s.name === schoolName);
+      const school = schoolsData.find(s => s.name === schoolName);
       if (school) {
-        // Use our improved findAdmissionScore helper
         const score = findAdmissionScore(school, selectedProgram.name);
         if (score) {
           admissionScore = score.toString();
         }
-      }
-    } else if (schoolsWithSelectedProgram.length > 0) {
-      // If no specific school, use average admission score if available
-      const scoresSum = schoolsWithSelectedProgram.reduce((sum, school) => {
-        const score = findAdmissionScore(school, selectedProgram.name);
-        return score ? sum + score : sum;
-      }, 0);
-      
-      // Count schools that have scores for this program
-      const schoolsWithScores = schoolsWithSelectedProgram.filter(school => {
-        return findAdmissionScore(school, selectedProgram.name) !== null;
-      }).length;
-      
-      if (schoolsWithScores > 0) {
-        admissionScore = (scoresSum / schoolsWithScores).toFixed(1);
       }
     }
     
@@ -212,6 +181,7 @@ const CareerMap = () => {
         <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
           <h3 className="text-lg font-medium mb-2">Ett fel uppstod</h3>
           <p>Det gick inte att ladda skoldata. Vänligen försök igen senare.</p>
+          <p className="text-sm mt-2">Detalj: {error instanceof Error ? error.message : 'Okänt fel'}</p>
         </div>
       </div>
     );
@@ -278,12 +248,14 @@ const CareerMap = () => {
             handleSaveProgram={handleSaveProgram}
           />
           
-          <SchoolList 
-            schools={schoolsWithSelectedProgram}
-            toggleCompareSchool={toggleCompareSchool}
-            handleSaveProgram={handleSaveProgram}
-            selectedProgramName={selectedProgram.name}
-          />
+          {schoolsData && (
+            <SchoolList 
+              schools={schoolsData}
+              toggleCompareSchool={toggleCompareSchool}
+              handleSaveProgram={handleSaveProgram}
+              selectedProgramName={selectedProgram.name}
+            />
+          )}
         </div>
       )}
       
