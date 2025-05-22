@@ -66,7 +66,7 @@ const ProgramDetail = ({ selectedProgram, handleViewCareerTree, toggleComparePro
                   <Star className="h-3 w-3 text-guidance-blue" />
                 </span>
                 <div>
-                  <span className="font-medium">Högskolebehörighet:</span> {selectedProgram.merit ? `${selectedProgram.merit} extra poäng vid högskolestudier` : 'Information saknas'}
+                  <span className="font-medium">Antagningspoäng:</span> {selectedProgram.merit ? `${selectedProgram.merit}` : 'Varierar mellan skolor'}
                 </div>
               </li>
             </ul>

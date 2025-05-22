@@ -10,6 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { School } from './types';
+import { findAdmissionScore } from '@/services/schoolService';
 
 interface SchoolListProps {
   schools: School[];
@@ -24,21 +25,6 @@ const getScoreColor = (score: number): string => {
   if (score >= 250) return 'text-orange-500';
   if (score >= 200) return 'text-yellow-500';
   return 'text-green-600';
-};
-
-// Helper function to find the admission score for a program
-const findAdmissionScore = (school: School, programName: string): number | null => {
-  // Look for exact match first
-  if (school.admissionScores[programName] !== undefined) {
-    return school.admissionScores[programName];
-  }
-  
-  // If no exact match, try to find a program that includes the search term
-  const matchingKey = Object.keys(school.admissionScores).find(
-    key => key.toLowerCase().includes(programName.toLowerCase())
-  );
-  
-  return matchingKey ? school.admissionScores[matchingKey] : null;
 };
 
 const SchoolList = ({ schools, toggleCompareSchool, handleSaveProgram, selectedProgramName }: SchoolListProps) => {

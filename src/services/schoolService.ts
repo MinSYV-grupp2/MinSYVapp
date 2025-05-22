@@ -2,6 +2,21 @@
 import { supabase } from '@/integrations/supabase/client';
 import { School } from '@/components/career/types';
 
+// Helper function to normalize program names for better matching
+const normalizeForComparison = (str: string): string => {
+  return str.toLowerCase().replace(/\s+/g, ' ').trim();
+};
+
+// Check if two program names match (exact match or one contains the other)
+const isProgramMatch = (programName1: string, programName2: string): boolean => {
+  const normalized1 = normalizeForComparison(programName1);
+  const normalized2 = normalizeForComparison(programName2);
+  
+  return normalized1 === normalized2 || 
+         normalized1.includes(normalized2) || 
+         normalized2.includes(normalized1);
+};
+
 export async function getSchools(): Promise<School[]> {
   const { data, error } = await supabase
     .from('schools')
@@ -108,3 +123,18 @@ export async function getSchoolById(id: string): Promise<School | null> {
     events: []
   };
 }
+
+// Helper function to find admission score for a program
+export const findAdmissionScore = (school: School, programName: string): number | null => {
+  // Look for exact match first
+  if (school.admissionScores[programName] !== undefined) {
+    return school.admissionScores[programName];
+  }
+  
+  // If no exact match, try to find a program that matches using our helper function
+  const matchingKey = Object.keys(school.admissionScores).find(
+    key => isProgramMatch(key, programName)
+  );
+  
+  return matchingKey ? school.admissionScores[matchingKey] : null;
+};

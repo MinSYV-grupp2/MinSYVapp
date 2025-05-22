@@ -178,28 +178,22 @@ export type Database = {
       educational_programs: {
         Row: {
           created_at: string
-          inriktning: string | null
-          inriktningskod: string
           kategori: string | null
-          program_id: number | null
+          program_id: number
           program_namn: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          inriktning?: string | null
-          inriktningskod: string
           kategori?: string | null
-          program_id?: number | null
+          program_id?: number
           program_namn: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          inriktning?: string | null
-          inriktningskod?: string
           kategori?: string | null
-          program_id?: number | null
+          program_id?: number
           program_namn?: string
           updated_at?: string
         }
@@ -803,13 +797,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "schools"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "schools_programs_inriktningskod_fkey"
-            columns: ["inriktningskod"]
-            isOneToOne: false
-            referencedRelation: "educational_programs"
-            referencedColumns: ["inriktningskod"]
           },
         ]
       }
