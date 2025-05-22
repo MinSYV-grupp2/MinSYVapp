@@ -27,7 +27,7 @@ const CareerMap = () => {
     programs: []
   });
   
-  // Fetch programs from database
+  // Fetch programs from database with stale time for better caching
   const {
     data: dbPrograms,
     isLoading: isLoadingDbPrograms,
@@ -35,7 +35,8 @@ const CareerMap = () => {
   } = useQuery({
     queryKey: ['programs'],
     queryFn: getPrograms,
-    staleTime: 10 * 60 * 1000 // 10 minutes
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2 // Retry failed requests twice
   });
   
   // Custom hooks for data fetching
@@ -261,11 +262,22 @@ const CareerMap = () => {
           handleBackToPrograms={handleBackToPrograms}
           toggleCompareProgram={toggleCompareProgram}
           toggleCompareSchool={toggleCompareSchool}
-          getProgramById={(id) => {
+          getProgramById={async (id) => {
+            // For comparison view, try to get enhanced program data
             if (dbPrograms) {
-              return dbPrograms.find(p => p.id === id);
+              const programFromDb = dbPrograms.find(p => p.id === id);
+              if (programFromDb) {
+                try {
+                  // Use the school service to get an AI-enhanced program
+                  const enhancedProgram = await getProgramById(id);
+                  return enhancedProgram || programFromDb;
+                } catch (error) {
+                  console.error('Error fetching enhanced program for comparison:', error);
+                  return programFromDb;
+                }
+              }
             }
-            return getProgramById(programData, id);
+            return getProgramById(id, programData);
           }}
           getSchoolById={(id) => getSchoolById(schoolsData, id)}
         />

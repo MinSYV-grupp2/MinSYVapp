@@ -1,6 +1,6 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { School, Program, Specialization } from '@/components/career/types';
+import { enhanceProgramWithAI, enhanceProgramListWithAI } from './programEnhancementService';
 
 // Helper function to normalize program names for better matching
 const normalizeForComparison = (str: string): string => {
@@ -73,7 +73,9 @@ export async function getPrograms(): Promise<Program[]> {
   }));
 
   console.log(`Transformed ${programs.length} programs`);
-  return programs;
+  
+  // Enhance program list with AI data for the overview (limited enhancement)
+  return await enhanceProgramListWithAI(programs);
 }
 
 // Function to fetch specializations (inriktningar) for a program
@@ -511,4 +513,50 @@ export async function getSpecializationNameByCode(code: string): Promise<string>
   }
   
   return data.inriktning || "Ingen specifik inriktning";
+}
+
+// NEW FUNCTION: Get a single program by ID with AI enhancement
+export async function getProgramById(programId: string): Promise<Program | null> {
+  console.log(`Fetching program with ID: ${programId}`);
+  
+  const { data, error } = await supabase
+    .from('educational_programs')
+    .select('*')
+    .eq('program_id', programId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      console.log(`No program found with ID: ${programId}`);
+      return null; // No program found with this ID
+    }
+    console.error('Error fetching program by ID:', error);
+    throw error;
+  }
+
+  if (!data) return null;
+
+  // Get specializations for this program
+  const specializations = await getProgramSpecializations(data.program_id);
+  
+  // Create the basic program object
+  const program: Program = {
+    id: data.program_id,
+    name: data.program_namn,
+    description: `Program inom ${data.kategori || 'okänd kategori'}`,
+    specializations: specializations.map(spec => spec.name),
+    meritDescription: "Se skolans webbsida för information om meritpoäng",
+    educationDescription: "Se skolans webbsida för information om utbildningen",
+    requiredCourses: [],
+    recommendedCourses: [],
+    furtherEducation: [],
+    careers: [],
+    universities: [],
+    subjects: [],
+    merit: "",
+    category: data.kategori || ""
+  };
+
+  // Enhance with AI data since this is a detailed view
+  return await enhanceProgramWithAI(program);
 }
