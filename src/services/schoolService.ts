@@ -21,8 +21,8 @@ export async function getSchools(): Promise<School[]> {
     const programsMap: Record<string, number> = {};
     if (schoolData.schools_programs && Array.isArray(schoolData.schools_programs)) {
       schoolData.schools_programs.forEach((prog: any) => {
-        if (prog.program_name && prog.admission_score) {
-          programsMap[prog.program_name] = prog.admission_score;
+        if (prog.program_name && prog.admission_score !== null) {
+          programsMap[prog.program_name] = Number(prog.admission_score);
         }
       });
     }
@@ -76,8 +76,8 @@ export async function getSchoolById(id: string): Promise<School | null> {
   const programsMap: Record<string, number> = {};
   if (data.schools_programs && Array.isArray(data.schools_programs)) {
     data.schools_programs.forEach((prog: any) => {
-      if (prog.program_name && prog.admission_score) {
-        programsMap[prog.program_name] = prog.admission_score;
+      if (prog.program_name && prog.admission_score !== null) {
+        programsMap[prog.program_name] = Number(prog.admission_score);
       }
     });
   }

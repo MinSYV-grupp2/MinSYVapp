@@ -62,21 +62,46 @@ const CareerMap = () => {
     return programData.find(program => program.id === id);
   };
   
-  const handleSaveProgram = (school?: string) => {
-    const schoolName = school || selectedSchool || "Valfri skola";
+  const handleSaveProgram = (schoolName?: string) => {
+    const schoolToSave = schoolName || selectedSchool || "Valfri skola";
     const programId = `${Date.now().toString()}-${selectedProgram.id}`;
+    
+    // Find the school to get its admission score for the selected program
+    let admissionScore = "Ej tillgänglig";
+    
+    if (schoolName) {
+      // If a specific school was provided
+      const school = schoolsData?.find(s => s.name === schoolName);
+      if (school && school.admissionScores[selectedProgram.name]) {
+        admissionScore = school.admissionScores[selectedProgram.name].toString();
+      }
+    } else if (schoolsWithSelectedProgram.length > 0) {
+      // If no specific school, use average admission score if available
+      const scoresSum = schoolsWithSelectedProgram.reduce((sum, school) => {
+        const score = school.admissionScores[selectedProgram.name];
+        return score ? sum + score : sum;
+      }, 0);
+      
+      const schoolsWithScores = schoolsWithSelectedProgram.filter(
+        school => school.admissionScores[selectedProgram.name]
+      ).length;
+      
+      if (schoolsWithScores > 0) {
+        admissionScore = (scoresSum / schoolsWithScores).toFixed(1);
+      }
+    }
     
     addSavedProgram({
       id: programId,
       programName: selectedProgram.name,
-      schoolName: schoolName,
+      schoolName: schoolToSave,
       specialization: undefined,
-      merit: selectedProgram.merit
+      merit: admissionScore
     });
     
     toast({
       title: "Program sparat",
-      description: `${selectedProgram.name} på ${schoolName} har lagts till i din profil. Meritpoäng: ${selectedProgram.merit}`,
+      description: `${selectedProgram.name} på ${schoolToSave} har lagts till i din profil. Antagningspoäng: ${admissionScore}`,
     });
   };
   
