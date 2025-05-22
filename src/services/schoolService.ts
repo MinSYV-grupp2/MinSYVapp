@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { School, Program, Specialization } from '@/components/career/types';
 
@@ -56,7 +57,7 @@ export async function getPrograms(): Promise<Program[]> {
       id: program.program_id,
       name: program.program_namn,
       description: `Program inom ${program.kategori || 'okänd kategori'}`,
-      specializations: specializations.map(spec => spec.inriktning),
+      specializations: specializations.map(spec => spec.name),
       meritDescription: "Se skolans webbsida för information om meritpoäng",
       educationDescription: "Se skolans webbsida för information om utbildningen",
       requiredCourses: [],
