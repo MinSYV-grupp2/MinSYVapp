@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, TreeDeciduous, SplitSquareVertical, GraduationCap, School, BookOpen, Map, Star } from 'lucide-react';
-import { Specialization } from '../types';
+import { Specialization } from './types';
 
 interface ProgramDetailProps {
   selectedProgram: any;
