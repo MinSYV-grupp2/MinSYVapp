@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { School } from '@/components/career/types';
 
@@ -32,6 +31,107 @@ export const isProgramMatch = (programName1: string, programName2: string): bool
   
   return false;
 };
+
+// New function to fetch all unique programs from schools_programs table
+export async function getUniquePrograms(): Promise<{ id: string, name: string }[]> {
+  console.log('Fetching unique programs from schools_programs...');
+  
+  const { data, error } = await supabase
+    .from('schools_programs')
+    .select('program_id, program_name')
+    .order('program_name');
+  
+  if (error) {
+    console.error('Error fetching unique programs:', error);
+    throw error;
+  }
+
+  // Create a map to store unique programs (by ID)
+  const uniquePrograms = new Map();
+  data?.forEach(program => {
+    if (program.program_name && program.program_id) {
+      uniquePrograms.set(program.program_id, {
+        id: program.program_id,
+        name: program.program_name
+      });
+    }
+  });
+
+  console.log(`Found ${uniquePrograms.size} unique programs`);
+  return Array.from(uniquePrograms.values());
+}
+
+// Function to get schools that offer a specific program
+export async function getSchoolsByProgram(programId: string): Promise<School[]> {
+  console.log(`Fetching schools for program ID: ${programId}`);
+  
+  const { data, error } = await supabase
+    .from('schools_programs')
+    .select(`
+      program_id,
+      program_name,
+      admission_score,
+      inriktningskod,
+      schools (
+        id,
+        name,
+        address
+      )
+    `)
+    .eq('program_id', programId);
+
+  if (error) {
+    console.error('Error fetching schools by program:', error);
+    throw error;
+  }
+
+  console.log(`Found ${data?.length || 0} entries for program ID: ${programId}`);
+  
+  // Transform the data to match our School interface
+  const schools: School[] = [];
+  const schoolsMap = new Map<string, School>();
+
+  data?.forEach(entry => {
+    if (!entry.schools) return;
+    
+    const schoolId = entry.schools.id;
+    
+    if (!schoolsMap.has(schoolId)) {
+      schoolsMap.set(schoolId, {
+        id: schoolId,
+        name: entry.schools.name,
+        programs: [entry.program_name],
+        location: {
+          address: entry.schools.address || 'Adress saknas',
+          coordinates: { lat: 0, lng: 0 },
+          commute: 'Information saknas'
+        },
+        admissionScores: {
+          [entry.program_name]: entry.admission_score
+        },
+        statistics: {
+          averageGrade: 0,
+          completionRate: 0,
+          qualifiedTeachers: 0,
+          satisfactionRate: 0
+        },
+        reviews: [],
+        facilities: {},
+        extracurricular: [],
+        events: []
+      });
+    } else {
+      // Add the program to the existing school
+      const school = schoolsMap.get(schoolId)!;
+      if (!school.programs.includes(entry.program_name)) {
+        school.programs.push(entry.program_name);
+      }
+      school.admissionScores[entry.program_name] = entry.admission_score;
+    }
+  });
+
+  return Array.from(schoolsMap.values());
+}
 
 export async function getSchools(): Promise<School[]> {
   console.log('Fetching schools data from Supabase...');

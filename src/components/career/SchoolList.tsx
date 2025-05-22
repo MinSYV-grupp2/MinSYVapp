@@ -46,16 +46,9 @@ const isGothenburgSchool = (school: School): boolean => {
 const SchoolList = ({ schools, toggleCompareSchool, handleSaveProgram, selectedProgramName }: SchoolListProps) => {
   const [expandedSchool, setExpandedSchool] = useState<string | null>(null);
   
-  // Filter schools that offer the selected program
-  const schoolsWithProgram = schools.filter(school => 
-    school.programs.some(program => 
-      isProgramMatch(program, selectedProgramName)
-    )
-  );
-  
   // Separate Gothenburg schools from others
-  const gothenburgSchools = schoolsWithProgram.filter(isGothenburgSchool);
-  const otherSchools = schoolsWithProgram.filter(school => !isGothenburgSchool(school));
+  const gothenburgSchools = schools.filter(isGothenburgSchool);
+  const otherSchools = schools.filter(school => !isGothenburgSchool(school));
   
   // Toggle expanded school detail
   const toggleSchoolDetail = (schoolId: string) => {
@@ -72,7 +65,7 @@ const SchoolList = ({ schools, toggleCompareSchool, handleSaveProgram, selectedP
     return match ? match[1] : null;
   };
   
-  if (schoolsWithProgram.length === 0) {
+  if (schools.length === 0) {
     return (
       <Card>
         <CardContent className="p-6">
@@ -105,7 +98,7 @@ const SchoolList = ({ schools, toggleCompareSchool, handleSaveProgram, selectedP
         <p className="text-sm text-gray-500 mb-4">
           Visar skolor som erbjuder {selectedProgramName}.
           <span className="ml-2">
-            ({schoolsWithProgram.length} {schoolsWithProgram.length === 1 ? 'skola' : 'skolor'} totalt, 
+            ({schools.length} {schools.length === 1 ? 'skola' : 'skolor'} totalt, 
             {gothenburgSchools.length} i Göteborg)
           </span>
         </p>

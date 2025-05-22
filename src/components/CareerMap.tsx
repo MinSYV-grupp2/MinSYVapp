@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 // Import the data
 import { programData } from '@/data/programData';
 // Import the school service
-import { getSchools } from '@/services/schoolService';
+import { getSchools, getUniquePrograms, getSchoolsByProgram } from '@/services/schoolService';
 
 // Import the components
 import ProgramCard from '@/components/career/ProgramCard';
@@ -30,10 +30,23 @@ const CareerMap = () => {
     programs: []
   });
   
-  // Fetch schools from Supabase
-  const { data: schoolsData, isLoading, error } = useQuery({
+  // Fetch all schools from Supabase
+  const { data: schoolsData, isLoading: isLoadingSchools, error: schoolsError } = useQuery({
     queryKey: ['schools'],
     queryFn: getSchools
+  });
+  
+  // Fetch unique programs from schools_programs table
+  const { data: uniqueProgramsData, isLoading: isLoadingPrograms, error: programsError } = useQuery({
+    queryKey: ['uniquePrograms'],
+    queryFn: getUniquePrograms
+  });
+  
+  // Fetch schools for the selected program
+  const { data: schoolsByProgram, isLoading: isLoadingSchoolsByProgram } = useQuery({
+    queryKey: ['schoolsByProgram', selectedProgram.id],
+    queryFn: () => getSchoolsByProgram(selectedProgram.id),
+    enabled: viewMode === 'programDetail' // Only run when a program is selected
   });
 
   // Auto-scroll to info section when a program is selected
@@ -162,13 +175,16 @@ const CareerMap = () => {
     setViewMode('compare');
   };
 
+  const isLoading = isLoadingSchools || isLoadingPrograms || (viewMode === 'programDetail' && isLoadingSchoolsByProgram);
+  const error = schoolsError || programsError;
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-guidance-blue mx-auto mb-4"></div>
-            <p className="text-gray-600">Laddar skoldata...</p>
+            <p className="text-gray-600">Laddar data...</p>
           </div>
         </div>
       </div>
@@ -180,7 +196,7 @@ const CareerMap = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
           <h3 className="text-lg font-medium mb-2">Ett fel uppstod</h3>
-          <p>Det gick inte att ladda skoldata. Vänligen försök igen senare.</p>
+          <p>Det gick inte att ladda data. Vänligen försök igen senare.</p>
           <p className="text-sm mt-2">Detalj: {error instanceof Error ? error.message : 'Okänt fel'}</p>
         </div>
       </div>
@@ -248,9 +264,9 @@ const CareerMap = () => {
             handleSaveProgram={handleSaveProgram}
           />
           
-          {schoolsData && (
+          {schoolsByProgram && (
             <SchoolList 
-              schools={schoolsData}
+              schools={schoolsByProgram}
               toggleCompareSchool={toggleCompareSchool}
               handleSaveProgram={handleSaveProgram}
               selectedProgramName={selectedProgram.name}
