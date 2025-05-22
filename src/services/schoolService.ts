@@ -140,169 +140,151 @@ export async function getUniquePrograms() {
 export async function getSchoolsByProgram(programId: string): Promise<School[]> {
   console.log(`Fetching schools for program ID: ${programId}`);
   
-  // Fetch data from database
   if (!programId) {
     console.error('No program ID provided');
     return [];
   }
   
   try {
-    // First try fetching directly from schools_programs table
-    const { data, error } = await supabase
-      .from('schools_programs')
-      .select(`
-        program_id,
-        program_name,
-        admission_score,
-        inriktningskod,
-        schools (
-          id,
-          name,
-          address,
-          website,
-          contact_email
-        )
-      `)
-      .eq('program_id', programId);
-
-    if (error) {
-      console.error('Error fetching schools by program:', error);
-      throw error;
-    }
-
-    // Log the raw data from supabase for debugging
-    console.log(`Raw data for program ID ${programId}:`, data);
-
-    // If data is empty, try fetching all schools as a fallback
-    if (!data || data.length === 0) {
-      console.log(`No schools found for program ID: ${programId}, fetching all schools as fallback`);
-      return await getAllSchoolsWithFallbackProgram(programId);
-    }
-
-    console.log(`Found ${data?.length || 0} entries for program ID: ${programId}`);
-    
-    // Transform the data to match our School interface
-    const schools: School[] = [];
-    const schoolsMap = new Map<string, School>();
-
-    data?.forEach(entry => {
-      if (!entry.schools) {
-        console.log('Entry without school data:', entry);
-        return;
-      }
-      
-      const schoolId = entry.schools.id;
-      
-      if (!schoolsMap.has(schoolId)) {
-        schoolsMap.set(schoolId, {
-          id: schoolId,
-          name: entry.schools.name,
-          programs: [entry.program_name || `Program ${entry.program_id}`],
-          specializations: entry.inriktningskod ? [entry.inriktningskod] : [],
-          location: {
-            address: entry.schools.address || 'Adress saknas',
-            coordinates: { lat: 0, lng: 0 },
-            commute: 'Information saknas'
-          },
-          admissionScores: {
-            [entry.program_name || `Program ${entry.program_id}`]: entry.admission_score
-          },
-          statistics: {
-            averageGrade: 0,
-            completionRate: 0,
-            qualifiedTeachers: 0,
-            satisfactionRate: 0
-          },
-          reviews: [],
-          facilities: {},
-          extracurricular: [],
-          events: []
-        });
-      } else {
-        // Add the program to the existing school
-        const school = schoolsMap.get(schoolId)!;
-        const programName = entry.program_name || `Program ${entry.program_id}`;
-        
-        if (!school.programs.includes(programName)) {
-          school.programs.push(programName);
-        }
-        if (entry.inriktningskod && !school.specializations?.includes(entry.inriktningskod)) {
-          school.specializations?.push(entry.inriktningskod);
-        }
-        school.admissionScores[programName] = entry.admission_score;
-      }
-    });
-
-    const result = Array.from(schoolsMap.values());
-    console.log(`Transformed ${result.length} schools for program ID: ${programId}`);
-    return result;
-  } catch (err) {
-    console.error('Failed to fetch schools by program:', err);
-    return [];
-  }
-}
-
-// Fallback function to get all schools with the program added
-async function getAllSchoolsWithFallbackProgram(programId: string): Promise<School[]> {
-  console.log('Fetching all schools as fallback...');
-  
-  try {
-    // Get program name from programId
-    const { data: programData, error: programError } = await supabase
+    // First try to get the program name to help with matching
+    let programName = programId; // Default to using ID as name
+    const { data: programData } = await supabase
       .from('educational_programs')
       .select('program_namn')
       .eq('program_id', programId)
-      .limit(1);
+      .maybeSingle();
       
-    if (programError) {
-      console.error('Error fetching program name:', programError);
+    if (programData) {
+      programName = programData.program_namn;
+      console.log(`Found program name: ${programName} for ID: ${programId}`);
     }
-    
-    const programName = programData && programData.length > 0 
-      ? programData[0].program_namn 
-      : `Program ${programId}`;
       
-    // Fetch all schools
+    // Fetch schools with their programs from database
     const { data: schoolsData, error: schoolsError } = await supabase
       .from('schools')
-      .select('id, name, address, website, contact_email');
+      .select(`
+        id,
+        name,
+        address,
+        website,
+        contact_email,
+        schools_programs (
+          program_id,
+          program_name,
+          admission_score,
+          inriktningskod
+        )
+      `);
       
     if (schoolsError) {
-      console.error('Error fetching all schools:', schoolsError);
-      throw schoolsError;
+      console.error('Error fetching schools for program:', schoolsError);
+      return createFallbackSchoolsForProgram(programId, programName);
     }
     
-    console.log(`Fetched ${schoolsData?.length || 0} schools as fallback`);
+    console.log(`Retrieved ${schoolsData?.length || 0} schools from database`);
     
-    // Transform to School objects with the program added
-    return (schoolsData || []).map(school => ({
-      id: school.id,
-      name: school.name,
-      programs: [programName],
-      specializations: [],
-      location: {
-        address: school.address || 'Adress saknas',
-        coordinates: { lat: 0, lng: 0 },
-        commute: 'Information saknas'
-      },
-      admissionScores: {
-        [programName]: null
-      },
-      statistics: {
-        averageGrade: 0,
-        completionRate: 0,
-        qualifiedTeachers: 0,
-        satisfactionRate: 0
-      },
-      reviews: [],
-      facilities: {},
-      extracurricular: [],
-      events: []
-    }));
+    if (!schoolsData || schoolsData.length === 0) {
+      return createFallbackSchoolsForProgram(programId, programName);
+    }
+    
+    // Filter for schools that offer this program
+    const schoolsWithProgram = schoolsData.filter(school => {
+      if (!school.schools_programs || !Array.isArray(school.schools_programs)) {
+        return false;
+      }
+      
+      return school.schools_programs.some(prog => {
+        // Match either by program_id or program_name
+        const idMatch = prog.program_id === programId;
+        const nameMatch = prog.program_name && 
+          isProgramMatch(prog.program_name, programName);
+          
+        return idMatch || nameMatch;
+      });
+    });
+    
+    console.log(`Filtered to ${schoolsWithProgram.length} schools offering program ${programName}`);
+    
+    // If no matching schools in database, use fallback
+    if (schoolsWithProgram.length === 0) {
+      return createFallbackSchoolsForProgram(programId, programName);
+    }
+    
+    // Transform to School objects
+    return schoolsWithProgram.map(schoolData => {
+      // Map the programs and admission scores from the joined data
+      const programsMap: Record<string, number> = {};
+      const programs: string[] = [];
+      const specializations: string[] = [];
+      
+      if (schoolData.schools_programs && Array.isArray(schoolData.schools_programs)) {
+        schoolData.schools_programs.forEach(prog => {
+          if (prog.program_name) {
+            programsMap[prog.program_name] = Number(prog.admission_score) || 0;
+            if (!programs.includes(prog.program_name)) {
+              programs.push(prog.program_name);
+            }
+          }
+          
+          if (prog.inriktningskod && !specializations.includes(prog.inriktningskod)) {
+            specializations.push(prog.inriktningskod);
+          }
+        });
+      }
+      
+      // Always include the requested program in the list
+      if (!programs.includes(programName)) {
+        programs.push(programName);
+      }
+      
+      return {
+        id: schoolData.id,
+        name: schoolData.name,
+        programs: programs,
+        specializations: specializations,
+        location: {
+          address: schoolData.address || 'Adress saknas',
+          coordinates: { lat: 0, lng: 0 },
+          commute: 'Information saknas'
+        },
+        admissionScores: programsMap,
+        statistics: {
+          averageGrade: 0,
+          completionRate: 0,
+          qualifiedTeachers: 0,
+          satisfactionRate: 0
+        },
+        reviews: [],
+        facilities: {},
+        extracurricular: [],
+        events: []
+      };
+    });
   } catch (err) {
-    console.error('Failed to fetch fallback schools:', err);
+    console.error('Failed to fetch schools by program:', err);
+    return createFallbackSchoolsForProgram(programId, programId);
+  }
+}
+
+// Helper function to create fallback schools for a program
+function createFallbackSchoolsForProgram(programId: string, programName: string): School[] {
+  console.log(`Creating fallback schools for program ${programName} (${programId})`);
+  
+  // Import schools data from our local fallback
+  const { schoolsData } = require('@/data/schoolsData');
+  
+  if (!schoolsData || !Array.isArray(schoolsData)) {
+    console.error('Fallback schoolsData is invalid');
     return [];
   }
+  
+  // Filter schools that offer this program or similar programs
+  return schoolsData.filter(school => 
+    school.programs.some(program => 
+      program.toLowerCase().includes(programId.toLowerCase()) || 
+      program.toLowerCase().includes(programName.toLowerCase())
+    )
+  );
 }
 
 export async function getSchools(): Promise<School[]> {

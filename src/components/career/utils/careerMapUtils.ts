@@ -41,3 +41,36 @@ export const getProgramById = (id: string, fallbackPrograms: Program[] = []): Pr
   
   return program;
 };
+
+/**
+ * Gets schools that offer a specific program by checking program ID or name matches
+ * @param schools All schools from database or fallback
+ * @param programId ID of the program to check
+ * @param programName Name of the program to check
+ * @returns Array of schools that offer the program
+ */
+export const getSchoolsForProgram = (schools: School[], programId: string, programName: string): School[] => {
+  if (!schools || !Array.isArray(schools) || schools.length === 0) {
+    console.warn('No schools data available for filtering');
+    return [];
+  }
+
+  // First try to match by programId in the programs array
+  let matchingSchools = schools.filter(school => 
+    school.programs.some(program => 
+      program.toLowerCase().includes(programId.toLowerCase())
+    )
+  );
+
+  // If no matches by ID, try matching by program name
+  if (matchingSchools.length === 0) {
+    matchingSchools = schools.filter(school => 
+      school.programs.some(program => 
+        program.toLowerCase().includes(programName.toLowerCase())
+      )
+    );
+  }
+
+  console.log(`Found ${matchingSchools.length} schools offering program ${programName} (${programId})`);
+  return matchingSchools;
+};

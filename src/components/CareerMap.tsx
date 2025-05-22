@@ -277,11 +277,11 @@ const CareerMap = () => {
                 }
               }
             }
-            // Fix: Pass both id and programData as arguments
+            // Pass both id and programData as arguments
             return getProgramById(id, programData);
           }}
           getSchoolById={(id) => {
-            // Fix: Ensure we return a School object or null, not a string
+            // Ensure we return a School object or null, not a string
             return schoolsData ? getSchoolById(schoolsData, id) : null;
           }}
         />
