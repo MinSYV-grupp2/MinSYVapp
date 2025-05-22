@@ -15,6 +15,7 @@ import ProgramsGrid from '@/components/career/views/ProgramsGrid';
 import ProgramDetailsView from '@/components/career/views/ProgramDetailsView';
 import CareerTreeView from '@/components/career/views/CareerTreeView';
 import CompareItemsView from '@/components/career/views/CompareItemsView';
+import { SplitSquareVertical } from 'lucide-react';
 
 const CareerMap = () => {
   const { addSavedProgram } = useUser();

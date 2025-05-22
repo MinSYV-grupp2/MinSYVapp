@@ -8,14 +8,19 @@ import SchoolCard from './SchoolCard';
 import NoSchoolsMessage from './NoSchoolsMessage';
 
 interface SchoolListProps {
-  schools: School[];
+  schools: School[] | null;
   toggleCompareSchool: (schoolId: string) => void;
   handleSaveProgram: (school: string) => void;
   selectedProgramName: string;
 }
 
-const SchoolList = ({ schools, toggleCompareSchool, handleSaveProgram, selectedProgramName }: SchoolListProps) => {
+const SchoolsList = ({ schools, toggleCompareSchool, handleSaveProgram, selectedProgramName }: SchoolListProps) => {
   const [expandedSchool, setExpandedSchool] = useState<string | null>(null);
+  
+  // Handle null or empty schools
+  if (!schools || schools.length === 0) {
+    return <NoSchoolsMessage selectedProgramName={selectedProgramName} />;
+  }
   
   // Separate Gothenburg schools from others
   const gothenburgSchools = schools.filter(isGothenburgSchool);
@@ -29,10 +34,6 @@ const SchoolList = ({ schools, toggleCompareSchool, handleSaveProgram, selectedP
       setExpandedSchool(schoolId);
     }
   };
-  
-  if (schools.length === 0) {
-    return <NoSchoolsMessage selectedProgramName={selectedProgramName} />;
-  }
 
   return (
     <Card>
@@ -109,4 +110,4 @@ const SchoolList = ({ schools, toggleCompareSchool, handleSaveProgram, selectedP
   );
 };
 
-export default SchoolList;
+export default SchoolsList;

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Program } from '../types';
 import ProgramDetail from '../ProgramDetail';
-import SchoolList from '../SchoolList';
+import SchoolsList from '../SchoolsList';
 import { School } from '../types';
 
 interface ProgramDetailsViewProps {
@@ -30,7 +30,7 @@ const ProgramDetailsView = ({
       />
       
       {schoolsByProgram && (
-        <SchoolList 
+        <SchoolsList 
           schools={schoolsByProgram}
           toggleCompareSchool={toggleCompareSchool}
           handleSaveProgram={handleSaveProgram}

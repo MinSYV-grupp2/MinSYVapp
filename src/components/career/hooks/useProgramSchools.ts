@@ -11,8 +11,13 @@ export function useProgramSchools(selectedProgram: Program, viewMode: ViewMode) 
   } = useQuery({
     queryKey: ['schoolsByProgram', selectedProgram.id],
     queryFn: () => getSchoolsByProgram(selectedProgram.id),
-    enabled: viewMode === 'programDetail' // Only run when a program is selected
+    enabled: viewMode === 'programDetail', // Only run when a program is selected
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    retry: 3, // Retry up to 3 times if fetch fails
   });
 
-  return { schoolsByProgram, isLoadingSchoolsByProgram };
+  return { 
+    schoolsByProgram: schoolsByProgram?.length ? schoolsByProgram : null, 
+    isLoadingSchoolsByProgram 
+  };
 }

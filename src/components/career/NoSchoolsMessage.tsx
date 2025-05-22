@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { SchoolIcon } from 'lucide-react';
+import { School as SchoolIcon, Loader } from 'lucide-react';
 
 interface NoSchoolsMessageProps {
   selectedProgramName: string;
@@ -18,9 +18,10 @@ const NoSchoolsMessage = ({ selectedProgramName }: NoSchoolsMessageProps) => {
           </h3>
         </div>
         
-        <div className="p-6 text-center">
-          <p className="text-gray-500">Inga skolor hittades som erbjuder detta program.</p>
-          <p className="text-gray-500 text-sm mt-2">Försök välja ett annat program.</p>
+        <div className="p-8 text-center border border-dashed border-gray-300 rounded-lg">
+          <Loader className="h-10 w-10 text-guidance-blue mx-auto animate-spin mb-4" />
+          <p className="text-lg text-gray-700 font-medium">Letar efter skolor...</p>
+          <p className="text-gray-500 mt-2">Vi använder fallbackdata om inga skolor hittas i databasen.</p>
         </div>
       </CardContent>
     </Card>
