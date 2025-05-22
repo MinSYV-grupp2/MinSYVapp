@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/context/UserContext';
@@ -60,7 +59,7 @@ const CareerMap = () => {
     schoolsByProgram, 
     programSpecializations,
     isLoadingSchoolsByProgram 
-  } = useProgramSchools(selectedProgram || (dbPrograms?.[0] as Program), viewMode);
+  } = useProgramSchools(selectedProgram, viewMode);
 
   // Auto-scroll to info section when a program is selected
   useEffect(() => {
