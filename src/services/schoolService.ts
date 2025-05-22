@@ -8,7 +8,7 @@ const normalizeForComparison = (str: string): string => {
 };
 
 // Check if two program names match (exact match, one contains the other, or contains program code)
-const isProgramMatch = (programName1: string, programName2: string): boolean => {
+export const isProgramMatch = (programName1: string, programName2: string): boolean => {
   const normalized1 = normalizeForComparison(programName1);
   const normalized2 = normalizeForComparison(programName2);
   
