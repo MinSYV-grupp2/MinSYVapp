@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useUser } from '@/context/UserContext';
 import { toast } from '@/components/ui/use-toast';
 import { programData } from '@/data/programData';
-import { findAdmissionScore, getPrograms } from '@/services/schoolService';
+import { findAdmissionScore, getPrograms, getSchoolsByProgram } from '@/services/schoolService';
 import { ViewMode, CompareItems, Program } from '@/components/career/types';
 import { useSchoolsData } from '@/components/career/hooks/useSchoolsData';
 import { useProgramSchools } from '@/components/career/hooks/useProgramSchools';
@@ -262,14 +262,14 @@ const CareerMap = () => {
           handleBackToPrograms={handleBackToPrograms}
           toggleCompareProgram={toggleCompareProgram}
           toggleCompareSchool={toggleCompareSchool}
-          getProgramById={async (id) => {
+          getProgramById={(id) => {
             // For comparison view, try to get enhanced program data
             if (dbPrograms) {
               const programFromDb = dbPrograms.find(p => p.id === id);
               if (programFromDb) {
                 try {
                   // Use the school service to get an AI-enhanced program
-                  const enhancedProgram = await getProgramById(id);
+                  const enhancedProgram = getProgramById(id, programData);
                   return enhancedProgram || programFromDb;
                 } catch (error) {
                   console.error('Error fetching enhanced program for comparison:', error);
@@ -277,11 +277,11 @@ const CareerMap = () => {
                 }
               }
             }
-            // Pass program ID and programData as the second argument to fix the Expected 2 arguments error
+            // Fix: Pass both id and programData as arguments
             return getProgramById(id, programData);
           }}
           getSchoolById={(id) => {
-            // Ensure we return a School object or null, not a string
+            // Fix: Ensure we return a School object or null, not a string
             return schoolsData ? getSchoolById(schoolsData, id) : null;
           }}
         />

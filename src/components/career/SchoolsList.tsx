@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, School as SchoolIcon } from 'lucide-react';
 import { School } from './types';
@@ -20,7 +20,9 @@ const SchoolsList = ({ schools, toggleCompareSchool, handleSaveProgram, selected
   const [specializationNames, setSpecializationNames] = useState<Record<string, string>>({});
   
   // Load specialization names
-  React.useEffect(() => {
+  useEffect(() => {
+    let isMounted = true;
+    
     async function loadSpecializationNames() {
       const specializations: Record<string, string> = {};
       
@@ -29,24 +31,42 @@ const SchoolsList = ({ schools, toggleCompareSchool, handleSaveProgram, selected
           if (school.specializations?.length) {
             for (const code of school.specializations) {
               if (!specializationNames[code]) {
-                const name = await getSpecializationNameByCode(code);
-                specializations[code] = name;
+                try {
+                  const name = await getSpecializationNameByCode(code);
+                  if (isMounted) {
+                    specializations[code] = name;
+                  }
+                } catch (error) {
+                  console.error(`Error fetching specialization name for code ${code}:`, error);
+                  if (isMounted) {
+                    specializations[code] = "Okänd inriktning";
+                  }
+                }
               }
             }
           }
         }
         
-        setSpecializationNames(prev => ({...prev, ...specializations}));
+        if (isMounted) {
+          setSpecializationNames(prev => ({...prev, ...specializations}));
+        }
       }
     }
     
     loadSpecializationNames();
-  }, [schools]);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [schools, specializationNames]);
   
   // Handle null or empty schools
   if (!schools || schools.length === 0) {
     return <NoSchoolsMessage selectedProgramName={selectedProgramName} />;
   }
+  
+  // Log schools data for debugging
+  console.log(`Displaying ${schools.length} schools for program: ${selectedProgramName}`);
   
   // Separate Gothenburg schools from others
   const gothenburgSchools = schools.filter(isGothenburgSchool);
