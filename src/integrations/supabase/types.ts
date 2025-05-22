@@ -177,27 +177,27 @@ export type Database = {
       }
       educational_programs: {
         Row: {
-          category: string | null
           created_at: string
-          description: string | null
-          id: string
-          name: string
+          inriktning: string | null
+          inriktningskod: string
+          kategori: string | null
+          program_namn: string
           updated_at: string
         }
         Insert: {
-          category?: string | null
           created_at?: string
-          description?: string | null
-          id?: string
-          name: string
+          inriktning?: string | null
+          inriktningskod: string
+          kategori?: string | null
+          program_namn: string
           updated_at?: string
         }
         Update: {
-          category?: string | null
           created_at?: string
-          description?: string | null
-          id?: string
-          name?: string
+          inriktning?: string | null
+          inriktningskod?: string
+          kategori?: string | null
+          program_namn?: string
           updated_at?: string
         }
         Relationships: []
@@ -541,34 +541,29 @@ export type Database = {
         }
         Relationships: []
       }
-      program_specializations: {
+      program_inriktningar: {
         Row: {
-          description: string | null
-          id: string
-          name: string
-          program_id: string
+          inriktning: string | null
+          inriktningskod: string
+          kategori: string | null
+          program_id: number
+          program_namn: string
         }
         Insert: {
-          description?: string | null
-          id?: string
-          name: string
-          program_id: string
+          inriktning?: string | null
+          inriktningskod: string
+          kategori?: string | null
+          program_id: number
+          program_namn: string
         }
         Update: {
-          description?: string | null
-          id?: string
-          name?: string
-          program_id?: string
+          inriktning?: string | null
+          inriktningskod?: string
+          kategori?: string | null
+          program_id?: number
+          program_namn?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "program_specializations_program_id_fkey"
-            columns: ["program_id"]
-            isOneToOne: false
-            referencedRelation: "educational_programs"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       quiz_questions: {
         Row: {
@@ -769,6 +764,51 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      schools_programs: {
+        Row: {
+          admission_score: number | null
+          average_admission_score: number | null
+          inriktningskod: string | null
+          program_id: string
+          program_name: string | null
+          school_id: string
+          school_name: string | null
+        }
+        Insert: {
+          admission_score?: number | null
+          average_admission_score?: number | null
+          inriktningskod?: string | null
+          program_id: string
+          program_name?: string | null
+          school_id: string
+          school_name?: string | null
+        }
+        Update: {
+          admission_score?: number | null
+          average_admission_score?: number | null
+          inriktningskod?: string | null
+          program_id?: string
+          program_name?: string | null
+          school_id?: string
+          school_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_school"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schools_programs_inriktningskod_fkey"
+            columns: ["inriktningskod"]
+            isOneToOne: false
+            referencedRelation: "educational_programs"
+            referencedColumns: ["inriktningskod"]
+          },
+        ]
       }
       student_documents: {
         Row: {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/context/UserContext';
@@ -48,9 +47,8 @@ const CareerMap = () => {
   // Filter schools that offer the selected program
   const schoolsWithSelectedProgram = schoolsData ? (
     schoolsData.filter(school => {
-      // This is a simple filter since we don't have program associations yet
-      // In a real implementation, you'd check if the school offers the program
-      return true;
+      // Check if the school offers the selected program
+      return school.programs.includes(selectedProgram.name);
     })
   ) : [];
   
