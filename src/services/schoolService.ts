@@ -270,21 +270,17 @@ export async function getSchoolsByProgram(programId: string): Promise<School[]> 
 function createFallbackSchoolsForProgram(programId: string, programName: string): School[] {
   console.log(`Creating fallback schools for program ${programName} (${programId})`);
   
-  // Import schools data from our local fallback
-  const { schoolsData } = require('@/data/schoolsData');
+  // Import directly instead of using require
+  import { schoolsData } from '@/data/schoolsData';
   
   if (!schoolsData || !Array.isArray(schoolsData)) {
     console.error('Fallback schoolsData is invalid');
     return [];
   }
   
-  // Filter schools that offer this program or similar programs
-  return schoolsData.filter(school => 
-    school.programs.some(program => 
-      program.toLowerCase().includes(programId.toLowerCase()) || 
-      program.toLowerCase().includes(programName.toLowerCase())
-    )
-  );
+  // Use the more robust getSchoolsForProgram function from careerMapUtils
+  const { getSchoolsForProgram } = require('@/components/career/utils/careerMapUtils');
+  return getSchoolsForProgram(schoolsData, programId, programName);
 }
 
 export async function getSchools(): Promise<School[]> {
