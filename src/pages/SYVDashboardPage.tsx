@@ -9,17 +9,30 @@ import { SYVStudentList } from "@/components/syv/SYVStudentList";
 import { SYVImportantDates } from "@/components/syv/SYVImportantDates";
 import { SYVDiscussionQuestions } from "@/components/syv/SYVDiscussionQuestions";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/context/UserContext";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const SYVDashboardPage = () => {
   const [isSYV, setIsSYV] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { profile, disableDemoMode } = useUser();
+  const isDemo = profile.demoMode;
 
   useEffect(() => {
     const checkUserRole = async () => {
+      // If in demo mode, allow access without authentication checks
+      if (isDemo) {
+        setIsLoading(false);
+        setIsSYV(true);
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -61,7 +74,12 @@ const SYVDashboardPage = () => {
     };
 
     checkUserRole();
-  }, [navigate, toast]);
+  }, [navigate, toast, isDemo]);
+
+  const handleExitDemo = () => {
+    disableDemoMode();
+    navigate("/");
+  };
 
   if (isLoading) {
     return (
@@ -76,13 +94,29 @@ const SYVDashboardPage = () => {
     );
   }
 
-  if (isSYV === false) {
+  if (isSYV === false && !isDemo) {
     return null; // Will redirect via the useEffect
   }
 
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
+      {isDemo && (
+        <Alert className="bg-orange-100 border-orange-300 m-4">
+          <AlertCircle className="h-4 w-4 text-orange-800" />
+          <AlertDescription className="flex items-center justify-between">
+            <span className="text-orange-800">Du är i demo-läge. Inga ändringar kommer att sparas.</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="ml-4 border-orange-500 text-orange-800 hover:bg-orange-200"
+              onClick={handleExitDemo}
+            >
+              Avsluta demo
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
       <main className="flex-1 container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Studievägledare - Dashboard</h1>
         
@@ -96,7 +130,7 @@ const SYVDashboardPage = () => {
           </TabsList>
           
           <TabsContent value="dashboard">
-            <SYVDashboard />
+            <SYVDashboard isDemo={isDemo} />
           </TabsContent>
           
           <TabsContent value="bookings">

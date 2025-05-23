@@ -13,17 +13,31 @@ interface DashboardStats {
   upcomingDates: number;
 }
 
-export const SYVDashboard = () => {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalStudents: 0,
-    upcomingAppointments: 0,
-    pendingQuestions: 0,
-    upcomingDates: 0
-  });
+interface SYVDashboardProps {
+  isDemo?: boolean;
+}
+
+// Demo data for when in demo mode
+const demoStats: DashboardStats = {
+  totalStudents: 24,
+  upcomingAppointments: 5,
+  pendingQuestions: 8,
+  upcomingDates: 3
+};
+
+export const SYVDashboard = ({ isDemo = false }: SYVDashboardProps) => {
+  const [stats, setStats] = useState<DashboardStats>(demoStats);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   
   useEffect(() => {
+    // If in demo mode, use pre-defined demo stats
+    if (isDemo) {
+      setStats(demoStats);
+      setLoading(false);
+      return;
+    }
+    
     const fetchDashboardData = async () => {
       setLoading(true);
       
@@ -73,7 +87,7 @@ export const SYVDashboard = () => {
     };
     
     fetchDashboardData();
-  }, []);
+  }, [isDemo]);
 
   const navigateToTab = (tab: string) => {
     // We use a small timeout to allow the click event to complete

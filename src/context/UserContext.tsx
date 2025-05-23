@@ -56,6 +56,7 @@ interface UserProfile {
     showToParents: boolean;
     showToCounselor: boolean;
   };
+  demoMode: boolean; // New field for demo mode
 }
 
 interface UserContextType {
@@ -83,6 +84,9 @@ interface UserContextType {
   updateAIInsight: (insightId: string, updates: Partial<AIInsight>) => void;
   addChatMessage: (role: 'user' | 'assistant', content: string) => void;
   updateInsightPermissions: (permissions: Partial<UserProfile['insightPermissions']>) => void;
+  // Demo mode methods
+  enableDemoMode: () => void;
+  disableDemoMode: () => void;
 }
 
 const defaultProfile: UserProfile = {
@@ -101,7 +105,8 @@ const defaultProfile: UserProfile = {
   insightPermissions: {
     showToParents: false,
     showToCounselor: true,
-  }
+  },
+  demoMode: false // Initialize demo mode as false
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -275,6 +280,20 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }));
   };
 
+  const enableDemoMode = () => {
+    setProfile(prev => ({
+      ...prev,
+      demoMode: true
+    }));
+  };
+
+  const disableDemoMode = () => {
+    setProfile(prev => ({
+      ...prev,
+      demoMode: false
+    }));
+  };
+
   return (
     <UserContext.Provider value={{
       profile,
@@ -299,7 +318,9 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       removeAIInsight,
       updateAIInsight,
       addChatMessage,
-      updateInsightPermissions
+      updateInsightPermissions,
+      enableDemoMode,
+      disableDemoMode
     }}>
       {children}
     </UserContext.Provider>

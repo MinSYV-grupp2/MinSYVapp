@@ -8,18 +8,21 @@ import Footer from '@/components/Footer';
 import GuidanceQuiz from '@/components/GuidanceQuiz';
 import SYlVester from '@/components/SYlVester';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { useState } from 'react';
-import { BookOpen, MessageSquare, CalendarClock, HelpCircle, UserCircle } from 'lucide-react';
+import { BookOpen, MessageSquare, CalendarClock, HelpCircle, UserCircle, Monitor } from 'lucide-react';
 import { useSYlVester } from '@/context/SYlVesterContext';
 import { toast } from '@/components/ui/use-toast';
+import { useUser } from '@/context/UserContext';
 
 const Index = () => {
   const [showGuidanceQuiz, setShowGuidanceQuiz] = useState(false);
   const [showInterestsQuiz, setShowInterestsQuiz] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const { mood, setMood } = useSYlVester();
+  const { enableDemoMode } = useUser();
+  const navigate = useNavigate();
 
   const handleStartGuidanceQuiz = () => {
     setShowGuidanceQuiz(true);
@@ -68,6 +71,16 @@ const Index = () => {
     });
   };
 
+  const handleDemoSYV = () => {
+    enableDemoMode();
+    setMood('excited');
+    toast({
+      title: "Demo-läge aktiverat",
+      description: "Du är nu i SYV demo-läge. Utforska SYV-vyn utan att logga in!",
+    });
+    navigate('/syv-dashboard');
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
@@ -102,6 +115,13 @@ const Index = () => {
             >
               Utforska karriärkartan
             </Link>
+            <Button
+              onClick={handleDemoSYV}
+              className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-lg flex items-center"
+            >
+              <Monitor className="mr-2 h-5 w-5" />
+              Prova SYV-demo
+            </Button>
           </div>
         </div>
       </div>
