@@ -18,6 +18,7 @@ import InterviewsPage from "./pages/InterviewsPage";
 import AIChatPage from "./pages/AIChatPage";
 import UtvecklingssamtalPage from "./pages/UtvecklingssamtalPage";
 import AppointmentsPage from "./pages/AppointmentsPage";
+import SYVDashboardPage from "./pages/SYVDashboardPage";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/ai-chat" element={<AIChatPage />} />
               <Route path="/utvecklingssamtal" element={<UtvecklingssamtalPage />} />
               <Route path="/appointments" element={<AppointmentsPage />} />
+              <Route path="/syv-dashboard" element={<SYVDashboardPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
