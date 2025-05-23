@@ -1,8 +1,26 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Monitor } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 const Footer = () => {
+  const { profile, enableDemoMode, disableDemoMode } = useUser();
+  const isDemo = profile.demoMode;
+  const navigate = useNavigate();
+
+  const handleDemoSYV = () => {
+    enableDemoMode();
+    navigate('/syv-dashboard');
+  };
+
+  const handleExitDemo = () => {
+    disableDemoMode();
+    navigate('/');
+  };
+
   return (
     <footer className="bg-gray-100 py-8">
       <div className="container mx-auto px-4">
@@ -26,6 +44,27 @@ const Footer = () => {
             <Link to="/profile" className="text-gray-600 hover:text-guidance-blue transition-colors">
               Min profil
             </Link>
+            
+            {isDemo ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-orange-600 border-orange-500 hover:bg-orange-100"
+                onClick={handleExitDemo}
+              >
+                Avsluta demo
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1"
+                onClick={handleDemoSYV}
+              >
+                <Monitor className="h-4 w-4" />
+                Prova SYV-demo
+              </Button>
+            )}
           </nav>
         </div>
         

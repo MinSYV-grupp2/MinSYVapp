@@ -12,8 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/context/UserContext";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const SYVDashboardPage = () => {
@@ -101,22 +99,6 @@ const SYVDashboardPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
-      {isDemo && (
-        <Alert className="bg-orange-100 border-orange-300 m-4">
-          <AlertCircle className="h-4 w-4 text-orange-800" />
-          <AlertDescription className="flex items-center justify-between">
-            <span className="text-orange-800">Du är i demo-läge. Inga ändringar kommer att sparas.</span>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="ml-4 border-orange-500 text-orange-800 hover:bg-orange-200"
-              onClick={handleExitDemo}
-            >
-              Avsluta demo
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
       <main className="flex-1 container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Studievägledare - Dashboard</h1>
         
