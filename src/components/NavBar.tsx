@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { UserIcon, MenuIcon, XIcon } from '@heroicons/react/solid';
+import { User as UserIcon, Menu as MenuIcon, X as XIcon } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 
 const NavBar = () => {

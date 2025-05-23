@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { 
@@ -62,7 +61,7 @@ export const SYVStudentProfile = ({ studentId }: StudentProfileProps) => {
   const [studentData, setStudentData] = useState<StudentData | null>(null);
   const [loading, setLoading] = useState(true);
   const [newNote, setNewNote] = useState("");
-  const [noteVisibility, setNoteVisibility] = useState<"private" | "shared">("private");
+  const [noteVisibility, setNoteVisibility] = useState<"private" | "public">("private");
   const [savingNote, setSavingNote] = useState(false);
   const { toast } = useToast();
   
@@ -415,9 +414,9 @@ export const SYVStudentProfile = ({ studentId }: StudentProfileProps) => {
                     type="radio" 
                     id="shared" 
                     name="visibility" 
-                    value="shared"
-                    checked={noteVisibility === "shared"}
-                    onChange={() => setNoteVisibility("shared")}
+                    value="public"
+                    checked={noteVisibility === "public"}
+                    onChange={() => setNoteVisibility("public")}
                     className="mr-1"
                   />
                   <label htmlFor="shared">Delad med elev</label>
